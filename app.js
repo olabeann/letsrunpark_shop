@@ -7,22 +7,17 @@ const loginDialog=document.getElementById('loginModal');
 function requireLogin(action){
   if(loginPreviewActive){action();return;}
   pendingLoginAction=action;
-  document.getElementById('loginPreview').hidden=true;
-  document.getElementById('loginStatus').textContent='현재는 화면 시연용입니다. 실제 계정 인증은 연결되지 않았습니다.';
+  document.getElementById('loginStatus').textContent='로그인 방법을 선택해 주세요.';
   loginDialog.showModal();
 }
 loginDialog.addEventListener('close',()=>{pendingLoginAction=null;});
 document.querySelectorAll('[data-provider]').forEach(button=>button.addEventListener('click',()=>{
-  document.getElementById('loginStatus').textContent=button.dataset.provider+' 로그인을 선택했습니다. 실제 인증은 아직 연결되지 않았으며, 아래 버튼으로 이후 화면을 시연할 수 있습니다.';
-  document.getElementById('loginPreview').hidden=false;
-}));
-document.getElementById('loginPreview').onclick=()=>{
   const action=pendingLoginAction;
   pendingLoginAction=null;
   loginPreviewActive=true;
   loginDialog.close();
   action?.();
-};
+}));
 document.getElementById('ordersToggle').onclick=e=>{
   e.preventDefault();
   requireLogin(()=>{
@@ -34,7 +29,7 @@ document.getElementById('ordersToggle').onclick=e=>{
 const save=()=>{localStorage.goodsProducts=JSON.stringify(products);localStorage.goodsCart=JSON.stringify(cart);localStorage.goodsOrders=JSON.stringify(orders)};
 function productVisual(p,className='product-image'){return `<div class="${className}">${p.image?`<img src="${p.image}" alt="${p.name}">`:p.art}</div>`}function renderProducts(){products.sort((a,b)=>a.id-b.id);productsEl.innerHTML=products.filter(p=>p.status!=='hidden').map(p=>`<article class="product ${p.status==='sale'?'':'soldout'}" onclick="showProduct(${p.id})">${productVisual(p)}<span class="badge">${p.status==='sale'?'판매 중':'품절'}</span><div class="product-info"><h3>${p.name}</h3><div class="price">${won(p.price)}</div></div></article>`).join('')||'<p class="empty">표시할 상품이 없습니다.</p>'}
 function renderCart(){cart=cart.filter(x=>products.find(p=>p.id===x.id));cartCount.textContent=cart.reduce((s,x)=>s+x.qty,0);cartItems.innerHTML=cart.map(x=>{let p=products.find(p=>p.id===x.id);return `<div class="cart-row"><div><strong>${p.name}</strong><small>${won(p.price)}</small></div><div class="qty"><button onclick="changeQty(${x.id},-1)">−</button>${x.qty}<button onclick="changeQty(${x.id},1)">+</button><button onclick="removeCart(${x.id})">×</button></div></div>`}).join('')||'<p class="empty">장바구니가 비어 있습니다.</p>';let sub=cart.reduce((s,x)=>s+products.find(p=>p.id===x.id).price*x.qty,0),ship=sub===0?0:sub>=50000?0:3000;subtotal.textContent=won(sub);shipping.textContent=ship?won(ship):'무료';total.textContent=won(sub+ship);save()}
-function showProduct(id){selected=products.find(p=>p.id===id);if(selected.status!=='sale')return;productDetail.innerHTML=`<div class="detail">${productVisual(selected,'detail-art')}<div><p class="eyebrow">OFFICIAL GOODS</p><h2>${selected.name}</h2><h3>${won(selected.price)}</h3><p class="stock">남은 재고 ${selected.stock}개</p><div class="counter"><button onclick="detailQty(-1)">−</button><output id="detailQty">1</output><button onclick="detailQty(1)">+</button></div><button class="primary" onclick="addSelected()">장바구니 담기</button></div></div>`;productModal.showModal()}
+function showProduct(id){selected=products.find(p=>p.id===id);if(selected.status!=='sale')return;productDetail.innerHTML=`<div class="detail">${productVisual(selected,'detail-art')}<div><p class="eyebrow">OFFICIAL GOODS</p><h2>${selected.name}</h2><h3>${won(selected.price)}</h3><p class="stock">남은 재고 ${selected.stock}개</p><div class="counter"><button onclick="detailQty(-1)">−</button><output id="detailQty">1</output><button onclick="detailQty(1)">+</button></div><button class="primary" onclick="addSelected()">장바구니에 담기</button></div></div>`;productModal.showModal()}
 function detailQty(n){let o=document.getElementById('detailQty'),v=Math.max(1,Math.min(selected.stock,+o.textContent+n));o.textContent=v}function addSelected(){
   const id=selected.id,qty=Number(document.getElementById('detailQty').textContent);
   requireLogin(()=>{
