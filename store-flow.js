@@ -39,6 +39,11 @@ purchaseAgreement.addEventListener('change',()=>{paymentButton.disabled=!purchas
 checkoutForm.addEventListener('reset',()=>{paymentButton.disabled=true;});
 const shippingFee=sub=>sub>0?storeSettings.shippingFee:0;
 function cartValid(items){return Array.isArray(items)&&items.length>0&&items.every(x=>Number.isInteger(x.qty)&&x.qty>0&&canBuy(products.find(p=>p.id===x.id))&&products.find(p=>p.id===x.id).stock>=x.qty);}
+// A product uses the same representative-image frame in both views.
+productVisual=function(p,className='product-image'){
+ const colors=['#f3ddd4','#e9e5df','#e1eadb'],background=colors[Math.abs(Number(p.id)||0)%3];
+ return `<div class="${className}" style="background:${background}!important">${p.image?`<img src="${escapeText(p.image)}" alt="${escapeText(p.name)}">`:escapeText(p.art||'GOODS')}</div>`;
+};
 renderProducts=function(){productsEl.innerHTML=products.filter(p=>p.status!=='hidden').map(p=>{return `<article class="product ${canBuy(p)?'':'soldout'}"><a class="product-link" href="#product/${p.id}">${productVisual(p)}<span class="badge">${canBuy(p)?'판매 중':'품절'}</span><div class="product-info"><h3>${escapeText(p.name)}</h3><div class="price">${won(p.price)}</div><span class="detail-hint">상품 소개 · 배송 안내 →</span></div></a></article>`;}).join('')||'<p class="empty">표시할 상품이 없습니다.</p>';updateSelection();};
 function updateSelection(){const count=cart.reduce((sum,x)=>sum+x.qty,0);cartCount.textContent=count;cartToggle.hidden=count===0;if(!count){cartPanel.classList.remove('open');cartPanel.hidden=true;}}
 const renderOriginalCart=renderCart;

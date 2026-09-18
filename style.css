@@ -94,3 +94,6 @@
 
 .purchase-actions.is-sold-out{grid-template-columns:minmax(0,1fr)}
 .purchase-actions .sold-out-button:disabled{width:100%;background:#e3e5e7;color:#656a70;opacity:1;font-weight:700;cursor:not-allowed}
+
+/* One square representative-image frame, scaled to each responsive layout. */
+.product .product-image,.product-layout .detail-art{width:100%;height:auto;min-height:0;max-height:none;aspect-ratio:1 / 1;overflow:hidden;box-sizing:border-box}.product-image img,.product-layout .detail-art img{width:100%;height:100%;object-fit:contain;object-position:center}
