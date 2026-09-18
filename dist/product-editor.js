@@ -68,7 +68,7 @@
       const canvas = document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
       canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);
       const data=canvas.toDataURL('image/webp',.82);
-      if (data.length > 1400000) throw new Error('이미지가 너무 큽니다. 작은 파일이나 이미지 URL을 사용해 주세요.');
+      if (data.length > 1400000) throw new Error('이미지가 너무 큽니다. 더 작은 이미지 파일을 선택해 주세요.');
       return data;
     } finally { bitmap.close(); }
   }
@@ -92,6 +92,47 @@
       dialog.close(); insert(html);
     } catch (error) { document.getElementById('mediaError').textContent=error.message || '이미지를 읽을 수 없습니다. 다른 파일을 선택해 주세요.'; }
     finally { submit.disabled=false; }
+  };
+  const coverInput = document.getElementById('coverImageFile');
+  const coverValue = document.getElementById('coverImageValue');
+  const coverStatus = document.getElementById('coverImageStatus');
+  const saveButton = document.getElementById('productSaveButton');
+  let coverRequest = 0;
+  function showCover(name) {
+    const src = ProductContent.url(coverValue.value, true);
+    document.getElementById('coverImagePreview').hidden = !src;
+    const image = document.getElementById('coverImageThumb');
+    if (src) image.src = src; else image.removeAttribute('src');
+    document.getElementById('coverImageName').textContent = name || '등록된 대표 이미지';
+  }
+  coverInput.addEventListener('change', async () => {
+    const file = coverInput.files[0]; if (!file) return;
+    const request = ++coverRequest;
+    saveButton.disabled = true;
+    coverStatus.className = 'form-note'; coverStatus.textContent = '이미지를 준비하고 있습니다…';
+    try {
+      if (!['image/jpeg','image/png','image/webp'].includes(file.type)) throw new Error('JPG, PNG, WebP 이미지 파일을 선택해 주세요.');
+      const data = await imageFile(file);
+      if (request !== coverRequest) return;
+      coverValue.value = data; showCover(file.name);
+      coverStatus.textContent = '이미지가 준비되었습니다. 상품 저장을 눌러 반영해 주세요.';
+    } catch (error) {
+      if (request !== coverRequest) return;
+      coverInput.value = ''; coverStatus.className = 'form-error';
+      coverStatus.textContent = error.message || '이미지를 읽을 수 없습니다. 다른 파일을 선택해 주세요.';
+    } finally {
+      if (request === coverRequest) { saveButton.disabled = false; }
+    }
+  });
+  document.getElementById('removeCoverImage').onclick = () => {
+    ++coverRequest; coverValue.value = ''; coverInput.value = ''; saveButton.disabled = false;
+    showCover(); coverStatus.className = 'form-note'; coverStatus.textContent = '대표 이미지를 삭제했습니다. 상품 저장을 눌러 반영해 주세요.';
+  };
+  window.CoverImage = {
+    load(value) {
+      ++coverRequest; coverValue.value = value || ''; coverInput.value = ''; saveButton.disabled = false;
+      coverStatus.textContent = ''; coverStatus.className = 'form-note'; showCover();
+    }
   };
   window.DetailEditor = {
     load(html) {
