@@ -1,6 +1,13 @@
 const won=n=>new Intl.NumberFormat('ko-KR').format(n)+'원';
-const base=[{id:1,name:'말마 인형',description:'귀여운 말마 캐릭터 봉제 인형',price:29000,stock:18,status:'sale',order:1,art:'MALMA'},{id:2,name:'경주마 인형 A',description:'경주마의 역동성을 담은 인형',price:26000,stock:9,status:'sale',order:2,art:'RACE A'},{id:3,name:'경주마 인형 B',description:'컬렉션을 완성하는 한정 디자인',price:26000,stock:0,status:'soldout',order:3,art:'RACE B'}];
+const base=JSON.parse(document.getElementById('storeProductData').textContent);
 let products=JSON.parse(localStorage.goodsProducts||'null')||base,cart=JSON.parse(localStorage.goodsCart||'[]'),orders=JSON.parse(localStorage.goodsOrders||'[]');let selected=null;
+// Seed the expanded preview catalog once, preserving edited products and inventory.
+if(localStorage.goodsSampleCatalogVersion!=='20260918'){
+  const existingIds=new Set(products.map(p=>p.id));
+  products.push(...base.filter(p=>p.id>=4&&!existingIds.has(p.id)));
+  localStorage.goodsProducts=JSON.stringify(products);
+  localStorage.goodsSampleCatalogVersion='20260918';
+}
 // Preview state only; production login must use a server-verified OAuth session.
 let loginPreviewActive=false,pendingLoginAction=null;
 const loginDialog=document.getElementById('loginModal');
