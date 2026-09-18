@@ -106,11 +106,19 @@ const carrierTrackingPages={'CJ대한통운':'https://www.cjlogistics.com/ko/too
 function shipmentLookup(o){const url=carrierTrackingPages[o.carrier];return o.status==='출고 완료'&&o.trackingNumber&&url?`<div class="shipment-lookup"><a class="outline" href="${url}" target="_blank" rel="noopener noreferrer">배송조회 ↗</a><small>택배사 조회 페이지에서 위 송장번호를 입력해 주세요.</small></div>`:'';}
 function orderStatusLabel(o){return o.status==='출고 대기'?'배송 준비 중':o.status==='출고 완료'?'발송 완료':o.status==='전체 취소'?'취소 완료':o.status;}
 function orderItemVisual(i){const p=products.find(p=>p.id===i.id);return p?.image?`<img src="${escapeText(p.image)}" alt="${escapeText(i.name)}" />`:`<span>${escapeText(p?.art||'GOODS')}</span>`;}
+function orderPlacedAt(order){
+ const timestamp=typeof order.createdAt==='number'?order.createdAt:Date.parse(order.createdAt||'');
+ if(Number.isFinite(timestamp)&&timestamp>0)return timestamp;
+ const match=String(order.date||'').match(/^(\d{4})[.\/-]\s*(\d{1,2})[.\/-]\s*(\d{1,2})/);
+ if(match){const date=new Date(Number(match[1]),Number(match[2])-1,Number(match[3]));if(date.getFullYear()===Number(match[1])&&date.getMonth()===Number(match[2])-1&&date.getDate()===Number(match[3]))return date.getTime();}
+ return 0;
+}
+function newestOrders(list){return [...list].sort((a,b)=>orderPlacedAt(b)-orderPlacedAt(a));}
 renderOrders=function(){
   const detailNumber=location.hash.startsWith('#orders/')?decodeURIComponent(location.hash.slice(8)):null;
   const title=document.querySelector('#orders .section-head h2');
   title.textContent=detailNumber?'주문 상세':'주문 조회';
-  if(!detailNumber){orderList.innerHTML=orders.map(o=>`<article class="order-list-card"><div class="order-list-top"><div><p>${escapeText(o.date)}</p><strong>주문번호 ${escapeText(o.number)}</strong></div><span class="order-state ${o.status==='전체 취소'?'cancelled':''}">${escapeText(orderStatusLabel(o))}</span></div><div class="order-list-items">${o.items.map(i=>`<div class="order-preview-item"><div class="order-thumbnail">${orderItemVisual(i)}</div><div><strong>${escapeText(i.name)}</strong><p>수량 ${i.qty}개</p></div></div>`).join('')}</div><div class="order-list-bottom"><strong>${won(o.total)}</strong><a class="outline" href="#orders/${encodeURIComponent(o.number)}">주문 상세 보기 →</a></div></article>`).join('')||'<p class="empty">아직 주문 내역이 없습니다. 마음에 드는 인형을 골라보세요.</p>';return;}
+  if(!detailNumber){orderList.innerHTML=newestOrders(orders).map(o=>`<article class="order-list-card"><div class="order-list-top"><div><p>${escapeText(o.date)}</p><strong>주문번호 ${escapeText(o.number)}</strong></div><span class="order-state ${o.status==='전체 취소'?'cancelled':''}">${escapeText(orderStatusLabel(o))}</span></div><div class="order-list-items">${o.items.map(i=>`<div class="order-preview-item"><div class="order-thumbnail">${orderItemVisual(i)}</div><div><strong>${escapeText(i.name)}</strong><p>수량 ${i.qty}개</p></div></div>`).join('')}</div><div class="order-list-bottom"><strong>${won(o.total)}</strong><a class="outline" href="#orders/${encodeURIComponent(o.number)}">주문 상세 보기 →</a></div></article>`).join('')||'<p class="empty">아직 주문 내역이 없습니다. 마음에 드는 인형을 골라보세요.</p>';return;}
   const o=orders.find(o=>o.number===detailNumber);
   if(!o){orderList.innerHTML='<a class="back-link" href="#orders">← 주문 목록</a><p>주문을 찾을 수 없습니다.</p>';return;}
   const ship=o.shippingFee??storeSettings.shippingFee,sub=o.subtotal??o.total-ship;
