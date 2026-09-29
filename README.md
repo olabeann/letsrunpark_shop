@@ -14,7 +14,7 @@
 | 화면 | 링크 | 확인할 내용 · 접근 조건 |
 | --- | --- | --- |
 | 스토어 홈 | [화면 보기](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/index.html#store) | 브랜드 소개와 전체 상품 목록 |
-| 상품 목록 | [화면 보기](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/index.html#products) | 상품 목록 위치로 이동, 판매 중·품절 상품 확인 |
+| 상품 목록 | [화면 보기](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/index.html#products) | 최근 등록·수정된 상품부터 표시, 판매 중·품절 상품 확인 |
 | 상품 상세 | [말마 인형 보기](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/index.html#product/1) | 대표 이미지, 가격, 수량, 상세정보, 배송·취소 안내 |
 | 주문·결제 | [화면 보기](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/index.html#checkout) | 상품 상세에서 **바로 구매** 또는 장바구니에서 주문 진행 후 확인. 상품 선택 없이 열면 주문 상품 확인 안내 표시 |
 | 주문 조회 | [화면 보기](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/index.html#orders) | 시연 로그인 후 주문 목록, 결제금액, 배송 상태 확인. 주문이 없으면 빈 목록 표시 |
@@ -28,7 +28,7 @@
 
 ### 상품별 상세 화면
 
-초기 샘플 상품 기준입니다. 관리자에서 상품명·판매 상태·재고를 수정하면 표시 내용이 달라질 수 있습니다.
+초기 샘플 상품 기준입니다. 관리자에서 상품을 등록하거나 상품명·판매 상태·재고를 수정하면 해당 상품이 목록 맨 위로 이동하고 표시 내용이 달라질 수 있습니다. 별도의 수동 노출 순서 설정은 제공하지 않습니다.
 
 | 상품 | 경로 | 확인할 화면 |
 | --- | --- | --- |

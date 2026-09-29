@@ -1,274 +1,108 @@
 (function(){
-  'use strict';
-
-  const sections=[
-    {
-      id:'overview',
-      key:'POL-00',
-      title:'정책 개요',
-      summary:'관리 공수는 줄이고 고객은 다음 행동을 이해할 수 있도록, 주문·배송·반품·환불 상태를 분리합니다.',
-      body:`
-        <div class="dev-policy-callout"><b>확정된 MVP 원칙</b><p>반품과 환불은 주문 전체 단위로만 처리합니다. 일부 상품·일부 수량의 부분 반품·부분 환불은 제공하지 않습니다.</p></div>
-        <h3>결정 근거</h3>
-        <ul>
-          <li><b>상태 분리:</b> 배송 진행과 결제·환불 진행은 서로 다른 수명주기이므로 <code>order.status</code>와 <code>returnStatus</code>를 별도 관리합니다.</li>
-          <li><b>행동 중심 문구:</b> 내부값 <code>신청 완료</code>를 고객에게 그대로 노출하지 않고, 다음 행동에 따라 <em>반품 발송 대기</em> 또는 <em>반품 확인 중</em>으로 표시합니다.</li>
-          <li><b>관리자 단계 최소화:</b> 관리자가 선택하는 핵심 상태는 반품 신청 확인과 환불 완료입니다. 중간 상태는 운송장 유무로 계산합니다.</li>
-          <li><b>직접 반송:</b> 택배사 수거 API가 없으므로 자동 수거 접수처럼 보이는 기능은 제공하지 않습니다. 고객이 신청 후 직접 착불 발송합니다.</li>
-        </ul>
-        <p class="dev-policy-note">이 문서는 현재 제품·MVP 구현 기준입니다. 전자상거래 관련 고지 문구와 기간의 법적 적합성은 출시 전 운영·법무 검토가 필요합니다.</p>`
-    },
-    {
-      id:'states',
-      key:'POL-01',
-      title:'상태값 정의',
-      summary:'DB에는 안정적인 내부 코드를 저장하고 화면 문구는 코드와 데이터 조합으로 계산합니다.',
-      body:`
-        <h3>주문·배송 상태</h3>
-        <div class="dev-policy-table-wrap"><table><thead><tr><th>현재 프로토타입 값</th><th>권장 API 코드</th><th>고객 표시</th><th>정의</th></tr></thead><tbody>
-          <tr><td><code>출고 대기</code></td><td><code>PREPARING</code></td><td>배송 준비 중</td><td>결제 완료, 송장 등록 전. 주문 전체 즉시 취소 가능.</td></tr>
-          <tr><td><code>출고 완료</code></td><td><code>SHIPPED</code></td><td>발송 완료</td><td>택배사와 운송장 등록 완료. 즉시 취소 불가.</td></tr>
-          <tr><td><code>배송 완료</code></td><td><code>DELIVERED</code></td><td>배송 완료</td><td>수령 완료. 반품 신청 기간 계산의 기준 시점.</td></tr>
-          <tr><td><code>전체 취소</code></td><td><code>CANCELLED</code></td><td>취소 완료</td><td>발송 전 주문 전체 취소 및 전액 환불 완료.</td></tr>
-        </tbody></table></div>
-        <h3>반품·환불 상태</h3>
-        <div class="dev-policy-table-wrap"><table><thead><tr><th>저장값</th><th>조건</th><th>고객 표시</th><th>관리자 표시</th></tr></thead><tbody>
-          <tr><td><code>null</code></td><td>반품 미신청</td><td>배송 상태 사용</td><td>결제 완료</td></tr>
-          <tr><td><code>신청 완료</code></td><td>반품 운송장 없음</td><td>반품 발송 대기</td><td>반품 신청 완료</td></tr>
-          <tr><td><code>신청 완료</code></td><td>반품 운송장 있음</td><td>반품 확인 중</td><td>환불 처리 대기</td></tr>
-          <tr><td><code>환불 완료</code></td><td>환불액·고객 안내 저장</td><td>환불 완료</td><td>환불 완료</td></tr>
-        </tbody></table></div>
-        <p class="dev-policy-note">화면 문구를 DB 상태값으로 재사용하지 않습니다. 향후 API에서는 한글 대신 enum 코드를 사용하고 프론트에서 표시 문구를 매핑하는 방식을 권장합니다.</p>`
-    },
-    {
-      id:'transitions',
-      key:'POL-02',
-      title:'상태 전이 규칙',
-      summary:'모든 전이는 서버에서 현재 상태를 다시 확인한 뒤 한 번의 트랜잭션으로 처리합니다.',
-      body:`
-        <div class="dev-policy-flow">
-          <span>PREPARING</span><i>송장 등록</i><span>SHIPPED</span><i>배송 완료 확인</i><span>DELIVERED</span><i>전체 반품 신청</i><span>RETURN_REQUESTED</span><i>관리자 환불</i><span>REFUNDED</span>
-        </div>
-        <h3>허용 전이</h3>
-        <ul>
-          <li><code>PREPARING → CANCELLED</code>: 기간 제한 없이 주문 전체 취소·전액 환불. 재고를 원복합니다.</li>
-          <li><code>PREPARING → SHIPPED</code>: 택배사와 운송장 번호가 모두 유효할 때만 허용합니다.</li>
-          <li><code>SHIPPED → DELIVERED</code>: 택배 연동 또는 관리자 확인 결과로 처리합니다. MVP에서는 자동 갱신이 없을 수 있습니다.</li>
-          <li><code>DELIVERED → RETURN_REQUESTED</code>: 전체 주문만 신청하며 일반 사유는 설정 기간 안에서 허용합니다.</li>
-          <li><code>RETURN_REQUESTED → REFUNDED</code>: 관리자가 배송비 처리와 고객 안내를 확정한 경우에만 허용합니다.</li>
-        </ul>
-        <h3>거부 규칙</h3>
-        <ul>
-          <li>발송 이후 주문 취소 요청, 배송 완료 전 반품 요청, 이미 환불된 주문의 재처리를 거부합니다.</li>
-          <li>클라이언트가 보낸 금액·상태를 신뢰하지 않고 서버 저장값으로 재계산합니다.</li>
-          <li>동일 요청 재전송은 idempotency key 또는 현재 상태 검사로 중복 취소·중복 환불을 방지합니다.</li>
-        </ul>`
-    },
-    {
-      id:'returns',
-      key:'POL-03',
-      title:'취소·반품·환불 정책',
-      summary:'고객의 신청 순서와 관리자의 최소 처리 항목을 명확히 고정합니다.',
-      body:`
-        <h3>고객 흐름</h3>
-        <ol>
-          <li>배송 준비 중이면 <b>주문 취소·전액 환불</b>을 즉시 요청합니다.</li>
-          <li>배송 완료 후 주문 상세에서 <b>전체 반품 신청</b>을 먼저 완료합니다.</li>
-          <li>화면에 표시된 반품 주소로 주문 상품 전체를 <b>착불 직접 발송</b>합니다.</li>
-          <li>발송 후에만 택배사와 반품 운송장 번호를 등록합니다.</li>
-          <li>관리자가 도착 상품을 확인하고 환불을 완료하면 최종 환불액과 안내 메모를 확인합니다.</li>
-        </ol>
-        <h3>반품 가능 기준</h3>
-        <ul>
-          <li>일반 반품은 <code>deliveredAt + returnDays</code> 이내에만 허용합니다.</li>
-          <li>현재 기본값은 7일이며 관리자 설정 범위는 7~90일입니다.</li>
-          <li>상품 불량·파손 또는 오배송은 일반 기간이 지나도 별도 사유로 신청할 수 있도록 설계했습니다.</li>
-          <li>부분 반품·부분 환불은 MVP 범위에서 제외합니다.</li>
-        </ul>
-        <h3>환불 완료 입력</h3>
-        <ul>
-          <li><b>배송비 차감 없음:</b> <code>refundAmount = total</code></li>
-          <li><b>배송비 차감:</b> <code>refundAmount = max(0, total - shippingDeduction)</code></li>
-          <li><code>customerRefundNote</code>는 필수이며 고객 주문 상세에 그대로 노출합니다.</li>
-          <li>배송비 차감 사유와 최종 환불액은 변경 이력에 남기는 것을 권장합니다.</li>
-        </ul>`
-    },
-    {
-      id:'data',
-      key:'POL-04',
-      title:'데이터 모델·API 계약',
-      summary:'프로토타입은 localStorage를 사용하지만 실제 구현에서는 서버 DB와 상태 전이 API가 단일 진실 공급원입니다.',
-      body:`
-        <h3>필수 주문 필드</h3>
-        <pre><code>{
-  id, orderNumber, userId,
-  status, createdAt, shippedAt, deliveredAt, cancelledAt,
-  subtotal, shippingFee, total,
-  carrierCode, trackingNumber,
-  items: [{ productId, productNameSnapshot, unitPrice, quantity }],
-  return: {
-    status, reasonCode, reasonDetail, requestedAt,
-    carrierCode, trackingNumber, trackingRegisteredAt,
-    shippingDeduction, refundAmount,
-    customerNote, refundedAt
-  },
-  version
-}</code></pre>
-        <h3>권장 명령 API</h3>
-        <div class="dev-policy-table-wrap"><table><thead><tr><th>API</th><th>검증</th><th>결과</th></tr></thead><tbody>
-          <tr><td><code>POST /orders/{id}/cancel</code></td><td>PREPARING, 전체 주문</td><td>취소·전액 환불·재고 원복</td></tr>
-          <tr><td><code>POST /orders/{id}/shipment</code></td><td>택배사, 운송장, PREPARING</td><td>SHIPPED 전이</td></tr>
-          <tr><td><code>POST /orders/{id}/returns</code></td><td>DELIVERED, 기간·사유, 미신청</td><td>RETURN_REQUESTED 생성</td></tr>
-          <tr><td><code>PUT /orders/{id}/returns/tracking</code></td><td>RETURN_REQUESTED, 숫자 8~30자리, 중복 운송장 방지</td><td>반품 운송장 저장</td></tr>
-          <tr><td><code>POST /orders/{id}/refund</code></td><td>RETURN_REQUESTED, 차감액·고객 메모</td><td>환불·상태·원장 원자적 반영</td></tr>
-        </tbody></table></div>
-        <h3>서버 구현 주의</h3>
-        <ul>
-          <li><code>version</code> 또는 행 잠금으로 관리자 동시 처리 충돌을 막습니다.</li>
-          <li>상품명과 단가는 주문 시점 스냅샷으로 보관해 상품 수정 후에도 과거 주문을 유지합니다.</li>
-          <li>상태 변경 이벤트에는 이전값·새값·처리자·시각·사유를 감사 로그로 기록합니다.</li>
-        </ul>`
-    },
-    {
-      id:'settlement',
-      key:'POL-05',
-      title:'정산 계산 기준',
-      summary:'환불 완료 전에는 원 결제액을 유지하고, 완료된 취소·환불만 정산 차감에 반영합니다.',
-      body:`
-        <div class="dev-policy-formula"><code>gross = total</code><code>refund = CANCELLED ? gross : REFUNDED ? refundAmount : 0</code><code>net = max(0, gross - refund)</code><code>pgFee = round(net × 0.02)</code><code>payout = max(0, net - pgFee)</code></div>
-        <ul>
-          <li>PG 수수료 2%는 현재 프로토타입 계산값이며 실제 계약 수수료·부가세·결제수단별 요율 확정 후 교체해야 합니다.</li>
-          <li>반품 신청 상태는 <em>환불 처리 대기</em>로 별도 집계하고 환불액에는 아직 포함하지 않습니다.</li>
-          <li>정산 상세에서는 주문 상품명·수량·상품별 금액, 배송비, 환불액과 처리 상태를 함께 조회합니다.</li>
-          <li>실서비스에서는 PG 승인·취소 거래 ID, 정산 기준일, 원장 조정 내역을 별도 저장해야 합니다.</li>
-        </ul>`
-    },
-    {
-      id:'mvp',
-      key:'POL-06',
-      title:'MVP 범위와 미연동 항목',
-      summary:'화면에 존재하는 기능과 실제 외부 연동 완료 여부를 구분합니다.',
-      body:`
-        <h3>MVP 포함</h3>
-        <ul>
-          <li>주문 전체 취소, 주문 전체 반품 신청, 직접 반송 운송장 등록</li>
-          <li>관리자의 배송비 차감 선택, 최종 환불액 계산, 고객 안내 메모</li>
-          <li>상품 가격·재고·판매 상태와 스토어 배송·반품 설정</li>
-          <li>주문별 정산 조회 및 CSV 내려받기</li>
-        </ul>
-        <h3>MVP 제외 또는 연동 필요</h3>
-        <ul>
-          <li>부분 취소·부분 반품·부분 환불</li>
-          <li>택배사 수거 API 자동 접수와 배송 완료 자동 갱신</li>
-          <li>실제 PG 승인·취소·환불 및 정산 대사</li>
-          <li>SMS·알림톡·이메일 자동 발송</li>
-          <li>반품 검수 사진, 창고 WMS, 교환 처리</li>
-        </ul>
-        <p class="dev-policy-note">미연동 기능은 성공한 것처럼 표시하지 않습니다. 사용자가 직접 해야 하는 단계와 관리자가 확인해야 하는 단계를 화면에 명시합니다.</p>`
-    },
-    {
-      id:'qa',
-      key:'POL-07',
-      title:'개발 완료 조건·QA',
-      summary:'프론트 표시뿐 아니라 서버 검증과 실패 복구까지 충족해야 완료로 봅니다.',
-      body:`
-        <ul class="dev-policy-checklist">
-          <li>배송 준비 중 주문만 즉시 전체 취소할 수 있다.</li>
-          <li>발송 완료 주문에는 취소 버튼이 나오지 않는다.</li>
-          <li>배송 완료 주문만 전체 반품을 신청할 수 있다.</li>
-          <li>반품 신청 전에는 반품 운송장을 등록할 수 없다.</li>
-          <li>운송장 미등록은 반품 발송 대기, 등록 후에는 반품 확인 중으로 표시된다.</li>
-          <li>환불 완료 시 배송비 차감액·최종 환불액·고객 메모가 함께 저장된다.</li>
-          <li>중복 클릭·재시도에도 취소·환불·재고 원복이 한 번만 실행된다.</li>
-          <li>상품 수정·삭제 후에도 과거 주문 상품명과 결제금액이 유지된다.</li>
-          <li>정산 목록의 상세 보기에서 주문 상품과 금액 구성을 확인할 수 있다.</li>
-          <li>실패 응답 시 기존 상태와 입력값을 유지하고 원인을 안내한다.</li>
-        </ul>`
-    }
-  ];
-
-  let dialog;
-  let activeId='overview';
-
-  function ensureDialog(){
-    if(dialog)return dialog;
-    dialog=document.createElement('dialog');
-    dialog.className='dev-policy-dialog';
-    dialog.setAttribute('aria-labelledby','devPolicyTitle');
-    dialog.innerHTML=`<div class="dev-policy-shell"><header><div><small>DEVELOPER POLICY · ⌥ + ⌘ + K</small><h2 id="devPolicyTitle">스토어 개발 정책</h2><p>확정된 제품 정책과 구현·검증 기준을 함께 제공합니다.</p></div><button type="button" data-policy-close aria-label="정책 닫기">×</button></header><div class="dev-policy-layout"><nav aria-label="개발 정책 목차"></nav><main tabindex="-1"></main></div><footer><span>현재 MVP 기준 · 변경 시 상태 전이와 API 계약을 함께 갱신</span><kbd>⌥</kbd><span>+</span><kbd>⌘</kbd><span>+</span><kbd>K</kbd></footer></div>`;
-    document.body.appendChild(dialog);
-    dialog.querySelector('[data-policy-close]').addEventListener('click',close);
-    dialog.addEventListener('click',event=>{if(event.target===dialog)close();});
-    dialog.addEventListener('wheel',event=>{
-      const scrollArea=event.target.closest('main,nav,.dev-policy-table-wrap,.dev-policy-flow,pre');
-      if(scrollArea||!dialog.open)return;
-      dialog.querySelector('main').scrollBy({top:event.deltaY,left:event.deltaX});
-      event.preventDefault();
-    },{passive:false});
-    dialog.addEventListener('close',unlockPageScroll);
-    renderNav();
-    renderSection(activeId);
-    return dialog;
-  }
-
-  function renderNav(){
-    const nav=dialog.querySelector('nav');
-    nav.innerHTML=sections.map(section=>`<button type="button" data-policy-section="${section.id}"><small>${section.key}</small><b>${section.title}</b></button>`).join('');
-    nav.querySelectorAll('button').forEach(button=>button.addEventListener('click',()=>renderSection(button.dataset.policySection)));
-  }
-
-  function renderSection(id){
-    activeId=sections.some(section=>section.id===id)?id:'overview';
-    const section=sections.find(item=>item.id===activeId);
-    dialog.querySelectorAll('[data-policy-section]').forEach(button=>{
-      const isActive=button.dataset.policySection===activeId;
-      button.classList.toggle('active',isActive);
-      button.setAttribute('aria-current',isActive?'page':'false');
-      if(isActive)button.scrollIntoView({block:'nearest'});
-    });
-    const main=dialog.querySelector('main');
-    main.innerHTML=`<div class="dev-policy-section-head"><small>${section.key}</small><h2>${section.title}</h2><p>${section.summary}</p></div><div class="dev-policy-body">${section.body}</div>`;
-    main.scrollTop=0;
-    main.focus({preventScroll:true});
-  }
-
-  function lockPageScroll(){
-    document.documentElement.classList.add('dev-policy-open');
-    document.body.classList.add('dev-policy-open');
-  }
-
-  function unlockPageScroll(){
-    document.documentElement.classList.remove('dev-policy-open');
-    document.body.classList.remove('dev-policy-open');
-  }
-
-  function open(sectionId){
-    ensureDialog();
-    lockPageScroll();
-    if(!dialog.open)dialog.showModal();
-    if(sectionId)renderSection(sectionId);
-  }
-
-  function close(){if(dialog?.open)dialog.close();else unlockPageScroll();}
-
-  document.addEventListener('click',event=>{
-    const trigger=event.target.closest('[data-policy-open]');
-    if(trigger){
-      event.preventDefault();
-      open(trigger.dataset.policyOpen||'overview');
-      return;
-    }
-    const viewTrigger=event.target.closest('[data-view]');
-    if(!viewTrigger)return;
-    const salesPolicy=document.querySelector('[data-policy-context="sales"]');
-    if(!salesPolicy)return;
-    const isShipping=viewTrigger.dataset.view==='shipping';
-    salesPolicy.dataset.policyOpen=isShipping?'transitions':'returns';
-    salesPolicy.textContent=isShipping?'배송 정책 보기':'주문 정책 보기';
-  });
-
-  document.addEventListener('keydown',event=>{
-    const isShortcut=event.altKey&&event.metaKey&&!event.ctrlKey&&event.key.toLowerCase()==='k';
-    if(isShortcut){event.preventDefault();dialog?.open?close():open();}
-  });
+'use strict';
+const rule=(id,scope,title,category,selector,section,summary,rules,fe,be,values)=>({id,scope,title,category,selector,section,summary,rules,fe,be,values});
+const specs=[
+rule('store-header','store','공통 헤더','전역 노출','.store-head','overview','브랜드 홈, 주문 조회와 장바구니 진입점을 제공합니다.',[['표시 대상','모든 사용자 화면'],['배치 기준','로고 좌측 · 사용자 행동 우측'],['표시 조건','장바구니 수량 1개 이상'],['표시 값','전체 상품 수량 합계']], '장바구니 수량은 라인 수가 아니라 qty 합계입니다. 인증 후 원래 행동을 이어갑니다.','인증 세션과 장바구니 요약을 서버 기준으로 제공합니다.','cartItemCount: 0 이상 정수 · 99 초과는 99+ 권장'),
+rule('home-hero','home','홈 히어로','콘텐츠 · 배치','.intro','overview','스토어 목적과 상품 목록으로 이어지는 주 행동을 안내합니다.',[['표시 대상','스토어 홈'],['배치 기준','PC 2열 · 모바일 세로'],['주 행동','컬렉션 둘러보기 → #products'],['값 출처','승인된 운영 콘텐츠']], 'CTA 이동 후 상품 목록 제목의 접근성 흐름을 유지합니다.','CMS 사용 시 제목·설명·이미지·CTA를 한 묶음으로 반환합니다.','이미지는 대체 텍스트 또는 장식 이미지 처리'),
+rule('product-grid','home','상품 카드 목록','정렬 · 표시개수','#products','mvp','판매 가능한 상품을 최근 등록하거나 수정한 순서대로 노출하고 상세로 연결합니다.',[['표시 대상','hidden이 아닌 상품'],['정렬 기준','최근 수정 시각 내림차순 · 가장 최근 수정 상품 우선'],['표시 개수','최대 24개 후 페이지네이션'],['배치 기준','PC 4열 · 태블릿 2열 · 모바일 1열'],['카드 정보','이미지, 상태, 상품명, 판매가']], '서버에서 받은 최신 수정순을 그대로 사용합니다. 품절 상품은 노출하되 구매를 막고 이미지 설명에는 상품명을 사용합니다.','고객에게 표시할 수 있는 상품만 조회해 가장 최근에 등록하거나 수정한 상품부터 전달합니다. 상품을 저장하거나 판매 상태를 변경할 때 서버에서 수정 시각을 새로 기록해야 합니다. 한 번에 최대 24개를 보내고 판매 중지 상품은 제외하되 품절 상품은 포함합니다.','최근 수정 시각은 서버가 기록한 값을 사용 · 판매 중=구매 가능 · 품절=노출하되 구매 불가 · 판매 중지=미노출'),
+rule('product-summary','product','상품 핵심 정보','상세 · 값 정의','#productPage .product-layout','mvp','상품 이미지, 명칭, 설명, 가격, 배송비와 판매 상태를 제공합니다.',[['표시 대상','URL productId와 일치하는 공개 상품 1개'],['배치 기준','PC 이미지/구매정보 2열 · 모바일 세로'],['가격 기준','서버 판매가'],['상태 기준','sale && stock>0이면 판매 중']], '직접 URL 접근을 지원하고 숨김/없는 상품은 찾을 수 없음으로 표시합니다.','GET /products/{id}가 공개 여부, 판매가, 가용 재고, 배송 설정을 반환합니다.','price는 부가세 포함 노출가 · shippingFee는 주문 단위'),
+rule('quantity-policy','product','수량 선택 · 구매 행동','검증 · 재고','#productPage .product-selection-box','transitions','구매 수량과 예상 금액을 표시하고 결제 시 서버에서 다시 검증합니다.',[['최솟값','1개'],['최댓값','가용 재고와 1회 구매 제한 중 작은 값'],['금액 계산','unitPrice × quantity'],['행동 배치','장바구니 → 바로 구매'],['품절 처리','수량·구매 행동 비활성']], '증감 시 합계를 즉시 갱신하되 클라이언트 계산을 결제 확정값으로 쓰지 않습니다.','장바구니/주문 생성 시 가격·상태·재고를 재검증하고 재고를 원자적으로 차감합니다.','quantity는 1 이상 정수 · lineAmount=unitPrice×quantity'),
+rule('product-content','product','상세정보 · 배송 · 취소','콘텐츠 정책','#productPage .product-information','returns','상품 콘텐츠와 주문에 영향을 주는 배송·취소 기준을 함께 고지합니다.',[['정렬 기준','상세정보 → 배송 → 취소'],['값 출처','상품 HTML + 스토어 설정'],['필수 고지','배송비, 발송 기준, 취소 시간, 부분 취소 불가'],['빈 값','상품 요약 설명으로 대체']], '관리자 HTML은 허용 목록으로 정화하고 외부 링크에 안전 속성을 적용합니다.','저장 시 HTML sanitize와 이미지 권한을 검증하고 주문에는 정책 스냅샷을 보관합니다.','cancelHours는 발송 전 조건과 AND'),
+rule('checkout-fields','checkout','주문자 · 배송지 입력','필수값 · 검증','#checkoutFields','data','주문 생성에 필요한 연락처와 배송지를 수집합니다.',[['필수 입력','이름, 전화번호, 우편번호, 기본·상세주소'],['선택 입력','배송메모'],['검증 시점','입력 중 안내 + 제출 시 최종 검증'],['배치 기준','정보 입력 → 고지 동의 → 결제']], '오류를 필드와 연결하고 값을 보존합니다. 주소 검색 실패 시 직접 입력을 허용합니다.','전화번호 정규화, 주소 길이와 금지문자를 검증하고 요청 금액은 신뢰하지 않습니다.','phone 10~11자리 · postcode 5자리 · memo 최대 100자 권장'),
+rule('checkout-summary','checkout','주문 요약 · 최종 금액','가격 · 배치','#checkoutSummary','settlement','결제 전 상품, 수량, 배송비와 총액을 확인합니다.',[['표시 대상','결제 초안 상품'],['정렬 기준','장바구니/바로구매 전달 순서'],['표시 개수','초안 전체'],['금액 계산','상품 합계 + 주문 배송비'],['배치 기준','PC 우측 · 모바일 폼 아래']], '결제 중 버튼을 잠그고 서버 재계산 금액이 다르면 확인 후 재시도합니다.','POST /orders/quote가 가격·재고·배송비와 quoteId/만료시각을 반환합니다.','subtotal=Σ(price×qty), total=subtotal+shippingFee'),
+rule('orders-list','orders','내 주문 목록','정렬 · 표시개수','#orderList','returns','현재 사용자의 주문만 최신순으로 표시합니다.',[['표시 대상','인증 사용자 소유 주문'],['정렬 기준','createdAt 내림차순'],['표시 개수','10건 후 더보기/페이지'],['카드 정보','일자, 번호, 상태, 상품, 총액'],['권한 기준','소유자만 조회']], '상태 문구를 enum 매핑으로 관리하고 빈 결과와 오류를 구분합니다.','GET /me/orders?page=1&size=10&sort=createdAt,desc. 세션 userId로 소유권을 강제합니다.','신청 완료+운송장 유무로 고객 반품 문구 계산'),
+rule('order-detail','orderDetail','주문 상세','주문 처리 요구사항','#orderList .order-detail','returns','고객이 주문 당시의 상품 정보와 현재 진행 상태를 쉽게 확인하고, 지금 가능한 처리만 선택할 수 있어야 합니다.',[['표시 대상','로그인한 고객 본인의 주문'],['정보 순서','주문 상태 → 상품과 배송 → 취소·반품 → 배송지 → 결제 정보'],['주문 취소','배송 준비 중이고 취소 가능한 시간이 남아 있을 때'],['반품 신청','배송 완료 후 아직 반품을 신청하지 않았을 때'],['반품 운송장','반품 신청 후 고객이 상품을 발송했을 때']], '주문 상태에 따라 지금 할 수 있는 버튼만 보여주고, 처리가 끝나면 변경된 상태를 바로 확인할 수 있게 해주세요.','같은 요청이 여러 번 전달되더라도 취소·반품·환불이 중복 처리되지 않아야 하며, 주문 당시의 상품명·가격·수량은 이후 상품 정보가 바뀌어도 그대로 남아 있어야 합니다.','배송 준비 중에는 주문 취소, 배송 완료 후에는 반품 신청, 반품 확인 후에는 환불 완료 순서로 처리합니다.'),
+rule('admin-nav','admin','관리자 업무 탐색','권한 · 배치','.sidebar','overview','업무별 진입점과 처리 대기 건수를 제공합니다.',[['표시 대상','권한에 허용된 메뉴'],['정렬 기준','예약 → 커머스 → 계정'],['배치 기준','좌측 고정'],['뱃지 값','발송 대기 주문 수']], '현재 메뉴를 aria-current로 표시하고 작은 화면에서는 접근 가능한 드로어로 전환합니다.','role/permissions와 업무별 pending count를 반환합니다.','pendingCount=PREPARING 주문 수 · 권한 없는 API는 403'),
+rule('sales-guide','adminSales','배송 상태 안내','값 설명','.shipping-guide','states','상태 의미와 변경 조건을 목록 처리 전에 설명합니다.',[['표시 개수','핵심 상태 3개'],['정렬 기준','배송 준비 → 발송 완료 → 취소 완료'],['값 출처','공통 상태 매핑'],['노출 위치','상품 판매 현황 상단']], '안내와 테이블 뱃지는 같은 상태 매핑을 사용합니다.','내부 enum을 고정하고 변경 이벤트에 이전/새 값, 처리자, 시각을 기록합니다.','PREPARING=배송 준비 · SHIPPED=발송 완료 · CANCELLED=취소 완료'),
+rule('sales-filter','adminSales','주문 검색 조건','조회 · 입력','#filterForm','data','기간, 결제·배송 상태와 식별값을 조합합니다.',[['기간 기준','주문 생성일'],['검색 대상','주문번호, 구매자, 전화번호'],['조건 결합','서로 다른 필드는 AND'],['초기화','조건 해제 후 1페이지'],['시간대','Asia/Seoul']], '검색 시 page를 1로 초기화하고 URL query 동기화를 권장합니다.','날짜 범위와 검색 길이를 제한하고 개인정보 검색 감사 로그를 남깁니다.','기간 양끝 포함 · 최대 1년 권장 · q는 trim'),
+rule('admin-orders','adminSales','주문 목록','조회 · 정렬 · 페이지','#ordersTable','returns','조건에 맞는 주문을 최신순으로 조회하고 전체 주문 단위로 처리합니다.',[['표시 대상','검색 조건 일치 주문'],['정렬 기준','createdAt 내림차순 → id 내림차순'],['표시 개수','페이지당 20건'],['배치 기준','주문 1건 = 1행'],['빈 결과','필터 유지 + 안내']], '로딩·빈 결과·실패를 구분하고 중복 요청을 취소합니다.','GET /admin/orders?...&page&size=20&sort=createdAt,desc. 전체 건수/페이지를 반환합니다.','날짜 입력은 KST 경계를 UTC로 변환'),
+rule('shipping-stages','adminShipping','발송 대상 단계','표시 대상','#shippingStages','transitions','발송 대기와 완료 주문을 분리합니다.',[['발송 대기','status=PREPARING'],['발송 완료','SHIPPED 또는 DELIVERED'],['기본 선택','발송 대기'],['정렬 기준','대기: 오래된 순 · 완료: 최근 발송 순'],['표시 개수','페이지당 20건']], '탭 변경 때 page/선택 행을 초기화합니다.','대기는 createdAt ASC, 완료는 shippedAt DESC로 조회합니다.','취소·반품·환불 주문은 발송 대상 제외'),
+rule('shipping-table','adminShipping','송장 등록 · 발송 처리','상태 전이','#ordersTable','transitions','유효한 택배사와 송장번호가 있는 주문만 발송 완료로 전이합니다.',[['표시 대상','선택한 발송 단계 주문'],['필수값','carrierCode, trackingNumber'],['검증 기준','숫자 8~30자리, 허용 택배사'],['처리 단위','주문 1건 또는 명시적 선택'],['완료 조건','서버 전이 성공']], '행별 저장/오류를 표시하고 실패 시 입력을 보존합니다. Enter와 버튼은 같은 핸들러를 씁니다.','POST /admin/orders/{id}/shipment. PREPARING 재검증, 중복 송장 검사, 원자 저장.','shippedAt은 서버 시각 · 송장은 정규화 저장'),
+rule('settlement-filter','adminSettlement','정산 조회 기간','조회 기준','#settlementFilter','settlement','주문일 기준 기간과 빠른 선택으로 조회합니다.',[['기준일','createdAt 주문일'],['빠른 선택','이번 달, 지난 달, 전체'],['시간대','Asia/Seoul 일자 경계'],['조건 반영','조회 실행 시']], '빠른 선택도 동일한 조회 흐름을 사용합니다.','대용량 전체 조회는 원장 기반 비동기 다운로드로 분리합니다.','from 00:00 포함 · to 다음날 00:00 미만'),
+rule('settlement-summary','adminSettlement','정산 요약 지표','계산 · 값 설명','.settlement-cards','settlement','동일 기간의 결제, 환불, 수수료와 정산 예정액을 계산합니다.',[['총 결제액','승인 gross 합계'],['취소·환불액','완료 refund 합계'],['정산 대상액','max(0,gross-refund)'],['PG 수수료','계약 요율·반올림 적용'],['정산 예정액','net-pgFee']], '기간과 계산 설명을 표시하고 대기액을 구분합니다.','집계값, currency, 기준시각, 적용요율을 API에서 반환합니다.','2%는 시연값 · 운영은 수단별 요율/VAT/PG 원장 적용'),
+rule('settlement-list','adminSettlement','주문별 정산 내역','대사 · 정렬','#settlementTable','settlement','요약을 주문 단위 원장과 대사할 근거를 제공합니다.',[['정렬 기준','createdAt 내림차순'],['표시 개수','페이지당 20건'],['행 정보','주문·환불·수수료·예정액·상태'],['상세 연결','상품과 거래 식별자']], '요약은 전체 기준이고 표는 현재 페이지임을 구분합니다.','PG 승인/취소 ID와 원장 version을 보존해 중복 반영을 막습니다.','RETURN_REQUESTED는 대기 · REFUNDED만 환불 반영'),
+rule('store-settings','adminOperations','스토어 운영 설정','운영값 · 반영 범위','.store-settings-card','mvp','배송비, 취소 기준, 택배사와 고객 안내를 관리합니다.',[['필수값','배송비, 취소 시간, 배송 안내, 반품 주소'],['적용 기준','신규 주문부터 스냅샷'],['배치 기준','숫자 → 선택 → 긴 안내'],['권한','스토어 설정 수정 권한']], '저장 전 변경/적용 범위를 알리고 성공 후 서버값으로 다시 표시합니다.','PUT /admin/store-settings에 version 충돌 검사와 변경 이력을 적용합니다.','shippingFee≥0 · cancelHours≥1 · carrierCode enum'),
+rule('product-filter','adminOperations','상품 검색 조건','표시 대상','#productFilter','data','판매 상태와 상품명으로 운영 상품을 검색합니다.',[['상태 조건','판매 중, 품절, 판매 중지, 전체'],['검색 대상','상품명'],['조건 결합','상태와 검색어를 모두 만족'],['초기 정렬','최근 수정 상품 우선']], '검색 시 첫 페이지로 이동하고 입력한 조건을 유지합니다.','관리자에게는 판매 중지 상품을 포함한 전체 상품을 조회할 수 있게 하고, 조건에 맞는 결과를 최근 수정순으로 전달합니다.','검색어 앞뒤 공백 제거 · 빈 검색어는 전체 상품 조회'),
+rule('admin-products','adminOperations','상품 운영 목록','정렬 · 표시개수','#productsTable','mvp','상품 가격, 재고와 판매 상태를 확인하고 수정합니다.',[['표시 대상','검색 조건에 맞는 운영 상품'],['정렬 기준','최근 수정 시각 내림차순'],['표시 개수','페이지당 20건'],['행 정보','이미지, 이름, 가격, 재고, 상태, 수정'],['상태 제약','재고 0이면 판매 중 전환 불가']], '상품을 저장하거나 판매 상태를 바꾸면 해당 상품을 목록 맨 위로 이동합니다. 변경 실패 시 이전값과 순서로 되돌립니다.','상품 정보나 판매 상태를 변경할 때 수정 시각을 서버 기준으로 갱신합니다. 재고 변경과 상태 변경 이력도 함께 기록합니다.','최근 수정 시각은 사용자의 기기 시간이 아닌 서버 시간 사용'),
+rule('product-actions','adminOperations','상품 수정 · 삭제','관리 행동','#productsTable .product-actions','mvp','상품 정보를 수정하거나 운영 목록에서 삭제합니다.',[['수정','현재 상품 정보로 편집 화면 열기'],['삭제','상품명 확인 후 최종 삭제'],['삭제 반영','고객 스토어와 운영 목록에서 제거'],['기존 주문','주문 당시 상품 정보 유지']], '수정과 삭제 결과를 즉시 목록에 반영합니다.','삭제된 상품과 관계없이 기존 주문 내역은 유지합니다.','삭제 전 확인 필수 · 삭제 후 상품 복구 불가')
+];
+const requirementCopy={
+'store-header':['스토어 홈·주문 조회 진입 제공','장바구니 전체 상품 수량 표시'],
+'home-hero':['PC·모바일 전용 배너 이미지 분리','화면 비율에 맞춘 선명한 이미지 노출','버튼·이동 링크 없이 이미지로만 구성'],
+'product-grid':['판매 중·품절 상품 노출','판매 중지 상품 고객 화면 제외','최근 등록·수정 상품 우선 정렬','이미지·상태·상품명·가격 표시 및 상세 연결'],
+'product-summary':['상품 이미지·상품명·설명·가격·배송비·판매 상태 표시','없는 상품·판매 중지 상품 구매 제한 안내','PC 2열·모바일 세로 배치'],
+'quantity-policy':['최소 1개부터 현재 재고 범위 내 수량 선택','수량 변경 시 예상 결제 금액 즉시 반영','품절 상품 수량 변경·구매 제한','결제 시점 가격·재고 재확인','재고 초과·중복 주문 방지'],
+'product-content':['상품 설명 → 배송 안내 → 취소 안내 순서','구매 전 배송비·발송 기준·취소 시간·부분 취소 불가 고지','주문 당시 안내 내용 보관'],
+'checkout-fields':['이름·전화번호·배송지 필수 입력','배송 메모 선택 입력','입력 오류 위치별 안내','오류 발생 시 기존 입력값 유지'],
+'checkout-summary':['결제 전 상품·수량·상품 금액·배송비·최종 금액 확인','장바구니 상품 순서 유지','결제 처리 중 중복 실행 방지','가격·재고 변경 시 고객 안내'],
+'orders-list':['본인 주문만 최신순 표시','주문일·주문번호·진행 상태·상품·결제 금액 표시','주문 없음·조회 오류 상태별 안내'],
+'order-detail':['주문 당시 상품명·가격·수량 유지','발송 전·취소 가능 시간 내 주문 전체 취소','배송 완료 후 반품 가능 기간 내 주문 전체 반품','현재 상태에서 가능한 취소·반품 행동만 노출','처리 완료 후 변경 상태 즉시 반영','취소·반품·환불 중복 처리 방지'],
+'admin-nav':['권한별 업무 메뉴 노출','현재 메뉴 강조 표시','발송 대기 주문 수 표시','좁은 화면에서도 전체 메뉴 접근'],
+'sales-guide':['배송 준비·발송 완료·취소 완료 의미 안내','안내와 주문 목록의 상태 명칭 통일'],
+'sales-filter':['주문 기간·결제 상태·배송 상태 조합 검색','주문번호·구매자명·전화번호 검색','조건 초기화 시 전체 주문 첫 화면 이동'],
+'admin-orders':['검색 조건 일치 주문 최신순 표시','주문 한 건당 한 행 구성','주문 전체 단위 처리','불러오는 중·결과 없음·오류 상태 구분'],
+'shipping-stages':['발송 대기·발송 완료 주문 분리','발송 대기 주문 오래된 순 정렬','발송 완료 주문 최근 발송 순 정렬','취소·반품·환불 주문 발송 대상 제외'],
+'shipping-table':['주문별 택배사·송장번호 입력 및 저장','배송 준비 주문만 발송 완료로 변경','입력 오류를 해당 주문 행에 표시','저장 실패 시 입력 내용 유지','송장번호 중복 등록 방지'],
+'settlement-filter':['주문일 기준 기간 조회','이번 달·지난 달 빠른 기간 선택','선택한 시작일·종료일 주문 모두 포함'],
+'settlement-summary':['결제 완료 주문 금액 합산','취소·환불 완료 금액 별도 표시','정산 대상 금액·결제 수수료 구분','계약 수수료율·반올림 기준 적용','업체 정산 예정 금액 강조 표시'],
+'settlement-list':['정산 요약과 주문별 내역 연결','주문별 결제·취소·환불·수수료·정산 예정 금액 표시','반품 신청 주문 환불 처리 대기로 구분'],
+'store-settings':['배송비·취소 가능 시간·기본 택배사·배송 안내·반품 주소 관리','변경 설정을 신규 주문부터 적용','기존 주문의 안내 내용 유지','저장 후 실제 적용값 즉시 표시'],
+'product-filter':['판매 중·품절·판매 중지 상태 검색','상품명 검색','상태와 검색어 동시 적용','최근 수정 상품 우선 정렬'],
+'admin-products':['이미지·상품명·가격·재고·판매 상태 표시','수정 상품 목록 상단 이동','재고 없는 상품 판매 중 전환 제한','저장 실패 시 이전 상태 복원 및 안내'],
+'product-actions':['현재 상품 정보로 수정 화면 열기','수정 완료 후 목록 즉시 반영','삭제 전 상품명 포함 최종 확인','삭제 후 고객 스토어·운영 목록에서 제거','기존 주문 내역의 상품 정보 유지','삭제 완료 상품 복구 불가']
+};
+const stateCopy={
+'product-grid':[
+['판매 중','sale','고객 화면 노출 · 구매 가능'],
+['품절','soldout','고객 화면 노출 · 구매 불가'],
+['판매 중지','hidden','고객 화면 미노출']
+],
+'order-detail':[
+['배송 준비 중','PREPARING','발송 전 · 주문 취소 가능'],
+['발송 완료','SHIPPED','송장 등록 완료 · 주문 취소 불가'],
+['배송 완료','DELIVERED','반품 신청 가능'],
+['취소 완료','CANCELLED','발송 전 주문 취소 처리 완료'],
+['반품 신청','RETURN_REQUESTED','상품 회수·환불 처리 대기'],
+['환불 완료','REFUNDED','환불 처리 완료']
+],
+'sales-guide':[
+['배송 준비 중','PREPARING','포장·발송 준비 단계'],
+['발송 완료','SHIPPED','택배사·송장번호 등록 완료'],
+['배송 완료','DELIVERED','고객 수령 완료'],
+['취소 완료','CANCELLED','발송 전 주문 취소 완료']
+],
+'shipping-stages':[
+['발송 대기','PREPARING','송장 등록 필요'],
+['발송 완료','SHIPPED','택배 이동 중'],
+['배송 완료','DELIVERED','고객 수령 완료']
+],
+'settlement-list':[
+['정상 결제','PAID','취소·반품 없음'],
+['환불 처리 대기','RETURN_REQUESTED','반품 신청 후 환불 전'],
+['취소 완료','CANCELLED','발송 전 전액 취소'],
+['환불 완료','REFUNDED','반품 확인 후 환불 완료']
+],
+'admin-products':[
+['판매 중','sale','고객 화면 노출 · 구매 가능'],
+['품절','soldout','고객 화면 노출 · 구매 불가'],
+['판매 중지','hidden','고객 화면 미노출']
+]
+};
+let shell,opened=false,panelCollapsed=false,activeId='',observer,raf=0;
+const $=(s,r=document)=>r.querySelector(s), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function visible(el){if(!el)return false;const st=getComputedStyle(el),r=el.getBoundingClientRect();return st.display!=='none'&&st.visibility!=='hidden'&&r.width>0&&r.height>0;}
+function bounds(selector){const rects=[...document.querySelectorAll(selector)].filter(visible).map(el=>el.getBoundingClientRect());if(!rects.length)return null;return rects.reduce((a,r)=>({left:Math.min(a.left,r.left),top:Math.min(a.top,r.top),right:Math.max(a.right,r.right),bottom:Math.max(a.bottom,r.bottom)}),rects[0]);}
+function scope(){if($('.sidebar')){if(!$('#settlementView')?.hidden)return'adminSettlement';if(!$('#operationsView')?.hidden)return'adminOperations';return $('[data-view].active')?.dataset.view==='shipping'?'adminShipping':'adminSales';}const h=location.hash.slice(1);if(h.startsWith('product/'))return'product';if(h==='checkout')return'checkout';if(h.startsWith('orders/'))return'orderDetail';if(h==='orders')return'orders';return'home';}
+function current(){const s=scope(),store=['home','product','checkout','orders','orderDetail'].includes(s);return specs.filter(x=>(x.scope===s||(store&&x.scope==='store')||(s.startsWith('admin')&&x.scope==='admin'))&&visible($(x.selector)));}
+function ensure(){if(shell)return;shell=document.createElement('div');shell.className='dev-spec-shell';shell.hidden=true;shell.innerHTML='<div class="dev-spec-tint"></div><div class="dev-spec-marks"></div><button type="button" class="dev-spec-reopen" hidden>요구사항 보기</button><aside class="dev-spec-panel" role="dialog" aria-modal="true" aria-labelledby="devSpecTitle"><header><div><small>화면별 개발 요청 · ⌥ + ⌘ + K</small><h2 id="devSpecTitle">현재 화면 요구사항</h2><p class="dev-spec-subtitle"></p></div><div class="dev-spec-panel-actions"><button type="button" class="dev-spec-minimize" aria-label="요구사항 패널 접기" title="패널 접기">→</button><button type="button" class="dev-spec-close" aria-label="요구사항 닫기" title="요구사항 닫기">×</button></div></header><div class="dev-spec-legend"><span><i></i> 화면 연결 영역</span><b></b></div><div class="dev-spec-list"></div><footer><span>사용자 관점의 개발 요청사항</span><kbd>⌥</kbd>+<kbd>⌘</kbd>+<kbd>K</kbd></footer></aside>';document.body.append(shell);$('.dev-spec-close',shell).onclick=closePolicy;$('.dev-spec-minimize',shell).onclick=()=>setPanelCollapsed(true);$('.dev-spec-reopen',shell).onclick=()=>setPanelCollapsed(false);$('.dev-spec-marks',shell).onclick=e=>{const b=e.target.closest('[data-spec-id]');if(b)activate(b.dataset.specId,true)};shell.addEventListener('pointerdown',e=>{if(e.target.closest('.dev-spec-close')){e.preventDefault();closePolicy();return}const card=e.target.closest('[data-card-toggle]');if(card){e.preventDefault();activate(card.dataset.cardToggle,true)}},true);addEventListener('resize',schedule,{passive:true});addEventListener('scroll',schedule,{passive:true,capture:true});addEventListener('hashchange',()=>opened&&setTimeout(refresh,30));}
+function card(x,i){const requests=requirementCopy[x.id]||[x.summary],states=stateCopy[x.id]||[];return `<article class="dev-spec-card" data-card-id="${x.id}"><button class="dev-spec-card-head" data-card-toggle="${x.id}" aria-expanded="false"><span class="dev-spec-number">${i+1}</span><span><small>${esc(x.category)}</small><b>${esc(x.title)}</b></span><i>＋</i></button><div class="dev-spec-card-body"><h3 class="dev-spec-request-title">개발 요청사항</h3><ul class="dev-spec-requirements">${requests.map(request=>`<li>${esc(request)}</li>`).join('')}</ul>${states.length?`<h3 class="dev-spec-state-title">상태값</h3><ul class="dev-spec-states">${states.map(state=>`<li><b>${esc(state[0])}</b><code>${esc(state[1])}</code><span>${esc(state[2])}</span></li>`).join('')}</ul>`:''}</div></article>`}
+function refresh(preferred){if(!opened)return;const list=current();$('.dev-spec-subtitle',shell).textContent=`${document.title.replace(/\s*\|.*$/,'')} · 요구사항 ${list.length}개`;$('.dev-spec-legend b',shell).textContent=`${list.length}개 영역`;$('.dev-spec-list',shell).innerHTML=list.map(card).join('')||'<p class="dev-spec-empty">현재 화면에 연결된 요구사항이 없습니다.</p>';shell.querySelectorAll('[data-card-toggle]').forEach(b=>b.onclick=()=>activate(b.dataset.cardToggle,true));activeId=(list.find(x=>x.id===preferred)||list.find(x=>x.section===preferred)||list[0])?.id||'';draw(list);if(activeId)activate(activeId,false);observer?.disconnect();observer=new MutationObserver(records=>{if(records.some(record=>!shell.contains(record.target)))schedule()});observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class']});}
+function draw(list=current()){if(!opened)return;const layer=$('.dev-spec-marks',shell),limit=panelCollapsed?innerWidth:$('.dev-spec-panel',shell).getBoundingClientRect().left;layer.innerHTML=list.map((x,i)=>{const r=bounds(x.selector);if(!r)return'';const l=Math.max(4,r.left),t=Math.max(4,r.top),right=Math.min(limit-(panelCollapsed?4:10),r.right),bottom=Math.min(innerHeight-4,r.bottom);if(right-l<20||bottom-t<16)return'';return `<button class="dev-spec-mark${x.id===activeId?' active':''}" data-spec-id="${x.id}" aria-label="${esc(x.title)}" style="left:${l}px;top:${t}px;width:${right-l}px;height:${bottom-t}px"><span>${i+1}</span><em>${esc(x.title)}</em></button>`}).join('');}
+function schedule(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>draw())}
+function activate(id,scroll){const list=current();if(!list.some(x=>x.id===id))return;activeId=id;shell.querySelectorAll('.dev-spec-card').forEach(c=>{const on=c.dataset.cardId===id;c.classList.toggle('active',on);c.querySelector('.dev-spec-card-head').setAttribute('aria-expanded',on);c.querySelector('.dev-spec-card-head i').textContent=on?'−':'＋'});draw(list);if(scroll)$(`[data-card-id="${CSS.escape(id)}"]`,shell)?.scrollIntoView({block:'nearest',behavior:'smooth'});}
+function setPanelCollapsed(collapsed){if(!shell)return;panelCollapsed=collapsed;shell.classList.toggle('is-panel-collapsed',collapsed);$('.dev-spec-reopen',shell).hidden=!collapsed;schedule();(collapsed?$('.dev-spec-reopen',shell):$('.dev-spec-minimize',shell)).focus({preventScroll:true});}
+function open(preferred){ensure();opened=true;shell.hidden=false;setPanelCollapsed(false);document.documentElement.classList.add('dev-spec-open');document.body.classList.add('dev-spec-open');refresh(preferred);$('.dev-spec-close',shell).focus({preventScroll:true});}
+function closePolicy(){if(!shell)return;opened=false;panelCollapsed=false;shell.classList.remove('is-panel-collapsed');shell.hidden=true;observer?.disconnect();document.documentElement.classList.remove('dev-spec-open');document.body.classList.remove('dev-spec-open');}
+document.addEventListener('click',e=>{if(e.target.closest('.dev-spec-close')){e.preventDefault();closePolicy();return}if(opened&&e.target.closest('[data-view],a[href^="#"]'))setTimeout(refresh,30)});
+document.addEventListener('keydown',e=>{if(e.altKey&&e.metaKey&&!e.ctrlKey&&e.key.toLowerCase()==='k'){e.preventDefault();opened?closePolicy():open()}else if(e.key==='Escape'&&opened){e.preventDefault();closePolicy()}});
 })();
