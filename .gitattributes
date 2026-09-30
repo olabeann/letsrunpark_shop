@@ -1,0 +1,12 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Keep generated documents, helper scripts, and bundled font tooling out of
+# GitHub's repository-language calculation. The deployed product is a static
+# HTML site; its CSS and JavaScript are counted as part of that HTML artifact.
+tmp/** linguist-vendored
+outputs/** linguist-documentation
+_archive/** linguist-documentation
+*.py linguist-detectable=false
+dist/*.css linguist-language=HTML
+dist/*.js linguist-language=HTML
