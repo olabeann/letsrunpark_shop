@@ -1,0 +1,14 @@
+{
+  "a_docx": "/Users/beomjimin/Documents/GitHub/letsrunpark_shop/outputs/\ub9d0\ub9c8\ud504\ub80c\uc988_\uc628\ub77c\uc778\uc2a4\ud1a0\uc5b4_\ucd94\uac00\uac1c\ubc1c_\uacac\uc801\uc11c_v17.docx",
+  "b_docx": "/Users/beomjimin/Documents/GitHub/letsrunpark_shop/output/docx/\ub9d0\ub9c8\ud504\ub80c\uc988_\uc628\ub77c\uc778\uc2a4\ud1a0\uc5b4_\ucd94\uac00\uac1c\ubc1c_\uacac\uc801\uc11c_\uc218\uc815\ubcf8.docx",
+  "pages_a": 5,
+  "pages_b": 5,
+  "changed_pages": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "num_changed_pages": 5
+}
