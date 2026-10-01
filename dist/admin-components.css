@@ -55,14 +55,15 @@ body .product-state-select.state-sale{color:#1463e6}
 body .product-state-select.state-soldout{color:#a46916}
 body .product-state-select.state-hidden{color:#616873}
 
-body #productsTable .kiosk-product-table{min-width:960px;table-layout:fixed}
-body #productsTable .kiosk-product-table :is(th,td):first-child{width:32%;text-align:left}
-body #productsTable .kiosk-product-table :is(th,td):nth-child(2){width:16%;text-align:center}
-body #productsTable .kiosk-product-table :is(th,td):nth-child(3){width:14%;text-align:center}
-body #productsTable .kiosk-product-table :is(th,td):nth-child(4){width:18%;text-align:center}
-body #productsTable .kiosk-product-table :is(th,td):nth-child(5){width:20%;text-align:center}
+body #productsTable .kiosk-product-table{min-width:880px;table-layout:fixed}
+body #productsTable .kiosk-product-table :is(th,td):first-child{width:7%;text-align:left}
+body #productsTable .kiosk-product-table :is(th,td):nth-child(2){width:34%;text-align:left}
+body #productsTable .kiosk-product-table :is(th,td):nth-child(3){width:14%;text-align:left}
+body #productsTable .kiosk-product-table :is(th,td):nth-child(4){width:11%;text-align:left}
+body #productsTable .kiosk-product-table :is(th,td):nth-child(5){width:13%;text-align:left}
+body #productsTable .kiosk-product-table :is(th,td):nth-child(6){width:21%;text-align:right}
 body #productsTable .product-title{justify-content:flex-start}
-body #productsTable .kiosk-product-table :is(td:nth-child(2),td:nth-child(3)){font-variant-numeric:tabular-nums}
+body #productsTable .kiosk-product-table :is(td:nth-child(1),td:nth-child(3),td:nth-child(4)){font-variant-numeric:tabular-nums}
 body #productsTable .product-state-select.badge{display:block;width:104px;margin:0 auto;padding:0 28px;text-align:center;text-align-last:center;background-position:right 12px center}
 body #productsTable .product-state-select option{text-align:left}
 
