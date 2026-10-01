@@ -90,6 +90,89 @@ const stateCopy={
 ['판매 중지','hidden','고객 화면 미노출']
 ]
 };
+
+/* 2026-10-01 confirmed commerce policy. Keep the ⌥⌘K panel aligned with the final IA/spec. */
+const patchSpec=(id,values)=>Object.assign(specs.find(item=>item.id===id)||{},values);
+patchSpec('product-grid',{summary:'판매 중·품절 상품을 관리자가 저장한 수동 노출 순서로 표시합니다.'});
+patchSpec('quantity-policy',{summary:'별도 구매 수량 제한 없이 현재 가용 재고 안에서 수량을 선택합니다.'});
+patchSpec('checkout-fields',{summary:'필수 배송 정보와 선택 상세주소, 필수 동의 2종을 입력합니다.'});
+patchSpec('order-detail',{summary:'발송 완료까지의 배송 상태와 전체 취소·전체 반품·반려·환불 결과를 확인합니다.'});
+patchSpec('sales-filter',{summary:'기간·상태와 주문번호·상품명만 조합해 검색합니다.'});
+patchSpec('admin-orders',{summary:'주문 전체 단위의 취소·반품 환불·반려·관리자 예외 환불을 처리합니다.'});
+patchSpec('shipping-stages',{summary:'발송 대기와 발송 완료 주문만 분리합니다.'});
+patchSpec('shipping-table',{summary:'한 주문씩 택배사와 운송장을 등록하며 최초 등록 후 삭제 없이 수정만 허용합니다.'});
+patchSpec('settlement-filter',{summary:'결제 승인월을 기준으로 월 정산 원장을 조회합니다.'});
+patchSpec('settlement-summary',{summary:'승인액·환불액·PG 2%·차감 이월을 반영한 지급 예정액을 표시합니다.'});
+patchSpec('settlement-list',{summary:'개인정보 없이 주문·상품·금액·상태를 표시하고 검색 조건 전체를 XLSX로 내려받습니다.'});
+patchSpec('store-settings',{summary:'배송비·취소시간·반품기간·단순 변심 반품비·기본 택배사와 고객 안내를 관리합니다.'});
+patchSpec('product-filter',{summary:'판매 상태와 상품명으로 검색하며 저장된 수동 노출 순서를 유지합니다.'});
+patchSpec('admin-products',{summary:'20건 단위 일반 목록과 전체 상품 순서 설정 모드를 분리해 운영합니다.'});
+patchSpec('product-actions',{summary:'상품은 소프트 삭제하고 과거 주문·정산의 스냅샷에는 삭제 상품임을 표시합니다.'});
+
+specs.push(
+rule('mobile-purchase-bar','product','모바일 고정 구매바','구매 행동','.purchase-actions','mvp','모바일 화면 하단에 장바구니·바로 구매 또는 품절 상태를 고정 표시합니다.',[], '', '', ''),
+rule('checkout-consents','checkout','필수 동의 2종','동의 · 기록','.payment-note','data','커머스 거래조건과 개인정보 수집·이용을 각각 필수 동의로 받습니다.',[], '', '', ''),
+rule('home-banner-admin','adminOperations','메인 배너 관리','운영 콘텐츠','.home-banner-admin','mvp','PC·모바일 배너를 각각 업로드·미리보기·교체·기본 복원합니다.',[], '', '', ''),
+rule('product-editor-policy','adminOperations','상품 등록 · 상세 에디터','필수값 · 콘텐츠','#productEditor','mvp','대표 이미지와 1원 이상 가격을 필수로 하고 상세 콘텐츠를 편집합니다.',[], '', '', ''),
+rule('account-commerce-permission','adminAccounts','계정별 커머스 권한','권한','#accountsView','overview','기존 계정마다 커머스 관리자 권한을 별도 부여합니다.',[], '', '', '')
+);
+
+Object.assign(requirementCopy,{
+'store-header':['스토어 홈·주문 조회·회원별 장바구니 진입 제공','장바구니 전체 상품 수량 표시','공개 사용자 화면에 관리자 진입 링크 미노출'],
+'product-grid':['판매 중·품절 상품 노출','판매 중지·삭제 상품 고객 화면 제외','관리자가 저장한 displayOrder 오름차순 노출','품절·재입고·상품 수정으로 순서 자동 변경 금지','이미지·상태·상품명·가격 표시 및 상세 연결'],
+'quantity-policy':['최소 1개부터 현재 재고 범위 안에서 수량 선택','재고 외 별도 1회 구매 수량 제한 없음','수량 변경 시 예상 금액 즉시 반영','품절은 구매 행동 대신 품절 상태만 표시','결제 직전 현재 가격·판매 상태·재고 재검증'],
+'cart-panel':['같은 브라우저 안에서 회원별로 장바구니 저장','로그아웃 후에도 유지 · 기기 간 공유 없음','삭제·미노출·품절·구매불가 상품은 장바구니에서 자동 제거','자동 제외 시 “구매할 수 없는 상품이 장바구니에서 제외되었습니다.” 토스트만 표시','현재 판매가로 합계 갱신','재고 범위 안에서만 수량 변경'],
+'product-content':['상품 상세 에디터 콘텐츠 → 배송 안내 → 취소·반품 안내 순서','배송비·발송 기준·취소 시간·전체 반품 기준 고지','상품·수량 일부 반품 미지원 고지','주문 당시 안내와 정책 버전 보관'],
+'mobile-purchase-bar':['모바일 화면 하단에 구매 행동 고정','판매 가능 시 장바구니·바로 구매 표시','품절 시 품절 버튼 하나만 표시','본문을 가리지 않도록 안전영역과 하단 여백 확보'],
+'checkout-fields':['이름·전화번호·우편번호·기본주소 필수','상세주소·배송메모 선택','주소 검색 실패 시 직접 입력 허용','입력 오류 위치별 안내와 기존 입력값 유지'],
+'checkout-consents':['커머스 거래조건 동의 필수 · 기본 미체크','개인정보 수집·이용 동의 필수 · 기본 미체크','동의 문서 버전과 동의 시각을 주문에 각각 저장','최종 법정 문구는 고객사 검토 필요'],
+'checkout-summary':['결제 전 상품·수량·상품금액·배송비·총액 확인','관리자 배송비 0원 설정 시 무료배송 표시','결제 대기 상태에서 재고 선점하지 않음','승인 완료 순서대로 재고 원자적 차감','동시 소진 후속 승인건은 PG 전액 자동 취소','결제 직전 가격 변경 시 결제를 막고 “상품 금액이 변경되었습니다. 변경된 주문 금액을 확인해 주세요.” 안내','중복 주문 생성·재고 차감 방지'],
+'orders-list':['본인 주문만 최신순 표시','주문일·주문번호·진행 상태·상품·결제 금액 표시','삭제 상품은 주문 당시 이름과 “삭제된 상품” 표시 유지','주문 없음·조회 오류 상태별 안내'],
+'order-detail':['주문 당시 상품명·가격·수량·배송비·정책 스냅샷 유지','배송 상태는 배송 준비 중·발송 완료까지만 사용','고객 취소는 주문 당시 설정 시간 이내이면서 운송장 미등록일 때만 허용','허용 취소는 상품금액·배송비 전액 환불 및 재고 복원','취소 재고 복원 후 판매 상태 자동 재개 금지','최초 발송 운송장 등록 시각부터 주문 당시 반품일수 적용 · 기본 14일','운송장 등록 후 주문 전체 반품만 신청 · 상품·수량 일부 반품 불가','반품 신청 후 고객 직접 반송 및 반품 운송장 등록','반품 운송장은 공백·하이픈 제거 후 영문·숫자 허용 · 중복 허용','반품 운송장 최초 등록 후 삭제 불가 · 환불/반려 전까지 수정 가능','반품 운송장 수정 이력 미보존 · 최신값만 저장','반품 운송장 미등록 전 고객 철회 가능 · 등록 후 CS 처리','반품 반려 사유 고객 표시 · 반려 후 재신청 차단','환불은 전액 또는 배송비 차감 후 전체 환불','환불 안내는 사유·차감액·최종 환불액으로 자동 생성 · 관리자 수정 불가','관리자 선택 추가 안내 문구 허용','환불 완료·반품 반려 후 상태 변경 불가','자동 문자·알림톡·푸시 미발송','기존 고객센터 전화번호·운영시간 안내 유지 · 온라인 문의 기능 제외'],
+'admin-nav':['예약관리시스템과 커머스관리시스템 메뉴 그룹 분리','커머스 메뉴: 상품 판매 현황·배송 처리·매출 정산·온라인 스토어 운영','기존 계정별 커머스 관리자 권한이 있는 경우만 커머스 메뉴 노출','통합 관리자는 커머스 관리자 권한 기본 부여','현재 메뉴 강조와 발송 대기 건수 표시','주문·배송 개인정보 보존·삭제 기간은 고객사 협의 항목으로 표시'],
+'sales-guide':['배송 준비 중·발송 완료·취소 완료만 안내','별도 배송 완료 상태 미사용','안내와 목록의 상태 명칭 통일'],
+'sales-filter':['주문 생성일 기간·결제 상태·배송 상태 조합 검색','키워드 검색 대상은 주문번호·상품명만','반품 신청·반품 반려·환불 완료·관리자 예외 환불 상태 필터','검색·필터 변경 시 1페이지로 이동','검색 결과 전체를 다운로드 · 현재 페이지만 다운로드하지 않음'],
+'admin-orders':['검색 조건 일치 주문을 20건 단위로 표시','주문번호 아래 상품명·수량 표시','결제 상태와 배송 상태를 서로 다른 값으로 관리','반품은 주문 전체 단위 · 상품·수량 일부 환불 미지원','발송 전 관리자 취소는 고객 제한시간과 무관하게 가능 · 필수 내부 사유','발송 전 취소는 전액 환불·재고 복원 · 판매 상태 자동 재개 없음','별도 반품 도착 상태·확인 버튼 없음 · 담당자가 실제 도착을 업무 절차로 확인','반품 운송장 등록 후 담당자가 실물 도착을 확인해 환불 또는 반려 처리','단순 변심은 설정의 반품비 기본값을 불러오고 건별 수정 가능','불량·파손·오배송은 배송비 차감 없음이 기본','환불은 전액 또는 배송비 차감 후 전체 금액 환불','환불 고객 안내는 자동 생성하고 수정 불가 · 추가 안내만 선택 입력','반품 환불 완료 시 판매 재고 자동 복원 없음','반품 반려 시 사유 필수·고객 노출·재신청 차단','반려 후 재발송 운송장 없이 기존 고객센터에서 처리','발송 후 관리자 예외 환불: 반품 신청·반품 운송장 없이 전액 또는 배송비 차감 가능','관리자 예외 환불은 내부 사유 필수·재고 미복원·완료 후 변경 불가','취소·반려·환불 요청은 멱등 처리','자동 알림·별도 CS 접수 기능 제외'],
+'shipping-stages':['발송 대기·발송 완료 주문만 분리','별도 배송 완료 단계 미사용','발송 대기 주문 오래된 순·발송 완료 최근 발송 순','취소 주문은 발송 대상 제외','각 목록 페이지당 20건'],
+'shipping-table':['주문별 택배사·운송장번호 입력 및 저장 · 일괄 배송 없음','기본 택배사를 불러오고 주문별로 변경 가능','공백·하이픈 제거 후 영문·숫자 허용 · 자리수 강제 없음','같은 운송장번호를 여러 주문에 등록 가능 · 중복 경고 없음','최초 등록 전 “등록 후 운송장 정보는 삭제할 수 없으며 수정만 가능합니다. 발송 완료로 처리하시겠습니까?” 확인','최초 등록 성공 시 발송 완료 전환','등록 후 운송장 삭제 불가·수정만 가능','운송장 수정 이력 미보존 · 최신값만 저장','입력 오류는 해당 주문 행에 표시','조회 조건 전체 CSV 내려받기 · 송장 엑셀 업로드·양식 다운로드 제외'],
+'settlement-filter':['결제 승인월을 월 단위로 선택','승인일 1일부터 말일까지 집계','결제·환불 상태 조합 검색','검색·필터 변경 시 1페이지로 이동','주문번호·상품명만 검색','고객명·전화번호·주소·배송 지역 검색 없음'],
+'settlement-summary':['승인월 총 결제액 표시','해당 월 취소·환불액 별도 표시','PG 수수료 2%와 환불 수수료 조정 반영','익월 8일 지급 예정 · 주말·공휴일은 다음 영업일','정산액 음수는 지급 0원·차감 이월액으로 다음 달 반영','송금·지급 완료 처리 기능 없음'],
+'settlement-list':['주문번호·상품명·금액·처리상태 표시','삭제 상품은 주문 당시 상품명과 “삭제된 상품” 표시 유지','고객명·전화번호·주소 등 개인정보 미노출','승인월 원장과 이전 승인건의 해당 월 환불 조정 함께 표시','환불 완료월에 환불액과 PG 수수료 조정 반영','페이지당 20건','검색 조건 전체 결과를 실제 XLSX로 다운로드','주문·배송 CSV와 정산 XLSX 분리'],
+'store-settings':['고정 배송비 관리 · 0원은 무료배송','고객 직접 취소 가능 시간 관리 · 기본 24시간','최초 운송장 등록 후 반품 신청 일수 관리 · 기본 14일','단순 변심 반품비 기본값 별도 관리 · 환불 시 불러와 건별 수정','기본 택배사와 주문별 변경 지원','배송 안내·반품 주소 관리','설정 변경은 신규 주문부터 적용하고 기존 주문 스냅샷 유지'],
+'product-filter':['판매 중·품절·판매 중지 상태와 상품명 검색','검색·필터 변경 시 1페이지로 이동','일반 목록은 저장된 수동 노출 순서 유지','삭제 상품은 일반 목록에서 제외'],
+'admin-products':['일반 상품 목록 페이지당 20건','이미지·상품명·가격·재고·상태·노출순서 표시','별도 순서 설정 모드에서 전체 미삭제 상품을 검색·드래그·저장','상품 편집·재고 변경·품절·재입고로 노출순서 자동 변경 금지','신규 상품은 마지막 순서','재고 0이면 품절 · 재입고 후 판매 자동 재개 금지'],
+'product-actions':['대표 이미지 필수','판매가격 1원 이상 정수 · 재고 0 이상 정수','상품명·가격·재고·상태·요약·상세 에디터 수정','삭제는 소프트 삭제 · 고객 스토어와 관리자 일반 목록에서 숨김','삭제 상품 복구·편집 불가 · 필요 시 신규 등록','과거 주문·정산에는 주문 당시 스냅샷과 “삭제된 상품” 표시 유지'],
+'home-banner-admin':['PC·모바일 배너 각각 등록','JPG·PNG·WebP 허용','업로드 즉시 미리보기','이미지 교체와 기본 배너 복원','PC·모바일 권장 비율 안내'],
+'product-editor-policy':['대표 이미지 필수','판매가격 1원 이상 정수','상품명·가격·재고·상태·요약 저장','본문·제목·서식·목록·링크·이미지 삽입','YouTube·Vimeo·HTTPS 영상 주소 삽입','영상 파일 직접 업로드 제외','상세 콘텐츠 미리보기와 허용 HTML 정제'],
+'account-commerce-permission':['기존 지역·부서·로그인 계정 정보와 커머스 권한을 분리','계정별 커머스 관리자 권한 boolean 체크','통합 관리자는 기본 true이며 해제 불가','일반 계정은 통합 관리자가 부여·해제','권한 없는 계정의 커머스 메뉴와 API 차단']
+});
+
+stateCopy['order-detail']=[
+['배송 준비 중','PREPARING','운송장 미등록 · 고객 기한 내 취소 또는 관리자 취소 가능'],
+['발송 완료','SHIPPED','운송장 등록 완료 · 고객 취소 불가 · 전체 반품 신청 가능'],
+['취소 완료','CANCELLED','발송 전 전액 취소 · 재고 복원'],
+['반품 신청 완료','RETURN_REQUESTED','고객 직접 반송·관리자 처리 대기'],
+['반품 반려','RETURN_REJECTED','사유 고객 표시 · 재신청 불가'],
+['반품 환불 완료','REFUNDED','전체 환불 또는 배송비 차감 환불 완료'],
+['관리자 예외 환불','EXCEPTION_REFUNDED','발송 후 반품 절차 없이 관리자 환불 완료']
+];
+stateCopy['sales-guide']=[
+['배송 준비 중','PREPARING','결제 완료 · 운송장 미등록'],
+['발송 완료','SHIPPED','택배사·운송장번호 등록 완료'],
+['취소 완료','CANCELLED','발송 전 주문 취소 완료']
+];
+stateCopy['shipping-stages']=[
+['발송 대기','PREPARING','주문별 운송장 등록 필요'],
+['발송 완료','SHIPPED','운송장 등록 완료 · 수정 가능']
+];
+stateCopy['settlement-list']=[
+['정상 결제','PAID','승인월 정산 반영'],
+['환불 처리 대기','RETURN_REQUESTED','정산 차감 전'],
+['취소 완료','CANCELLED','취소 완료월 차감'],
+['반품 환불 완료','REFUNDED','환불 완료월 차감'],
+['관리자 예외 환불','EXCEPTION_REFUNDED','예외 환불 완료월 차감'],
+['차감 이월','CARRY_FORWARD','음수 정산액 다음 달 차감']
+];
 let shell,opened=false,panelCollapsed=false,activeId='',observer,raf=0;
 const isMac=/Mac|iPhone|iPad|iPod/.test(navigator.platform);
 const shortcutLabel=isMac?'⌥ + ⌘ + K':'Ctrl + Alt + K';
@@ -97,7 +180,7 @@ const shortcutKeys=isMac?'<kbd>⌥</kbd>+<kbd>⌘</kbd>+<kbd>K</kbd>':'<kbd>Ctrl
 const $=(s,r=document)=>r.querySelector(s), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function visible(el){if(!el)return false;const st=getComputedStyle(el),r=el.getBoundingClientRect();return st.display!=='none'&&st.visibility!=='hidden'&&r.width>0&&r.height>0;}
 function bounds(selector){const rects=[...document.querySelectorAll(selector)].filter(visible).map(el=>el.getBoundingClientRect());if(!rects.length)return null;return rects.reduce((a,r)=>({left:Math.min(a.left,r.left),top:Math.min(a.top,r.top),right:Math.max(a.right,r.right),bottom:Math.max(a.bottom,r.bottom)}),rects[0]);}
-function scope(){if($('.sidebar')){if(!$('#settlementView')?.hidden)return'adminSettlement';if(!$('#operationsView')?.hidden)return'adminOperations';return $('[data-view].active')?.dataset.view==='shipping'?'adminShipping':'adminSales';}const h=location.hash.slice(1);if(h.startsWith('product/'))return'product';if(h==='checkout')return'checkout';if(h.startsWith('orders/'))return'orderDetail';if(h==='orders')return'orders';return'home';}
+function scope(){if($('.sidebar')){if(!$('#accountsView')?.hidden)return'adminAccounts';if(!$('#settlementView')?.hidden)return'adminSettlement';if(!$('#operationsView')?.hidden)return'adminOperations';return $('[data-view].active')?.dataset.view==='shipping'?'adminShipping':'adminSales';}const h=location.hash.slice(1);if(h.startsWith('product/'))return'product';if(h==='checkout')return'checkout';if(h.startsWith('orders/'))return'orderDetail';if(h==='orders')return'orders';return'home';}
 function current(){const s=scope(),store=['home','product','checkout','orders','orderDetail'].includes(s);return specs.filter(x=>(x.scope===s||(store&&x.scope==='store')||(s.startsWith('admin')&&x.scope==='admin'))&&visible($(x.selector)));}
 function ensure(){if(shell)return;shell=document.createElement('div');shell.className='dev-spec-shell';shell.hidden=true;shell.innerHTML=`<div class="dev-spec-tint"></div><div class="dev-spec-marks"></div><button type="button" class="dev-spec-reopen" hidden>요구사항 보기</button><aside class="dev-spec-panel" role="dialog" aria-modal="true" aria-labelledby="devSpecTitle"><header><div><small>화면별 개발 요청 · ${shortcutLabel}</small><h2 id="devSpecTitle">현재 화면 요구사항</h2><p class="dev-spec-subtitle"></p></div><div class="dev-spec-panel-actions"><button type="button" class="dev-spec-minimize" aria-label="요구사항 패널 접기" title="패널 접기">→</button><button type="button" class="dev-spec-close" aria-label="요구사항 닫기" title="요구사항 닫기">×</button></div></header><div class="dev-spec-legend"><span><i></i> 화면 연결 영역</span><b></b></div><div class="dev-spec-list"></div><footer><span>사용자 관점의 개발 요청사항</span>${shortcutKeys}</footer></aside>`;document.body.append(shell);$('.dev-spec-close',shell).onclick=closePolicy;$('.dev-spec-minimize',shell).onclick=()=>setPanelCollapsed(true);$('.dev-spec-reopen',shell).onclick=()=>setPanelCollapsed(false);$('.dev-spec-marks',shell).onclick=e=>{const b=e.target.closest('[data-spec-id]');if(b)activate(b.dataset.specId,true)};shell.addEventListener('pointerdown',e=>{if(e.target.closest('.dev-spec-close')){e.preventDefault();closePolicy();return}const card=e.target.closest('[data-card-toggle]');if(card){e.preventDefault();activate(card.dataset.cardToggle,true)}},true);addEventListener('resize',schedule,{passive:true});addEventListener('scroll',schedule,{passive:true,capture:true});addEventListener('hashchange',()=>opened&&setTimeout(refresh,30));}
 function card(x,i){const requests=requirementCopy[x.id]||[x.summary],states=stateCopy[x.id]||[];return `<article class="dev-spec-card" data-card-id="${x.id}"><button class="dev-spec-card-head" data-card-toggle="${x.id}" aria-expanded="false"><span class="dev-spec-number">${i+1}</span><span><small>${esc(x.category)}</small><b>${esc(x.title)}</b></span><i>＋</i></button><div class="dev-spec-card-body"><h3 class="dev-spec-request-title">개발 요청사항</h3><ul class="dev-spec-requirements">${requests.map(request=>`<li>${esc(request)}</li>`).join('')}</ul>${states.length?`<h3 class="dev-spec-state-title">상태값</h3><ul class="dev-spec-states">${states.map(state=>`<li><b>${esc(state[0])}</b><code>${esc(state[1])}</code><span>${esc(state[2])}</span></li>`).join('')}</ul>`:''}</div></article>`}
