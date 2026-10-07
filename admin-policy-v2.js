@@ -436,10 +436,37 @@
     const link = document.createElement('a'); link.href = URL.createObjectURL(makeXlsx(rows)); link.download = `커머스_정산_${$('settlementMonth').value}.xlsx`; link.click(); setTimeout(() => URL.revokeObjectURL(link.href), 1000);
   };
 
+  function mountSharedAccounts() {
+    const view = document.createElement('section');
+    view.id = 'sharedAccountsView';
+    view.hidden = true;
+    view.innerHTML = '<iframe title="관리자 계정 · 권한" class="shared-accounts-frame"></iframe>';
+    $('admin-main').append(view);
+    const frame = view.querySelector('iframe');
+    frame.addEventListener('load', () => {
+      // Both GitHub Pages projects share an origin and the same account storage.
+      const doc = frame.contentDocument;
+      if (!doc) return;
+      const style = doc.createElement('style');
+      style.textContent = '.admin-sidebar,.admin-topbar,.skip-link{display:none!important}.admin-shell{margin-left:0!important}.account-admin-main{padding:0!important}html,body{background:#fff!important}body{min-width:0!important}';
+      doc.head.append(style);
+    });
+    document.querySelector('[data-view="accounts"]').addEventListener('click', () => {
+      document.querySelectorAll('[data-view]').forEach(item => item.classList.toggle('active', item.dataset.view === 'accounts'));
+      $('salesView').hidden = true;
+      $('settlementView').hidden = true;
+      $('operationsView').hidden = true;
+      view.hidden = false;
+      if (!frame.getAttribute('src')) frame.src = 'https://olabeann.github.io/letsrunpark-reser/account-admin.html?v=20261007-commerce1';
+      document.title = '계정 · 권한 | 렛츠런파크 관리자';
+    });
+  }
+
   function bindPrimaryNavigation() {
     document.querySelectorAll('[data-view]').forEach(button => {
       if (button.dataset.view === 'accounts') return;
       button.addEventListener('click', () => {
+        $('sharedAccountsView').hidden = true;
         const view = button.dataset.view;
         document.querySelectorAll('[data-view]').forEach(item => item.classList.toggle('active', item === button));
         salesTab = view === 'shipping' ? 'shipping' : 'orders';
@@ -465,6 +492,7 @@
 
   ensurePolicyData();
   mountPolicyUi();
+  mountSharedAccounts();
   bindPrimaryNavigation();
   $('reorderProducts').onclick = () => { reorderMode = !reorderMode; $('reorderProducts').textContent = reorderMode ? '순서 설정 중' : '노출 순서 설정'; renderProducts(); };
   $('filterForm').onsubmit = event => { event.preventDefault(); orderPage = 1; renderOrders(); };

@@ -102,3 +102,5 @@ body .refund-options label:has(input:checked){border-color:var(--admin-blue);bac
 @media(max-width:1180px){body .filter-panel{grid-template-columns:repeat(4,minmax(130px,1fr))}body .filter-panel .search-field{grid-column:1/4}}
 @media(max-width:820px){body :is(.page-head,.page-heading){align-items:flex-start;flex-direction:column}body :is(.page-head__actions,.heading-actions){width:100%}body :is(.page-head__actions,.heading-actions)>button{flex:1}body .filter-panel{grid-template-columns:1fr 1fr}body #filterForm .search-field{grid-column:1/-1;width:100%;max-width:none;flex:auto}body .filter-panel>button{grid-column:auto}body .settlement-cards{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){body .filter-panel{grid-template-columns:1fr}body .filter-panel>*{grid-column:auto!important}body .settlement-cards{grid-template-columns:1fr}}
+
+.shared-accounts-frame{display:block;width:100%;height:max(850px,calc(100vh - 160px));border:0;background:#fff}
