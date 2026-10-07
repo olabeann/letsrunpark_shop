@@ -7,7 +7,7 @@
 - [사용자 스토어 열기](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/index.html)
 - [스토어 관리자 열기](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/admin.html)
 
-> GitHub 저장소의 공개 설정과 시연 사이트의 접근 권한은 별개입니다. 현재 시연 사이트는 허용된 계정으로 로그인해야 접근할 수 있습니다. 아래 링크가 열리지 않으면 사이트 접근 권한을 확인하거나 [로컬 실행](#로컬-실행) 방법을 이용하세요.
+> 시연 사이트는 공개 접근으로 설정되어 있어 ChatGPT 로그인 없이 열 수 있습니다. 구매·주문 조회 화면의 시연 로그인은 사이트 내부에서 진행합니다.
 
 ### 사용자 화면
 
