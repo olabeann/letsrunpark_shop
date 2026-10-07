@@ -104,3 +104,5 @@ body .refund-options label:has(input:checked){border-color:var(--admin-blue);bac
 @media(max-width:560px){body .filter-panel{grid-template-columns:1fr}body .filter-panel>*{grid-column:auto!important}body .settlement-cards{grid-template-columns:1fr}}
 
 .shared-accounts-frame{display:block;width:100%;height:max(850px,calc(100vh - 160px));border:0;background:#fff}
+
+.shared-accounts-frame.has-account-modal{position:fixed;inset:0;z-index:10000;width:100vw;height:100dvh;background:transparent}
