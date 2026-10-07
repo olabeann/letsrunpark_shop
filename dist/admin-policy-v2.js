@@ -45,7 +45,6 @@
       if (node.textContent.includes('배송 완료 상태')) node.textContent = '택배사 배송조회로 연결되며, 별도의 배송 완료 상태는 사용하지 않습니다.';
     });
     $('keyword').placeholder = '주문번호 / 상품명';
-    $('exportOrders').textContent = '검색 결과 전체 내려받기';
     $('exportSettlement').textContent = '정산 엑셀 다운로드 (.xlsx)';
     $('settlementKeyword').placeholder = '주문번호 · 상품명 검색';
     $('settlementShipping').querySelectorAll('option').forEach(option => {
