@@ -61,7 +61,7 @@
 | --- | --- |
 | 예약 · 티켓 | [예약 관리자](https://olabeann.github.io/letsrunpark-reser/admin-reservations.html) |
 | 프로그램 · 회차 / 운영일 관리 / 매출 · 정산 | [예약 운영 관리자](https://olabeann.github.io/letsrunpark-reser/admin.html) |
-| 계정 · 권한 | [기존 계정 관리](https://olabeann.github.io/letsrunpark-reser/account-admin.html): 계정 정보에서 커머스 권한 선택, 통합관리자만 변경 |
+| 계정 · 권한 | shop 관리자 내 **계정 · 권한**: 기존 계정 관리 화면을 같은 주소에서 표시. 계정 정보에서 커머스 권한 선택, 통합관리자만 변경 |
 
 위 네 메뉴는 현재 동일한 예약 관리자 주소로 연결됩니다.
 
