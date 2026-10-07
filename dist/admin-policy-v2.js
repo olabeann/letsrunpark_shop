@@ -84,7 +84,6 @@
     $('customerRefundNote').closest('label').querySelector('span').textContent = '고객 환불 안내 (자동 생성)';
     if (!$('refundExtraNote')) $('customerRefundNote').closest('label').insertAdjacentHTML('afterend', '<label><span>고객 추가 안내 (선택)</span><textarea id="refundExtraNote" rows="3" placeholder="필요한 경우에만 추가 안내를 입력해 주세요."></textarea></label>');
 
-    mountAccounts();
     mountActionDialog();
     rebuildSettlementFilter();
   }
@@ -437,18 +436,6 @@
     const link = document.createElement('a'); link.href = URL.createObjectURL(makeXlsx(rows)); link.download = `커머스_정산_${$('settlementMonth').value}.xlsx`; link.click(); setTimeout(() => URL.revokeObjectURL(link.href), 1000);
   };
 
-  function mountAccounts() {
-    const link = [...document.querySelectorAll('.sidebar nav a')].find(node => node.textContent.includes('계정 · 권한'));
-    if (!link) return;
-    const button = document.createElement('button'); button.dataset.view = 'accounts'; button.innerHTML = link.innerHTML; link.replaceWith(button);
-    $('admin-main').insertAdjacentHTML('beforeend', `<section id="accountsView" class="admin-view" hidden><div class="page-heading"><div><h1>계정 · 권한</h1><p>기존 계정 정보와 별개로 커머스 관리자 권한을 부여합니다.</p></div></div><div class="account-policy-note">통합 관리자는 기본으로 권한이 부여됩니다. 일반 계정은 아래 항목을 개별 선택합니다.</div><div id="accountsTable" class="table-wrap"></div></section>`);
-    button.onclick = () => {
-      document.querySelectorAll('[data-view]').forEach(node => node.classList.toggle('active', node === button));
-      $('salesView').hidden = true; $('settlementView').hidden = true; $('operationsView').hidden = true; $('accountsView').hidden = false;
-      renderAccounts(); document.title = '계정 · 권한 | 렛츠런파크 관리자';
-    };
-  }
-
   function bindPrimaryNavigation() {
     document.querySelectorAll('[data-view]').forEach(button => {
       if (button.dataset.view === 'accounts') return;
@@ -460,7 +447,6 @@
         $('salesView').hidden = !['sales', 'shipping'].includes(view);
         $('settlementView').hidden = view !== 'settlement';
         $('operationsView').hidden = view !== 'operations';
-        $('accountsView').hidden = true;
         if (view === 'sales' || view === 'shipping') {
           $('salesHeading').textContent = view === 'shipping' ? '배송 처리' : '상품 판매 현황';
           $('salesDescription').textContent = view === 'shipping' ? '발송할 주문의 송장번호를 입력하고 발송 완료로 변경합니다.' : '주문별 구매 상품, 결제 내역과 배송 상태를 확인합니다.';
@@ -475,13 +461,6 @@
         document.title = `${titles[view]} | 렛츠런파크 관리자`;
       });
     });
-  }
-
-  function renderAccounts() {
-    const defaults = [{ id: 'integrated', region: '전체 지역', department: '통합 운영', login: 'admin@letsrunpark.kr', integrated: true, commerce: true }, { id: 'seoul-pr', region: '서울', department: '홍보부', login: 'name@letsrunpark.kr', commerce: false }];
-    const accounts = JSON.parse(localStorage.goodsAdminAccounts || 'null') || defaults;
-    $('accountsTable').innerHTML = `<table><thead><tr><th>지역</th><th>부서</th><th>로그인 ID</th><th>계정 유형</th><th>커머스 관리자 권한</th></tr></thead><tbody>${accounts.map(account => `<tr><td>${esc(account.region)}</td><td>${esc(account.department)}</td><td>${esc(account.login)}</td><td>${account.integrated ? '통합 관리자' : '지역 관리자'}</td><td><label class="permission-toggle"><input type="checkbox" data-account-commerce="${account.id}" ${account.commerce ? 'checked' : ''} ${account.integrated ? 'disabled' : ''}><span>${account.commerce ? '부여' : '미부여'}</span></label></td></tr>`).join('')}</tbody></table>`;
-    document.querySelectorAll('[data-account-commerce]').forEach(input => input.onchange = () => { const account = accounts.find(item => item.id === input.dataset.accountCommerce); account.commerce = input.checked; input.nextElementSibling.textContent = input.checked ? '부여' : '미부여'; localStorage.goodsAdminAccounts = JSON.stringify(accounts); });
   }
 
   ensurePolicyData();
