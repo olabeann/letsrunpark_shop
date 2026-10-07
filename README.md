@@ -4,20 +4,20 @@
 
 ## 화면 바로가기
 
-- [사용자 스토어 열기](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/index.html)
-- [스토어 관리자 열기](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/admin.html)
+- [사용자 스토어 열기](https://olabeann.github.io/letsrunpark_shop/index.html)
+- [스토어 관리자 열기](https://olabeann.github.io/letsrunpark_shop/admin.html)
 
-> 시연 사이트는 공개 접근으로 설정되어 있어 ChatGPT 로그인 없이 열 수 있습니다. 구매·주문 조회 화면의 시연 로그인은 사이트 내부에서 진행합니다.
+> 시연 사이트는 GitHub Pages로 제공하며 ChatGPT 로그인 없이 열 수 있습니다. 구매·주문 조회 화면의 시연 로그인은 사이트 내부에서 진행합니다.
 
 ### 사용자 화면
 
 | 화면 | 링크 | 확인할 내용 · 접근 조건 |
 | --- | --- | --- |
-| 스토어 홈 | [화면 보기](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/index.html#store) | 브랜드 소개와 전체 상품 목록 |
-| 상품 목록 | [화면 보기](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/index.html#products) | 저장된 수동 노출 순서로 페이지당 24개 표시, 판매 중·품절 상품 확인 |
-| 상품 상세 | [말마 인형 보기](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/index.html#product/1) | 대표 이미지, 가격, 수량, 상세정보, 배송·취소 안내 |
-| 주문·결제 | [화면 보기](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/index.html#checkout) | 상품 상세에서 **바로 구매** 또는 장바구니에서 주문 진행 후 확인. 상품 선택 없이 열면 주문 상품 확인 안내 표시 |
-| 주문 조회 | [화면 보기](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/index.html#orders) | 시연 로그인 후 페이지당 10건의 주문 목록, 결제금액, 배송 상태 확인. 주문이 없으면 빈 목록 표시 |
+| 스토어 홈 | [화면 보기](https://olabeann.github.io/letsrunpark_shop/index.html#store) | 브랜드 소개와 전체 상품 목록 |
+| 상품 목록 | [화면 보기](https://olabeann.github.io/letsrunpark_shop/index.html#products) | 저장된 수동 노출 순서로 페이지당 24개 표시, 판매 중·품절 상품 확인 |
+| 상품 상세 | [말마 인형 보기](https://olabeann.github.io/letsrunpark_shop/index.html#product/1) | 대표 이미지, 가격, 수량, 상세정보, 배송·취소 안내 |
+| 주문·결제 | [화면 보기](https://olabeann.github.io/letsrunpark_shop/index.html#checkout) | 상품 상세에서 **바로 구매** 또는 장바구니에서 주문 진행 후 확인. 상품 선택 없이 열면 주문 상품 확인 안내 표시 |
+| 주문 조회 | [화면 보기](https://olabeann.github.io/letsrunpark_shop/index.html#orders) | 시연 로그인 후 페이지당 10건의 주문 목록, 결제금액, 배송 상태 확인. 주문이 없으면 빈 목록 표시 |
 | 주문 상세 | 주문 조회 → **주문 상세 보기** | `#orders/주문번호` 경로. 발송 완료 주문의 전체 반품 신청, 직접 반송 안내, 발송 후 운송장 등록과 고객 환불 안내 확인 |
 | 주문 완료 | 주문·결제 → **결제하기** | `#complete/주문번호` 경로. 시연 주문 완료 후 표시 |
 | 로그인 | 주문 조회 또는 구매 버튼 클릭 | 로그인 선택 팝업. 실제 소셜 인증 대신 시연 상태로 전환 |
@@ -32,18 +32,18 @@
 
 | 상품 | 경로 | 확인할 화면 |
 | --- | --- | --- |
-| [말마 인형](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/index.html#product/1) | `#product/1` | 상품 소개 · 수량 선택 · 구매 |
-| [경주마 인형 A](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/index.html#product/2) | `#product/2` | 상품 소개 · 수량 선택 · 구매 |
-| [경주마 인형 B](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/index.html#product/3) | `#product/3` | 품절 화면 |
-| [말마 미니 인형](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/index.html#product/4) | `#product/4` | 상품 소개 · 수량 선택 · 구매 |
-| [말마 인형 키링](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/index.html#product/5) | `#product/5` | 상품 소개 · 수량 선택 · 구매 |
-| [경주마 미니 인형](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/index.html#product/6) | `#product/6` | 상품 소개 · 수량 선택 · 구매 |
-| [말마 쿠션 인형](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/index.html#product/7) | `#product/7` | 상품 소개 · 수량 선택 · 구매 |
-| [말마 인형 선물 세트](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/index.html#product/8) | `#product/8` | 상품 소개 · 수량 선택 · 구매 |
+| [말마 인형](https://olabeann.github.io/letsrunpark_shop/index.html#product/1) | `#product/1` | 상품 소개 · 수량 선택 · 구매 |
+| [경주마 인형 A](https://olabeann.github.io/letsrunpark_shop/index.html#product/2) | `#product/2` | 상품 소개 · 수량 선택 · 구매 |
+| [경주마 인형 B](https://olabeann.github.io/letsrunpark_shop/index.html#product/3) | `#product/3` | 품절 화면 |
+| [말마 미니 인형](https://olabeann.github.io/letsrunpark_shop/index.html#product/4) | `#product/4` | 상품 소개 · 수량 선택 · 구매 |
+| [말마 인형 키링](https://olabeann.github.io/letsrunpark_shop/index.html#product/5) | `#product/5` | 상품 소개 · 수량 선택 · 구매 |
+| [경주마 미니 인형](https://olabeann.github.io/letsrunpark_shop/index.html#product/6) | `#product/6` | 상품 소개 · 수량 선택 · 구매 |
+| [말마 쿠션 인형](https://olabeann.github.io/letsrunpark_shop/index.html#product/7) | `#product/7` | 상품 소개 · 수량 선택 · 구매 |
+| [말마 인형 선물 세트](https://olabeann.github.io/letsrunpark_shop/index.html#product/8) | `#product/8` | 상품 소개 · 수량 선택 · 구매 |
 
 ### 관리자 화면
 
-[관리자 페이지](https://letsrunpark-goods-store.wiiee-dev.chatgpt.site/admin.html)를 연 뒤 왼쪽 **커머스관리시스템** 메뉴를 이용하세요. 관리자 세부 메뉴와 팝업은 별도 URL 없이 같은 페이지에서 전환됩니다.
+[관리자 페이지](https://olabeann.github.io/letsrunpark_shop/admin.html)를 연 뒤 왼쪽 **커머스관리시스템** 메뉴를 이용하세요. 관리자 세부 메뉴와 팝업은 별도 URL 없이 같은 페이지에서 전환됩니다.
 
 | 화면 | 접근 방법 | 확인할 내용 |
 | --- | --- | --- |
