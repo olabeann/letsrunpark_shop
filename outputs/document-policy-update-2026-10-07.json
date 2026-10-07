@@ -1,0 +1,348 @@
+{
+  "date": "2026-10-07",
+  "policyAreas": 35,
+  "financialVerification": {
+    "xlsxNumericAndFormulaCells": 12,
+    "quotationFinancialCells": 1257,
+    "passed": true
+  },
+  "wordVisualReview": {
+    "uniqueLayouts": 15,
+    "allCopies": 32,
+    "pagesReviewed": 58,
+    "specificationPagesAfterPaginationFix": 13,
+    "result": "한글 표시, 표 배치와 페이지별 내용 확인"
+  },
+  "spreadsheetVisualReview": {
+    "sheets": 5,
+    "result": "5개 시트 렌더링과 숫자·수식 원본 대조 완료"
+  },
+  "pdfVisualReview": {
+    "copies": 3,
+    "pagesPerCopy": 6,
+    "result": "6쪽 구성 요약으로 갱신, 모든 페이지 표시 확인"
+  },
+  "historicalArchives": 2,
+  "updatedFiles": [
+    {
+      "path": "말마프렌즈_온라인스토어_추가개발_견적서_v16.docx",
+      "sha256": "085835ef1b41dbab39f966ddc2a1bf44740b9729896739660fad5684e73f04fa"
+    },
+    {
+      "path": "README.md",
+      "sha256": "feda06ceb65ee0d8a2743efeb76a37b4ebf56c3f2c194b2625cfe5f35a839c88"
+    },
+    {
+      "path": "렛츠런파크_온라인스토어_화면구성안.pdf",
+      "sha256": "11d7d91dbc7157a2568897beb70ee4d477fdedd1f6a40c991f986be1ac49324c"
+    },
+    {
+      "path": "03_말마프렌즈_견적산정용_개발전달서_v2.3.docx",
+      "sha256": "b9ec4644ebbe5902b54899ec1ca47226d0391d34f0a615954de8c2fccc1b2b95"
+    },
+    {
+      "path": "개발정책_오버레이_구현_프롬프트.md",
+      "sha256": "e943e7b7236420b970e8777d6fa8b9aadfb2bdc420dc331e50f0d4f07181d065"
+    },
+    {
+      "path": "말마프렌즈_온라인스토어_추가개발_견적서.docx",
+      "sha256": "7e7d9eba20060d1ed5e23b269053d9c4aadd50873cf8ca5f67dcc857374fa719"
+    },
+    {
+      "path": "outputs/말마프렌즈_온라인스토어_추가개발_견적서_v17.docx",
+      "sha256": "7e7d9eba20060d1ed5e23b269053d9c4aadd50873cf8ca5f67dcc857374fa719"
+    },
+    {
+      "path": "outputs/policy-audit-2026-10-07.json",
+      "sha256": "c51fbf36e689c3d1c3c17651f43b5a1fb10050d8174c8fa7556cf56d4d0ae8db"
+    },
+    {
+      "path": "outputs/ux-ui-review-2026-09-18.md",
+      "sha256": "bd5bdaea229a190a3945b347f7dc02b6e55207620e74ec7571c68e79a292b5f9"
+    },
+    {
+      "path": "최종_전달자료_2026-09-29/README.md",
+      "sha256": "e883e7caa5b8f712e39f06042f22a22a47d85fac5050a086ff56e3972f441b09"
+    },
+    {
+      "path": "output/pdf/렛츠런파크_온라인스토어_화면구성안.pdf",
+      "sha256": "11d7d91dbc7157a2568897beb70ee4d477fdedd1f6a40c991f986be1ac49324c"
+    },
+    {
+      "path": "output/docx/말마프렌즈_온라인스토어_추가개발_견적서_수정본.docx",
+      "sha256": "17934bb48185eccf2b136ee1defd0bd4704524f9139c14e41522cc1119a51d35"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_온라인스토어_추가개발_견적서_v7.docx",
+      "sha256": "2303adff5776dbb385762e14cabaa3d171bb6963c1b9a52ee6b7dd9791e085d0"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_온라인스토어_추가개발_견적서_v16.docx",
+      "sha256": "085835ef1b41dbab39f966ddc2a1bf44740b9729896739660fad5684e73f04fa"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_온라인스토어_추가개발_견적서_v10.docx",
+      "sha256": "0e225f4918cc61a57886a329234f94c3e4bd8f7d9e3d4bdcf0bfa83dd03192ca"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_서비스기획_개발전달자료_v2.zip",
+      "sha256": "66349c71cd0e4b44ee972d1532f6039f28b7554a2eb4b915956ce5f36deeef57"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_온라인스토어_추가개발_견적서_v11.docx",
+      "sha256": "a2085e4e0d5df1529f0244389c6c7dee039bf4ba4c266c92034a983a9160d2ff"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_온라인스토어_추가개발_견적서_v12.docx",
+      "sha256": "5807631202d542edb8d516ae762fc7fe1fdaf2aa17c1fe5ad7e134127e5fe607"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_온라인스토어_기능명세서_v1.docx",
+      "sha256": "529c655ec8458b74ed4950ac13d40dfbf36cea5fa1dbe655886c4de27ff96619"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_온라인스토어_추가개발_견적서_v13.docx",
+      "sha256": "a5d10fb7eb3efc2a9bc41314b6f685ae2f3a6ecc3f4ab87f9e454acbd956194d"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_온라인스토어_추가개발_견적서_v9.docx",
+      "sha256": "d900f8114c2e2ecbd91d8da56e47b5de7c2e232d01d190f7c21773d2d01c9e16"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_온라인스토어_추가개발_견적서.docx",
+      "sha256": "dfa4a4b96f17e49d3f4c0d87b7fa63c591a16ed1de5848d578dfdd342f3cd287"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_온라인스토어_추가개발_견적서_v14.docx",
+      "sha256": "e139c95a68406e24b4cd82194f4041eb36586d30564c113f3f70e665c2d43be0"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_서비스기획_개발전달자료_v2.1.zip",
+      "sha256": "6ff7f6f04b050c9e16a9bfd77e96c04e1d35a02a2e615b4197e2f5e97fb3c475"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_온라인스토어_추가개발_견적서_v15.docx",
+      "sha256": "fc8aba791dfd852a249d622a98a0097e2c89bde83b99dcf8e6dc3986b7f1a635"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_온라인스토어_추가개발_견적서_v8.docx",
+      "sha256": "d900f8114c2e2ecbd91d8da56e47b5de7c2e232d01d190f7c21773d2d01c9e16"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_서비스기획_개발전달자료_v2.1/02_말마프렌즈_기능명세서_v2.1.docx",
+      "sha256": "529c655ec8458b74ed4950ac13d40dfbf36cea5fa1dbe655886c4de27ff96619"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_서비스기획_개발전달자료_v2.1/02_기능명세서.md",
+      "sha256": "9355adae370bd075929c793b3acf595f1849633e0b5996e2f7ee53c19cb7077d"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_서비스기획_개발전달자료_v2.1/03_말마프렌즈_개발전달서_v2.1.docx",
+      "sha256": "b9ec4644ebbe5902b54899ec1ca47226d0391d34f0a615954de8c2fccc1b2b95"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_서비스기획_개발전달자료_v2.1/README.md",
+      "sha256": "27d9166112adf62b67888c724287cc3715afa6f07f01cd9b618b5fad90514756"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_서비스기획_개발전달자료_v2.1/01_말마프렌즈_IA구조도_v2.1.docx",
+      "sha256": "bbeeface2b69f99c0b5f0136f1067a878eb69012e93c2fa32fa1441e632d070b"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_서비스기획_개발전달자료_v2.1/03_개발전달서.md",
+      "sha256": "5ce07fb1aa823492aa7402845aa34ce4abf1c9749d0824384e853323d6a7ae46"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_서비스기획_개발전달자료_v2.1/기능목록.json",
+      "sha256": "c8319fa6a9cb4eaab27e20f6ebcda6ad43b6177625b9a9b03eb4dcf3179453c5"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_서비스기획_개발전달자료_v2.1/01_IA구조도.md",
+      "sha256": "f0d84fec9148203287876e207d3473709a739a74cdab0c64beda032e85b6d768"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/planning-v2/02_기능명세서.md",
+      "sha256": "9355adae370bd075929c793b3acf595f1849633e0b5996e2f7ee53c19cb7077d"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/planning-v2/03_말마프렌즈_개발전달서_v2.docx",
+      "sha256": "b9ec4644ebbe5902b54899ec1ca47226d0391d34f0a615954de8c2fccc1b2b95"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/planning-v2/02_말마프렌즈_기능명세서_v2.docx",
+      "sha256": "529c655ec8458b74ed4950ac13d40dfbf36cea5fa1dbe655886c4de27ff96619"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/planning-v2/01_말마프렌즈_IA구조도_v2.docx",
+      "sha256": "bbeeface2b69f99c0b5f0136f1067a878eb69012e93c2fa32fa1441e632d070b"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/planning-v2/README.md",
+      "sha256": "0c036685253fd148a646b7350dc8d781fc794488b5619b25333fc1f97f4dc957"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/planning-v2/03_개발전달서.md",
+      "sha256": "5ce07fb1aa823492aa7402845aa34ce4abf1c9749d0824384e853323d6a7ae46"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/planning-v2/기능목록.json",
+      "sha256": "c8319fa6a9cb4eaab27e20f6ebcda6ad43b6177625b9a9b03eb4dcf3179453c5"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/planning-v2/01_IA구조도.md",
+      "sha256": "f0d84fec9148203287876e207d3473709a739a74cdab0c64beda032e85b6d768"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/planning-v2.1/03_말마프렌즈_개발전달서_v2.1.docx",
+      "sha256": "b9ec4644ebbe5902b54899ec1ca47226d0391d34f0a615954de8c2fccc1b2b95"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/planning-v2.1/README.md",
+      "sha256": "32801de964a0318e8454b50624fb0cbff29b87dc0b71712c39ec1a4b3f3385be"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/planning-v2.1/03_개발전달서.md",
+      "sha256": "5ce07fb1aa823492aa7402845aa34ce4abf1c9749d0824384e853323d6a7ae46"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/planning-v2.2/03_말마프렌즈_개발전달서_v2.2.docx",
+      "sha256": "b9ec4644ebbe5902b54899ec1ca47226d0391d34f0a615954de8c2fccc1b2b95"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/planning-v2.2/03_개발전달서.md",
+      "sha256": "5ce07fb1aa823492aa7402845aa34ce4abf1c9749d0824384e853323d6a7ae46"
+    },
+    {
+      "path": "outputs/planning-v2.1/02_말마프렌즈_기능명세서_v2.1.docx",
+      "sha256": "529c655ec8458b74ed4950ac13d40dfbf36cea5fa1dbe655886c4de27ff96619"
+    },
+    {
+      "path": "outputs/planning-v2.1/02_기능명세서.md",
+      "sha256": "9355adae370bd075929c793b3acf595f1849633e0b5996e2f7ee53c19cb7077d"
+    },
+    {
+      "path": "outputs/planning-v2.1/01_말마프렌즈_IA구조도_v2.1.docx",
+      "sha256": "bbeeface2b69f99c0b5f0136f1067a878eb69012e93c2fa32fa1441e632d070b"
+    },
+    {
+      "path": "outputs/planning-v2.1/기능목록.json",
+      "sha256": "c8319fa6a9cb4eaab27e20f6ebcda6ad43b6177625b9a9b03eb4dcf3179453c5"
+    },
+    {
+      "path": "outputs/planning-v2.1/01_IA구조도.md",
+      "sha256": "f0d84fec9148203287876e207d3473709a739a74cdab0c64beda032e85b6d768"
+    },
+    {
+      "path": "outputs/01a0f4e1-9633-7ef3-9ea3-45372f0331d8/말마프렌즈_온라인스토어_최종_IA_기능명세_기본견적.xlsx",
+      "sha256": "9992d00ddaaee53a8dfad1204c7a9e9b429a725281a04a6e42d5a0e780d92961"
+    },
+    {
+      "path": "outputs/planning-v2.3/03_말마프렌즈_견적산정용_개발전달서_v2.3.docx",
+      "sha256": "b9ec4644ebbe5902b54899ec1ca47226d0391d34f0a615954de8c2fccc1b2b95"
+    },
+    {
+      "path": "outputs/planning-v2.3/03_견적산정용_개발전달서.md",
+      "sha256": "5ce07fb1aa823492aa7402845aa34ce4abf1c9749d0824384e853323d6a7ae46"
+    },
+    {
+      "path": "최종_전달자료_2026-09-29/01_서비스기획/02_말마프렌즈_기능명세서_v2.1.docx",
+      "sha256": "529c655ec8458b74ed4950ac13d40dfbf36cea5fa1dbe655886c4de27ff96619"
+    },
+    {
+      "path": "최종_전달자료_2026-09-29/01_서비스기획/02_기능명세서.md",
+      "sha256": "9355adae370bd075929c793b3acf595f1849633e0b5996e2f7ee53c19cb7077d"
+    },
+    {
+      "path": "최종_전달자료_2026-09-29/01_서비스기획/01_말마프렌즈_IA구조도_v2.1.docx",
+      "sha256": "bbeeface2b69f99c0b5f0136f1067a878eb69012e93c2fa32fa1441e632d070b"
+    },
+    {
+      "path": "최종_전달자료_2026-09-29/01_서비스기획/기능목록.json",
+      "sha256": "c8319fa6a9cb4eaab27e20f6ebcda6ad43b6177625b9a9b03eb4dcf3179453c5"
+    },
+    {
+      "path": "최종_전달자료_2026-09-29/01_서비스기획/01_IA구조도.md",
+      "sha256": "f0d84fec9148203287876e207d3473709a739a74cdab0c64beda032e85b6d768"
+    },
+    {
+      "path": "최종_전달자료_2026-09-29/03_화면설계/렛츠런파크_온라인스토어_화면구성안.pdf",
+      "sha256": "11d7d91dbc7157a2568897beb70ee4d477fdedd1f6a40c991f986be1ac49324c"
+    },
+    {
+      "path": "최종_전달자료_2026-09-29/05_참고자료/개발정책_오버레이_구현_프롬프트.md",
+      "sha256": "e943e7b7236420b970e8777d6fa8b9aadfb2bdc420dc331e50f0d4f07181d065"
+    },
+    {
+      "path": "최종_전달자료_2026-09-29/05_참고자료/ux-ui-review-2026-09-18.md",
+      "sha256": "bd5bdaea229a190a3945b347f7dc02b6e55207620e74ec7571c68e79a292b5f9"
+    },
+    {
+      "path": "최종_전달자료_2026-09-29/04_견적/말마프렌즈_온라인스토어_추가개발_견적서_v17.docx",
+      "sha256": "7e7d9eba20060d1ed5e23b269053d9c4aadd50873cf8ca5f67dcc857374fa719"
+    },
+    {
+      "path": "최종_전달자료_2026-09-29/02_개발전달/03_말마프렌즈_견적산정용_개발전달서_v2.3.docx",
+      "sha256": "b9ec4644ebbe5902b54899ec1ca47226d0391d34f0a615954de8c2fccc1b2b95"
+    },
+    {
+      "path": "최종_전달자료_2026-09-29/02_개발전달/03_견적산정용_개발전달서.md",
+      "sha256": "abf80fa785aa0a00f55fe133b8cbd504608061ac7004c6f7c41f5c0e0737c89f"
+    }
+  ],
+  "contentVerification": {
+    "documentsScanned": 61,
+    "obsoletePolicyOrExcludedFeatureMatches": 0,
+    "gitDiffCheck": "passed"
+  },
+  "diagrams": [
+    {
+      "path": "outputs/말마프렌즈_01_전체개발범위도.png",
+      "sha256": "b0bb9ab0c64b666fd79b9a4167cf0333d9528e635b144ecde6ff0c7f1f00ac95"
+    },
+    {
+      "path": "outputs/말마프렌즈_02_주문결제출고취소흐름도.png",
+      "sha256": "1119ec87024918589cbd8e71d4283fc8f10dd08037b2e1ab63a933cf80c544ad"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_서비스기획_개발전달자료_v2.1/02_관리자_IA.png",
+      "sha256": "7b3bf94aa282a39b0e0e887b457241fe96e4e503da2f45839b4965c005be30b4"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/말마프렌즈_서비스기획_개발전달자료_v2.1/01_사용자_IA.png",
+      "sha256": "8a3d971063b8fd882688b2dc62a57351a545d596951a95eacba61f4303b1e69b"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/planning-v2/02_관리자_IA.png",
+      "sha256": "7b3bf94aa282a39b0e0e887b457241fe96e4e503da2f45839b4965c005be30b4"
+    },
+    {
+      "path": "_archive/outputs-documents-20260918/planning-v2/01_사용자_IA.png",
+      "sha256": "8a3d971063b8fd882688b2dc62a57351a545d596951a95eacba61f4303b1e69b"
+    },
+    {
+      "path": "outputs/planning-v2.1/02_관리자_IA.png",
+      "sha256": "7b3bf94aa282a39b0e0e887b457241fe96e4e503da2f45839b4965c005be30b4"
+    },
+    {
+      "path": "outputs/planning-v2.1/01_사용자_IA.png",
+      "sha256": "8a3d971063b8fd882688b2dc62a57351a545d596951a95eacba61f4303b1e69b"
+    },
+    {
+      "path": "최종_전달자료_2026-09-29/01_서비스기획/02_관리자_IA.png",
+      "sha256": "7b3bf94aa282a39b0e0e887b457241fe96e4e503da2f45839b4965c005be30b4"
+    },
+    {
+      "path": "최종_전달자료_2026-09-29/01_서비스기획/01_사용자_IA.png",
+      "sha256": "8a3d971063b8fd882688b2dc62a57351a545d596951a95eacba61f4303b1e69b"
+    },
+    {
+      "path": "최종_전달자료_2026-09-29/02_개발전달/말마프렌즈_01_전체개발범위도.png",
+      "sha256": "b0bb9ab0c64b666fd79b9a4167cf0333d9528e635b144ecde6ff0c7f1f00ac95"
+    },
+    {
+      "path": "최종_전달자료_2026-09-29/02_개발전달/말마프렌즈_02_주문결제출고취소흐름도.png",
+      "sha256": "1119ec87024918589cbd8e71d4283fc8f10dd08037b2e1ab63a933cf80c544ad"
+    }
+  ],
+  "deliveryPackage": "outputs/말마프렌즈_전달자료_정책정리_2026-10-07.zip"
+}

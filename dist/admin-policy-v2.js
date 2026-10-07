@@ -32,7 +32,7 @@
       ? goods.slice().sort((a, b) => Number(a.id) - Number(b.id)) : goods;
     orderSeed.forEach((product, index) => {
       let position = Number(product.displayOrder);
-      if (!Number.isInteger(position) || position < 1 || used.has(position)) position = index + 1;
+      if (!Number.isInteger(position) || position < 1 || used.has(position)) { position = index + 1; while (used.has(position)) position++; }
       product.displayOrder = position;
       used.add(position);
     });
@@ -72,7 +72,11 @@
     }
     const originalSettingsSubmit = $('inlineSettingsForm').onsubmit;
     $('inlineSettingsForm').onsubmit = event => {
-      originalSettingsSubmit.call($('inlineSettingsForm'), event);
+      const form = $('inlineSettingsForm'), values = Object.fromEntries(new FormData(form));
+      const valid = ['shippingFee','returnShippingFee'].every(key => Number.isInteger(Number(values[key])) && Number(values[key]) >= 0) && Number.isInteger(Number(values.cancelHours)) && Number(values.cancelHours) >= 1 && Number.isInteger(Number(values.returnDays)) && Number(values.returnDays) >= 1 && Number(values.returnDays) <= 365;
+      if (!valid) { event.preventDefault(); $('inlineSettingsStatus').textContent = '배송비·반품비는 0 이상, 취소 시간은 1 이상, 반품 일수는 1~365의 정수로 입력해 주세요.'; return; }
+      orderData.forEach(order => { if (!order.policySnapshot) order.policySnapshot = {...settings}; });
+      originalSettingsSubmit.call(form, event);
       settings.returnShippingFee = Math.max(0, Number($('returnShippingFee').value) || 0);
       saveAll();
     };
@@ -111,9 +115,9 @@
         || (payment === 'paid' && order.status !== '전체 취소' && !order.returnStatus);
       const stageMatch = salesTab !== 'shipping' || (shippingStage === 'pending' ? order.status === '출고 대기' : order.status === '출고 완료');
       const created = day(order.createdAt);
-      return stageMatch && (!keyword || search.includes(keyword)) && paymentMatch && (!shipping || order.status === shipping)
+      return stageMatch && (salesTab !== 'shipping' || shippingStage !== 'pending' || !order.returnStatus) && (!keyword || search.includes(keyword)) && paymentMatch && (!shipping || order.status === shipping)
         && (!$('startDate').value || created >= $('startDate').value) && (!$('endDate').value || created <= $('endDate').value);
-    }).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    }).sort((a, b) => salesTab === 'shipping' ? (shippingStage === 'pending' ? (a.createdAt || 0) - (b.createdAt || 0) : (b.shippedAt || 0) - (a.shippedAt || 0)) || String(b.number).localeCompare(String(a.number)) : (b.createdAt || 0) - (a.createdAt || 0) || String(b.number).localeCompare(String(a.number)));
   };
 
   paymentLabel = function (order) {
@@ -168,7 +172,7 @@
     $('listTitle').firstChild.textContent = shipping ? (shippingStage === 'pending' ? '발송 대기 주문 ' : '발송 완료 주문 ') : '상품 주문 목록 ';
     $('listHint').textContent = shipping ? '주문별로 운송장을 등록합니다. 최초 등록 후에는 삭제할 수 없고 수정만 가능합니다.' : '주문번호와 상품명으로 검색하며, 반품·예외 환불 처리는 상세에서 진행합니다.';
     $('shippingStages').hidden = !shipping;
-    $('ordersTable').innerHTML = rows.length ? `<table class="orders-table ${shipping ? 'orders-table--shipping' : 'orders-table--sales'}"><thead><tr><th>주문 일시</th><th>주문번호 · 상품명</th>${shipping ? '<th>구매자 · 배송지</th>' : '<th>구매자</th><th>결제금액</th><th>결제 · 환불</th>'}<th>배송 상태</th><th>송장 정보</th><th>상세</th></tr></thead><tbody>${rows.map(order => `<tr data-number="${esc(order.number)}"><td class="order-date">${esc(dateText(order))}</td><td class="order-summary"><b>${esc(order.number)}</b><div>${(order.items || []).map(item => `<small>${esc(item.name + (item.deletedProduct ? ' (삭제된 상품)' : ''))}${item.qty > 1 ? ` × ${item.qty}` : ''}</small>`).join('')}</div></td>${shipping ? `<td class="shipping-address"><b>${esc(order.recipient || order.name)}</b><small>${esc(order.recipientPhone || order.phone || '')}</small><small>${esc(order.address || '')}</small></td>` : `<td class="buyer-summary"><b>${esc(order.name)}</b><small>${esc(order.phone || '')}</small></td><td><b>${money(order.total)}</b></td><td><span class="badge ${order.returnStatus ? 'return-pending' : ''}">${esc(paymentLabel(order))}</span></td>`}<td><span class="badge ${order.status === '출고 완료' ? 'green' : order.status === '전체 취소' ? 'grey' : ''}">${esc(state(order))}</span></td><td>${invoiceCell(order)}</td><td><button data-detail="${esc(order.number)}">상세보기</button></td></tr>`).join('')}</tbody></table>` : '<div class="empty">조건에 맞는 주문이 없습니다.</div>';
+    $('ordersTable').innerHTML = rows.length ? `<table class="orders-table ${shipping ? 'orders-table--shipping' : 'orders-table--sales'}"><thead><tr><th>주문 일시</th><th>주문번호 · 상품명</th>${shipping ? '<th>구매자 · 배송지</th>' : '<th>구매자</th><th>결제금액</th><th>결제 · 환불</th>'}<th>배송 상태</th><th>송장 정보</th><th>상세</th></tr></thead><tbody>${rows.map(order => `<tr data-number="${esc(order.number)}"><td class="order-date">${esc(dateText(order))}</td><td class="order-summary"><b>${esc(order.number)}</b><div>${(order.items || []).map(item => `<small>${esc(item.name + (item.deletedProduct ? ' (삭제된 상품)' : ''))}${item.qty > 1 ? ` × ${item.qty}` : ''}</small>`).join('')}</div></td>${shipping ? `<td class="shipping-address"><b>${esc(order.recipient || order.name)}</b><small>${esc(order.recipientPhone || order.phone || '')}</small><small>${esc(order.address || '')}</small><small>${esc(order.request || '')}</small></td>` : `<td class="buyer-summary"><b>${esc(order.name)}</b><small>${esc(order.phone || '')}</small></td><td><b>${money(order.total)}</b></td><td><span class="badge ${order.returnStatus ? 'return-pending' : ''}">${esc(paymentLabel(order))}</span></td>`}<td><span class="badge ${order.status === '출고 완료' ? 'green' : order.status === '전체 취소' ? 'grey' : ''}">${esc(state(order))}</span></td><td>${invoiceCell(order)}</td><td><button data-detail="${esc(order.number)}">상세보기</button></td></tr>`).join('')}</tbody></table>` : '<div class="empty">조건에 맞는 주문이 없습니다.</div>';
     document.querySelectorAll('[data-detail]').forEach(button => button.onclick = () => showDetail(button.dataset.detail));
     document.querySelectorAll('.invoice-save').forEach(button => button.onclick = () => saveRowInvoice(button.closest('tr')));
     document.querySelectorAll('.tracking-input').forEach(input => input.onkeydown = event => { if (event.key === 'Enter') { event.preventDefault(); saveRowInvoice(input.closest('tr')); } });
@@ -194,7 +198,7 @@
     $('orderActionRefundOptions').hidden = rejected || type === 'cancel';
     $('orderActionDeductionRow').hidden = rejected || type === 'cancel';
     $('orderActionExtraRow').hidden = rejected || type === 'cancel';
-    $('orderActionDeduction').value = settings.returnShippingFee;
+    $('orderActionDeduction').value = order.policySnapshot?.returnShippingFee ?? settings.returnShippingFee;
     $('orderActionError').textContent = '';
     updateOrderActionPreview();
     $('orderActionDialog').showModal();
@@ -217,6 +221,8 @@
     const order = orderData.find(item => item.number === $('orderActionNumber').value);
     const reason = $('orderActionReason').value.trim();
     if (!order || !reason) { $('orderActionError').textContent = '처리 사유를 입력해 주세요.'; return; }
+    if (order.status === '전체 취소' || ['환불 완료', '반품 반려'].includes(order.returnStatus)) { $('orderActionError').textContent = '이미 처리가 완료된 주문입니다.'; return; }
+    if (type === 'exception' && (!order.trackingNumber || order.returnStatus)) { $('orderActionError').textContent = '발송 후 반품 절차가 없는 주문만 예외 환불할 수 있습니다.'; return; }
     if (type === 'reject') {
       if (order.returnStatus !== '신청 완료' || !order.returnTrackingNumber) { $('orderActionError').textContent = '반품 운송장이 등록된 신청 건만 반려할 수 있습니다.'; return; }
       Object.assign(order, { returnStatus: '반품 반려', returnRejectedAt: Date.now(), returnRejectReason: reason });
@@ -243,8 +249,9 @@
     if (!order) return;
     detailOrder = order;
     const final = order.status === '전체 취소' || order.returnStatus === '환불 완료' || order.returnStatus === '반품 반려';
+    const audit = order.refundDecision ? `<section class="detail-section"><h3>환불 처리 이력</h3><div class="detail-box"><p>처리자: ${esc(order.refundDecision.processedBy)}</p><p>처리 시각: ${esc(new Date(order.refundDecision.processedAt).toLocaleString('ko-KR'))}</p><p>배송비 차감: ${money(order.refundDecision.shippingDeduction)}</p>${order.refundDecision.overridden ? `<p>기본값 변경 사유: ${esc(order.refundDecision.overrideReason)}</p>` : ''}</div></section>` : '';
     const returnBox = order.returnStatus ? `<section class="detail-section"><h3>전체 반품 · 환불</h3><div class="detail-box"><p class="detail-cost"><span>처리 상태</span><b>${esc(paymentLabel(order))}</b></p><p class="detail-cost"><span>반품 사유</span><b>${esc(order.returnReason || '—')}</b></p><p class="detail-cost"><span>반품 운송장</span><b>${order.returnTrackingNumber ? esc(`${order.returnCarrier || '택배사 미등록'} · ${order.returnTrackingNumber}`) : '미등록'}</b></p>${order.returnRejectReason ? `<p class="customer-note-preview"><b>반려 사유</b><br>${esc(order.returnRejectReason)}</p>` : ''}${order.returnStatus === '환불 완료' ? `<p class="detail-cost"><span>배송비 차감</span><b>${order.shippingDeduction ? '-' + money(order.shippingDeduction) : '차감 없음'}</b></p><p class="detail-cost total"><span>최종 환불액</span><b>${money(order.refundAmount ?? order.total)}</b></p><p class="customer-note-preview"><b>고객 안내</b><br>${esc(order.customerRefundNote || '')}${order.customerRefundExtraNote ? `<br>${esc(order.customerRefundExtraNote)}` : ''}</p>` : ''}</div></section>` : '';
-    $('orderDetail').innerHTML = `<p><b>${esc(order.number)}</b> <span class="badge">${esc(paymentLabel(order))}</span></p><p class="form-note">${esc(dateText(order))}</p><section class="detail-section"><h3>주문상품</h3><div class="detail-box">${(order.items || []).map(item => `<p class="detail-cost"><span>${esc(item.name + (item.deletedProduct ? ' (삭제된 상품)' : ''))} × ${item.qty}</span><b>${money(item.price * item.qty)}</b></p>`).join('')}</div></section><section class="detail-section"><h3>회원 · 배송정보</h3><div class="detail-box"><p><b>${esc(order.recipient || order.name)}</b> · ${esc(order.recipientPhone || order.phone || '')}</p><p>${esc(order.address || '')}</p>${order.trackingNumber ? `<p>${esc(order.carrier || '')} · ${esc(order.trackingNumber)}</p>` : ''}</div></section>${returnBox}<section class="detail-section"><h3>결제정보</h3><div class="detail-box"><p class="detail-cost"><span>상품금액</span><b>${money(order.subtotal ?? order.total - (order.shippingFee || 0))}</b></p><p class="detail-cost"><span>배송비</span><b>${money(order.shippingFee || 0)}</b></p><p class="detail-cost total"><span>총 결제금액</span><b>${money(order.total)}</b></p></div></section><p class="form-note">상품·수량 일부 환불은 지원하지 않습니다. 전체 환불 또는 배송비 차감 후 전체 환불만 가능합니다.</p><div class="dialog-footer"><button data-close="detailDialog">닫기</button>${!order.trackingNumber && order.status === '출고 대기' ? '<button id="adminCancelOrder" class="danger">관리자 주문 취소</button>' : ''}${order.returnStatus === '신청 완료' && order.returnTrackingNumber ? '<button id="rejectReturn">반품 반려</button><button id="completeRefund" class="blue">반품 환불 완료</button>' : ''}${order.trackingNumber && !order.returnStatus && !final ? '<button id="exceptionRefund" class="danger">관리자 예외 환불</button>' : ''}</div>`;
+    $('orderDetail').innerHTML = `<p><b>${esc(order.number)}</b> <span class="badge">${esc(paymentLabel(order))}</span></p><p class="form-note">${esc(dateText(order))}</p><section class="detail-section"><h3>주문상품</h3><div class="detail-box">${(order.items || []).map(item => `<p class="detail-cost"><span>${esc(item.name + (item.deletedProduct ? ' (삭제된 상품)' : ''))} × ${item.qty}</span><b>${money(item.price * item.qty)}</b></p>`).join('')}</div></section><section class="detail-section"><h3>회원 · 배송정보</h3><div class="detail-box"><p><b>${esc(order.recipient || order.name)}</b> · ${esc(order.recipientPhone || order.phone || '')}</p><p>${esc(order.address || '')}</p>${order.request ? `<p>배송메모: ${esc(order.request)}</p>` : ''}${order.trackingNumber ? `<p>${esc(order.carrier || '')} · ${esc(order.trackingNumber)}</p>` : ''}</div></section>${returnBox}${audit}<section class="detail-section"><h3>결제정보</h3><div class="detail-box"><p class="detail-cost"><span>상품금액</span><b>${money(order.subtotal ?? order.total - (order.shippingFee || 0))}</b></p><p class="detail-cost"><span>배송비</span><b>${money(order.shippingFee || 0)}</b></p><p class="detail-cost total"><span>총 결제금액</span><b>${money(order.total)}</b></p></div></section><p class="form-note">상품·수량 일부 환불은 지원하지 않습니다. 전체 환불 또는 배송비 차감 후 전체 환불만 가능합니다.</p><div class="dialog-footer"><button data-close="detailDialog">닫기</button>${!order.trackingNumber && order.status === '출고 대기' ? '<button id="adminCancelOrder" class="danger">관리자 주문 취소</button>' : ''}${order.returnStatus === '신청 완료' && order.returnTrackingNumber ? '<button id="rejectReturn">반품 반려</button><button id="completeRefund" class="blue">반품 환불 완료</button>' : ''}${order.trackingNumber && !order.returnStatus && !final ? '<button id="exceptionRefund" class="danger">관리자 예외 환불</button>' : ''}</div>`;
     bindClose();
     $('adminCancelOrder')?.addEventListener('click', () => openOrderAction('cancel', order));
     $('rejectReturn')?.addEventListener('click', () => openOrderAction('reject', order));
@@ -255,13 +262,13 @@
 
   refundDefault = function (order) {
     const deduct = order?.returnReason === '단순 변심';
-    const deduction = deduct ? Math.min(order.total, settings.returnShippingFee) : 0;
+    const deduction = deduct ? Math.min(order.total, order.policySnapshot?.returnShippingFee ?? settings.returnShippingFee) : 0;
     return { deduct, deduction };
   };
   const originalRefundOpen = openRefundDialog;
   openRefundDialog = function (number) {
     originalRefundOpen(number);
-    $('shippingDeduction').value = settings.returnShippingFee;
+    $('shippingDeduction').value = orderData.find(order => order.number === number)?.policySnapshot?.returnShippingFee ?? settings.returnShippingFee;
     $('refundExtraNote').value = '';
     updateRefundSummary();
   };
@@ -302,7 +309,8 @@
       row.ondragover = event => { event.preventDefault(); const target = event.currentTarget; if (dragged && target !== dragged) target.parentElement.insertBefore(dragged, target.getBoundingClientRect().top + target.offsetHeight / 2 < event.clientY ? target.nextSibling : target); };
     });
     $('saveProductOrder').onclick = () => {
-      [...$('productOrderList').children].forEach((row, index) => { const product = goods.find(item => item.id === Number(row.dataset.id)); if (product) product.displayOrder = index + 1; });
+      const positions = rows.map(product => product.displayOrder).sort((a,b)=>a-b);
+      [...$('productOrderList').children].forEach((row, index) => { const product = goods.find(item => item.id === Number(row.dataset.id)); if (product) product.displayOrder = positions[index]; });
       saveAll(); reorderMode = false; $('reorderProducts').textContent = '노출 순서 설정'; renderProducts();
     };
     $('cancelProductOrder').onclick = () => { reorderMode = false; $('reorderProducts').textContent = '노출 순서 설정'; renderProducts(); };
@@ -327,11 +335,13 @@
     if (!Number.isInteger(stock) || stock < 0) { $('productSaveError').textContent = '재고는 0 이상의 정수로 입력해 주세요.'; return; }
     if (!form.image) { $('productSaveError').textContent = '대표 이미지를 등록해 주세요.'; return; }
     const index = goods.findIndex(product => product.id === id);
+    if (index >= 0 && goods[index].deletedAt) { $('productSaveError').textContent = '삭제된 상품은 수정할 수 없습니다.'; return; }
     const displayOrder = index >= 0 ? goods[index].displayOrder : Math.max(0, ...activeGoods().map(product => Number(product.displayOrder) || 0)) + 1;
     const value = { ...(index >= 0 ? goods[index] : {}), ...form, id, price, stock, displayOrder, updatedAt: Date.now() };
     if (stock === 0 && value.status === 'sale') value.status = 'soldout';
+    const previous = goods.slice();
     if (index >= 0) goods[index] = value; else goods.push({ ...value, art: 'GOODS' });
-    saveAll(); $('productDialog').close(); renderProducts();
+    try { localStorage.goodsProducts = JSON.stringify(goods); } catch { goods = previous; $('productSaveError').textContent = '저장 공간이 부족합니다. 이미지 크기를 줄인 뒤 다시 저장해 주세요.'; return; } $('productDialog').close(); renderProducts();
   };
 
   function rebuildSettlementFilter() {
@@ -352,8 +362,8 @@
       const search = `${order.number} ${names}`.toLowerCase();
       if (keyword && !search.includes(keyword)) return;
       if (monthKey(order.approvedAt || order.createdAt) === month && (!payment || payment === 'paid')) rows.push({ date: day(order.approvedAt || order.createdAt), order, type: '승인', amount: Number(order.total) || 0, fee: -Math.round((Number(order.total) || 0) * .02), status: '정상 결제' });
-      const refundDate = order.refundCompletedAt || order.cancelCompletedAt;
-      if (monthKey(refundDate) === month && (!payment || ['refunded', 'cancelled'].includes(payment))) {
+      const refundDate = order.refundCompletedAt || order.cancelCompletedAt || order.cancelledAt;
+      if (monthKey(refundDate) === month && (!payment || (payment === 'cancelled' && order.status === '전체 취소') || (payment === 'refunded' && order.returnStatus === '환불 완료'))) {
         const refund = order.status === '전체 취소' ? Number(order.total) || 0 : Number(order.refundAmount) || 0;
         rows.push({ date: day(refundDate), order, type: '환불', amount: -refund, fee: Math.round(refund * .02), status: order.status === '전체 취소' ? '취소 완료' : paymentLabel(order) });
       }
@@ -447,7 +457,7 @@
         const view = button.dataset.view;
         document.querySelectorAll('[data-view]').forEach(item => item.classList.toggle('active', item === button));
         salesTab = view === 'shipping' ? 'shipping' : 'orders';
-        shippingStage = 'pending';
+        shippingStage = 'pending'; orderPage = 1; $('filterForm').reset();
         $('salesView').hidden = !['sales', 'shipping'].includes(view);
         $('settlementView').hidden = view !== 'settlement';
         $('operationsView').hidden = view !== 'operations';
@@ -482,7 +492,7 @@
   $('filterForm').onsubmit = event => { event.preventDefault(); orderPage = 1; renderOrders(); };
   $('resetFilters').onclick = () => { $('filterForm').reset(); orderPage = 1; renderOrders(); };
   $('productFilter').onsubmit = event => { event.preventDefault(); productPage = 1; renderProducts(); };
-  document.querySelectorAll('[data-shipping-stage]').forEach(button => button.addEventListener('click', () => { orderPage = 1; }));
+  document.querySelectorAll('[data-shipping-stage]').forEach(button => button.addEventListener('click', () => { orderPage = 1; renderOrders(); }));
   renderOrders();
   renderProducts();
   renderSettlement();
