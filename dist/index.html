@@ -8,7 +8,7 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%230c3b2e' d='M8 54V10h48v44z'/%3E%3Cpath fill='%23f4a340' d='M18 43c4-20 24-28 29-14 2 7-3 16-14 17l-3-9c9-1 11-8 7-10-5-2-12 5-13 16z'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="style.css?v=20261007-1" />
   <link rel="stylesheet" href="developer-policy.css?v=11" />
-</head>
+<link rel="stylesheet" href="product-image.css?v=4"><link rel="stylesheet" href="empty-states.css?v=1"><script src="empty-states.js?v=1"></script></head>
 <body>
   <header class="top">
     <div class="utility"><span>렛츠런파크 공식 온라인 스토어</span></div>
@@ -55,7 +55,7 @@
   </footer>
   <aside id="cartPanel" class="panel" hidden><div class="panel-head"><h2>장바구니</h2><button class="close" data-close="cartPanel">×</button></div><div id="cartItems"></div><div class="summary"><div><span>상품 금액</span><b id="subtotal">0원</b></div><div><span>배송비</span><b id="shipping">0원</b></div><div class="total"><span>총 결제금액</span><b id="total">0원</b></div><button id="checkout" class="primary">주문·결제하기</button></div></aside>
   <dialog id="productModal"><button class="modal-close" data-close="productModal">×</button><div id="productDetail"></div></dialog>
-  <dialog id="checkoutModal"><button class="modal-close" data-close="checkoutModal">×</button><form id="checkoutForm"><p class="eyebrow">CHECKOUT</p><h2>회원정보</h2><p class="required-guide"><span class="required-mark">*</span> 필수 입력 항목</p><label>이름 <span class="required-mark">*</span><input required name="name" autocomplete="name" placeholder="이름" /></label><label>전화번호 <span class="required-mark">*</span><input required name="phone" type="tel" autocomplete="tel" placeholder="010-0000-0000" /></label><div class="address-fields"><label for="postcode">주소 <span class="required-mark">*</span></label><div class="address-search-row"><input id="postcode" name="postcode" required inputmode="numeric" autocomplete="postal-code" placeholder="우편번호" aria-label="우편번호" /><button id="searchAddress" type="button" class="outline">주소 검색</button></div><input id="baseAddress" name="address" required autocomplete="address-line1" placeholder="기본주소를 입력하거나 검색해 주세요" aria-label="기본주소" /><label class="detail-address-label" for="detailAddress">상세주소 <span class="optional-mark">선택</span></label><input id="detailAddress" name="detailAddress" autocomplete="address-line2" placeholder="동·호수 등 상세주소" aria-label="상세주소" /><p id="addressStatus" role="status" class="address-status"></p></div><label>배송메모<input name="request" placeholder="문 앞에 놓아주세요 (선택)" /></label><div class="payment-note"><h3>구매 전 확인사항</h3><ul id="purchaseNotices"></ul><label class="purchase-agreement"><input id="purchaseAgreement" name="purchaseAgreement" type="checkbox" required /><span>구매·배송·취소·반품 조건을 확인하고 동의합니다. (필수)</span></label><label class="purchase-agreement"><input id="privacyAgreement" name="privacyAgreement" type="checkbox" required /><span>주문 및 배송을 위한 개인정보 수집·이용에 동의합니다. (필수)</span></label><p class="agreement-version">각 동의의 문서 버전과 동의 시각이 주문에 저장됩니다.</p></div><button class="primary" disabled>카드 결제하기</button></form></dialog>
+  <dialog id="checkoutModal"><button class="modal-close" data-close="checkoutModal">×</button><form id="checkoutForm"><p class="eyebrow">CHECKOUT</p><h2>회원정보</h2><p class="required-guide"><span class="required-mark">*</span> 필수 입력 항목</p><label>이름 <span class="required-mark">*</span><input required name="name" autocomplete="name" placeholder="이름" /></label><label>전화번호 <span class="required-mark">*</span><input required name="phone" type="tel" autocomplete="tel" placeholder="010-0000-0000" /></label><div class="address-fields"><label for="postcode">주소 <span class="required-mark">*</span></label><div class="address-search-row"><input id="postcode" name="postcode" required inputmode="numeric" autocomplete="postal-code" placeholder="우편번호" aria-label="우편번호" /><button id="searchAddress" type="button" class="outline">주소 검색</button></div><input id="baseAddress" name="address" required autocomplete="address-line1" placeholder="기본주소를 입력하거나 검색해 주세요" aria-label="기본주소" /><label class="detail-address-label" for="detailAddress">상세주소 <span class="optional-mark">선택</span></label><input id="detailAddress" name="detailAddress" autocomplete="address-line2" placeholder="동·호수 등 상세주소" aria-label="상세주소" /><p id="addressStatus" role="status" class="address-status"></p></div><label>배송메모<input name="request" placeholder="문 앞에 놓아주세요 (선택)" /></label><div class="payment-note"><h3>구매 전 확인사항</h3><ul id="purchaseNotices"></ul><label class="purchase-agreement"><input id="purchaseAgreement" name="purchaseAgreement" type="checkbox" required /><span>구매·배송·취소·반품 조건을 확인하고 동의합니다. (필수)</span></label><label class="purchase-agreement"><input id="privacyAgreement" name="privacyAgreement" type="checkbox" required /><span>주문 및 배송을 위한 개인정보 수집·이용에 동의합니다. (필수)</span></label></div><button class="primary" disabled>카드 결제하기</button></form></dialog>
   <dialog id="loginModal" class="login-modal" aria-labelledby="loginTitle" aria-describedby="loginDescription">
     <button class="modal-close" data-close="loginModal" aria-label="로그인 창 닫기">×</button>
     <p class="eyebrow">LETSRUN GOODS</p>
@@ -190,9 +190,9 @@
 ]
   </script>
   <script src="product-content.js?v=1"></script>
-  <script src="app.js?v=20260918-10"></script>
+  <script src="app.js?v=20261008-1"></script>
   <script src="home-banner.js?v=4"></script>
-  <script src="store-flow.js?v=20261007-1"></script>
+  <script src="checkout-content.js?v=2"></script><script src="store-flow.js?v=20261008-4"></script>
   <script src="developer-policy.js?v=26"></script>
 </body>
 </html>
