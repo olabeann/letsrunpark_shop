@@ -14,12 +14,12 @@
 | 화면 | 링크 | 확인할 내용 · 접근 조건 |
 | --- | --- | --- |
 | 스토어 홈 | [화면 보기](https://olabeann.github.io/letsrunpark_shop/index.html#store) | 브랜드 소개와 전체 상품 목록 |
-| 상품 목록 | [화면 보기](https://olabeann.github.io/letsrunpark_shop/index.html#products) | 저장된 수동 노출 순서로 페이지당 24개 표시, 판매 중·품절 상품 확인 |
-| 상품 상세 | [말마 인형 보기](https://olabeann.github.io/letsrunpark_shop/index.html#product/1) | 대표 이미지, 가격, 수량, 상세정보, 배송·취소 안내 |
-| 주문·결제 | [화면 보기](https://olabeann.github.io/letsrunpark_shop/index.html#checkout) | 상품 상세에서 **바로 구매** 또는 장바구니에서 주문 진행 후 확인. 상품 선택 없이 열면 주문 상품 확인 안내 표시 |
-| 주문 조회 | [화면 보기](https://olabeann.github.io/letsrunpark_shop/index.html#orders) | 시연 로그인 후 페이지당 10건의 주문 목록, 결제금액, 배송 상태 확인. 주문이 없으면 빈 목록 표시 |
-| 주문 상세 | 주문 조회 → **주문 상세 보기** | `#orders/주문번호` 경로. 발송 완료 주문의 전체 반품 신청, 직접 반송 안내, 발송 후 운송장 등록과 고객 환불 안내 확인 |
-| 주문 완료 | 주문·결제 → **결제하기** | `#complete/주문번호` 경로. 시연 주문 완료 후 표시 |
+| 상품 목록 | [화면 보기](https://olabeann.github.io/letsrunpark_shop/products.html) | 저장된 수동 노출 순서로 페이지당 24개 표시, 판매 중·품절 상품 확인 |
+| 상품 상세 | [말마 인형 보기](https://olabeann.github.io/letsrunpark_shop/product.html?id=1) | 대표 이미지, 가격, 수량, 상세정보, 배송·취소 안내 |
+| 주문·결제 | [화면 보기](https://olabeann.github.io/letsrunpark_shop/checkout.html) | 상품 상세에서 **바로 구매** 또는 장바구니에서 주문 진행 후 확인. 상품 선택 없이 열면 주문 상품 확인 안내 표시 |
+| 주문 조회 | [화면 보기](https://olabeann.github.io/letsrunpark_shop/orders.html) | 시연 로그인 후 페이지당 10건의 주문 목록, 결제금액, 배송 상태 확인. 주문이 없으면 빈 목록 표시 |
+| 주문 상세 | 주문 조회 → **주문 상세 보기** | `order-detail.html?id=주문번호` 경로. 발송 완료 주문의 전체 반품 신청, 직접 반송 안내, 발송 후 운송장 등록과 고객 환불 안내 확인 |
+| 주문 완료 | 주문·결제 → **결제하기** | `order-complete.html?id=주문번호` 경로. 시연 주문 완료 후 표시 |
 | 로그인 | 주문 조회 또는 구매 버튼 클릭 | 로그인 선택 팝업. 실제 소셜 인증 대신 시연 상태로 전환 |
 | 장바구니 | 상품 상세 → **장바구니에 담기** | 같은 화면 안에서 열리는 패널 |
 | 주소 검색 | 주문·결제 → **주소 검색** | 주소 검색 팝업 또는 우편번호·주소 직접 입력 |
@@ -32,28 +32,28 @@
 
 | 상품 | 경로 | 확인할 화면 |
 | --- | --- | --- |
-| [말마 인형](https://olabeann.github.io/letsrunpark_shop/index.html#product/1) | `#product/1` | 상품 소개 · 수량 선택 · 구매 |
-| [경주마 인형 A](https://olabeann.github.io/letsrunpark_shop/index.html#product/2) | `#product/2` | 상품 소개 · 수량 선택 · 구매 |
-| [경주마 인형 B](https://olabeann.github.io/letsrunpark_shop/index.html#product/3) | `#product/3` | 품절 화면 |
-| [말마 미니 인형](https://olabeann.github.io/letsrunpark_shop/index.html#product/4) | `#product/4` | 상품 소개 · 수량 선택 · 구매 |
-| [말마 인형 키링](https://olabeann.github.io/letsrunpark_shop/index.html#product/5) | `#product/5` | 상품 소개 · 수량 선택 · 구매 |
-| [경주마 미니 인형](https://olabeann.github.io/letsrunpark_shop/index.html#product/6) | `#product/6` | 상품 소개 · 수량 선택 · 구매 |
-| [말마 쿠션 인형](https://olabeann.github.io/letsrunpark_shop/index.html#product/7) | `#product/7` | 상품 소개 · 수량 선택 · 구매 |
-| [말마 인형 선물 세트](https://olabeann.github.io/letsrunpark_shop/index.html#product/8) | `#product/8` | 상품 소개 · 수량 선택 · 구매 |
+| [말마 인형](https://olabeann.github.io/letsrunpark_shop/product.html?id=1) | `#product/1` | 상품 소개 · 수량 선택 · 구매 |
+| [경주마 인형 A](https://olabeann.github.io/letsrunpark_shop/product.html?id=2) | `#product/2` | 상품 소개 · 수량 선택 · 구매 |
+| [경주마 인형 B](https://olabeann.github.io/letsrunpark_shop/product.html?id=3) | `#product/3` | 품절 화면 |
+| [말마 미니 인형](https://olabeann.github.io/letsrunpark_shop/product.html?id=4) | `#product/4` | 상품 소개 · 수량 선택 · 구매 |
+| [말마 인형 키링](https://olabeann.github.io/letsrunpark_shop/product.html?id=5) | `#product/5` | 상품 소개 · 수량 선택 · 구매 |
+| [경주마 미니 인형](https://olabeann.github.io/letsrunpark_shop/product.html?id=6) | `#product/6` | 상품 소개 · 수량 선택 · 구매 |
+| [말마 쿠션 인형](https://olabeann.github.io/letsrunpark_shop/product.html?id=7) | `#product/7` | 상품 소개 · 수량 선택 · 구매 |
+| [말마 인형 선물 세트](https://olabeann.github.io/letsrunpark_shop/product.html?id=8) | `#product/8` | 상품 소개 · 수량 선택 · 구매 |
 
 ### 관리자 화면
 
-[관리자 페이지](https://olabeann.github.io/letsrunpark_shop/admin.html)를 연 뒤 왼쪽 **커머스관리시스템** 메뉴를 이용하세요. 관리자 세부 메뉴와 팝업은 별도 URL 없이 같은 페이지에서 전환됩니다.
+[관리자 페이지](https://olabeann.github.io/letsrunpark_shop/admin.html)를 연 뒤 왼쪽 **커머스관리시스템** 메뉴를 이용하세요. 관리자 메뉴는 각각 별도 HTML 주소로 이동하며, 상품 편집·주문 상세 팝업은 해당 페이지 안에서 열립니다.
 
 | 화면 | 접근 방법 | 확인할 내용 |
 | --- | --- | --- |
-| 상품 판매 현황 | 관리자 접속 시 기본 화면 / **상품 판매 현황** | 주문 검색, 기간·결제·배송 상태 필터, 주문 목록, CSV 다운로드 |
+| 상품 판매 현황 | `admin.html` | 주문 검색, 기간·결제·배송 상태 필터, 주문 목록, CSV 다운로드 |
 | 주문 상세 | 상품 판매 현황 → 주문 상세 버튼 | 구매 상품, 배송지, 결제·배송 정보와 전체 반품 신청·반품 운송장 확인. 추천 배송비 처리와 고객 안내를 확인한 후 환불 완료 처리 |
-| 배송 처리 | **배송 처리** | 발송 대상·발송 완료 목록, 택배사·송장번호 입력, 주문별 최초 송장 등록 시 발송 완료 처리 |
-| 온라인 스토어 운영 | **온라인 스토어 운영** | 상품 검색, 판매 상태, 가격, 재고 관리 |
+| 배송 처리 | `admin-shipping.html` | 발송 대상·발송 완료 목록, 택배사·송장번호 입력, 주문별 최초 송장 등록 시 발송 완료 처리 |
+| 온라인 스토어 운영 | `admin-products.html` | 상품 검색, 판매 상태, 가격, 재고 관리 |
 | 상품 등록 | 온라인 스토어 운영 → **상품 등록** | 상품 정보, 대표 이미지, 상세 소개 편집 팝업 |
 | 상품 수정 | 온라인 스토어 운영 → 상품 수정 버튼 | 상품 정보·가격·재고·판매 상태 수정 |
-| 스토어 설정 | **스토어 설정** 버튼 | 배송비, 취소 가능 시간, 배송 안내 문구와 고객에게 표시할 반품 주소 설정 팝업 |
+| 스토어 설정 | `admin-settings.html` | 배송비, 취소 가능 시간, 배송 안내 문구와 고객에게 표시할 반품 주소 설정 팝업 |
 
 예약관리시스템 메뉴는 별도 예약 프로젝트로 연결됩니다.
 
@@ -85,8 +85,8 @@ python3 -m http.server 8000 --directory dist
 ```
 
 - [로컬 사용자 화면](http://localhost:8000/index.html)
-- [로컬 상품 상세](http://localhost:8000/index.html#product/1)
-- [로컬 주문 조회](http://localhost:8000/index.html#orders)
+- [로컬 상품 상세](http://localhost:8000/product.html?id=1)
+- [로컬 주문 조회](http://localhost:8000/orders.html)
 - [로컬 관리자 화면](http://localhost:8000/admin.html)
 
 시연 링크의 도메인을 `http://localhost:8000`으로 바꾸면 동일한 경로를 확인할 수 있습니다. GitHub에서 `dist/index.html` 파일을 클릭하면 소스가 표시되므로, 화면은 시연 사이트 또는 로컬 서버에서 확인하세요.
@@ -102,10 +102,24 @@ python3 -m http.server 8000 --directory dist
 
 | 위치 | 내용 |
 | --- | --- |
-| [dist/index.html](dist/index.html) | 사용자 스토어 화면과 초기 상품 데이터 |
-| [dist/store-flow.js](dist/store-flow.js) | 상품 상세, 주문·결제, 주문 조회 경로와 시연 흐름 |
+| [dist/index.html](dist/index.html) / [dist/home.js](dist/home.js) | 스토어 홈과 메인 배너 |
+| [dist/products.html](dist/products.html) / [dist/store-catalog.js](dist/store-catalog.js) | 상품 목록 (홈에서도 공통 사용) |
+| [dist/product.html](dist/product.html) / [dist/product.js](dist/product.js) | 상품 상세·수량 선택 |
+| [dist/checkout.html](dist/checkout.html) / [dist/checkout.js](dist/checkout.js) | 주문·결제·주소 검색 |
+| [dist/orders.html](dist/orders.html) / [dist/orders.js](dist/orders.js) | 주문 조회 |
+| [dist/order-detail.html](dist/order-detail.html) / [dist/order-detail.js](dist/order-detail.js) | 주문 상세·취소·반품 |
+| [dist/order-complete.html](dist/order-complete.html) / [dist/order-complete.js](dist/order-complete.js) | 주문 완료 |
+| [dist/store-layout.js](dist/store-layout.js) / [dist/store-common.js](dist/store-common.js) | 사용자 공통 헤더·푸터·로그인·장바구니·데이터 |
 | [dist/admin.html](dist/admin.html) | 관리자 화면 |
-| [dist/admin-ui.js](dist/admin-ui.js) | 관리자 메뉴, 상품 관리, 주문·배송 처리 |
+| [dist/admin-sales.js](dist/admin-sales.js) / [dist/admin-shipping.js](dist/admin-shipping.js) | 판매 현황·배송 처리의 페이지별 초기화 |
+| [dist/admin-orders.js](dist/admin-orders.js) / [dist/admin-order-detail.js](dist/admin-order-detail.js) | 판매·배송 화면에서 공통으로 사용하는 주문 목록·상세·환불 위젯 |
+| [dist/admin-products.js](dist/admin-products.js) | 상품 관리·편집·노출 순서 |
+| [dist/admin-banner.js](dist/admin-banner.js) | 배너 관리 |
+| [dist/admin-settings.js](dist/admin-settings.js) | 운영 설정 |
+| [dist/admin-settlement.js](dist/admin-settlement.js) | 정산 원장·XLSX 다운로드 |
+| [dist/admin-accounts.js](dist/admin-accounts.js) | 예약 프로젝트의 계정·권한 연동 |
+| [dist/admin-layout.js](dist/admin-layout.js) / [dist/admin-common.js](dist/admin-common.js) | 관리자 공통 메뉴·데이터·표 스타일 |
+| [dist/product-data.js](dist/product-data.js) | 사용자·관리자의 초기 상품 데이터 |
 | [기획 자료 v2.1](outputs/planning-v2.1/README.md) | IA 구조도, 기능명세서, 개발 전달 자료 안내 |
 | [견적산정용 개발 전달서 v2.3](outputs/planning-v2.3/03_견적산정용_개발전달서.md) | 최신 로컬 견적 산정 범위 정리 |
 
@@ -124,3 +138,13 @@ python3 -m http.server 8000 --directory dist
 ```bash
 git subtree push --prefix=dist origin codex/pages-deploy
 ```
+
+## 독립 페이지 주소
+
+사용자 화면: `index.html`(홈), `products.html`(상품 목록), `product.html?id=1`(상품 상세), `checkout.html`(결제), `orders.html`(주문 조회), `order-detail.html?id=주문번호`(주문 상세), `order-complete.html?id=주문번호`(주문 완료).
+
+관리자 화면: `admin.html`(판매 현황), `admin-shipping.html`(배송), `admin-settlement.html`(정산), `admin-products.html`(상품 관리), `admin-banner.html`(배너), `admin-settings.html`(운영 설정), `admin-accounts.html`(계정). 각 주소는 `dist` 기준입니다. 기존 사용자 해시 링크는 새 페이지로 이동합니다.
+
+각 HTML에는 해당 페이지의 본문과 필요한 대화상자만 있습니다. 각 페이지는 전용 JavaScript를 로드하며, 헤더·푸터·관리자 메뉴는 `store-layout.js`·`admin-layout.js`에서 공유합니다. 데이터, 로그인, 장바구니와 재사용 위젯만 공통 파일에 두었습니다. `app.js`, `store-flow.js`, `admin-ui.js`, `admin-policy-v2.js`는 페이지별 파일로 통합·이관 후 제거했습니다. 별도 빌드 없이 해당 HTML과 JavaScript를 직접 수정합니다. 시연 로그인은 같은 탭의 세션에 유지됩니다.
+
+구조와 주요 흐름 검사는 `node --test tests/*.test.cjs`로 실행합니다. 페이지별 본문 분리, 스크립트 경로·선언 충돌, 결제 진행 데이터 전달과 송장 등록 규칙을 검사합니다.
