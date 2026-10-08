@@ -2,7 +2,7 @@ const orderList=document.getElementById("orderList"),detailNumber=new URLSearchP
 const returnDialog=document.getElementById('returnDialog'),returnForm=document.getElementById('returnForm'),returnTrackingDialog=document.getElementById('returnTrackingDialog'),returnTrackingForm=document.getElementById('returnTrackingForm');
 let activeReturnOrderNumber='';
 
-function cancelOrder(num){requireLogin(()=>{const o=orders.find(o=>o.number===num);if(!o||!canCancel(o))return alert('취소 가능 시점이 지났거나 이미 처리된 주문입니다.');if(!confirm('주문한 모든 상품을 전액 취소하시겠습니까?'))return;if(o.inventoryApplied!==false)o.items.forEach(i=>{const p=products.find(p=>p.id===i.id);if(p)p.stock+=i.qty;});o.status='전체 취소';o.cancelledAt=Date.now();o.cancelCompletedAt=o.cancelledAt;save();renderOrders();});};
+function cancelOrder(num){requireLogin(()=>{const o=orders.find(o=>o.number===num);if(!o||!canCancel(o))return alert('취소 가능 시점이 지났거나 이미 처리된 주문입니다.');if(!confirm('주문한 모든 상품을 전액 취소하시겠습니까?'))return;const latestOrders=JSON.parse(localStorage.goodsOrders||JSON.stringify(orders));const latestOrder=latestOrders.find(item=>item.number===num);if(!latestOrder||!canCancel(latestOrder))return alert('주문 상태가 변경되었습니다. 다시 확인해 주세요.');orders=latestOrders;Object.assign(o,latestOrder);products=JSON.parse(localStorage.goodsProducts||JSON.stringify(products));if(o.inventoryApplied!==false)o.items.forEach(i=>{const p=products.find(p=>p.id===i.id);if(p)Inventory.change(p,i.qty,'주문 취소 재고 복원','고객',o.number+':cancel');});o.status='전체 취소';o.cancelledAt=Date.now();o.cancelCompletedAt=o.cancelledAt;Object.assign(latestOrder,o);save();renderOrders();});};
 
 function openReturnRequest(number){
   const order=orders.find(o=>o.number===number);
