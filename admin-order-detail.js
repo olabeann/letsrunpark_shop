@@ -32,6 +32,8 @@ $('refundForm').addEventListener('submit',event=>{const latest=JSON.parse(localS
   }
 
   function updateOrderActionPreview() {
+    goods=JSON.parse(localStorage.goodsProducts||JSON.stringify(goods));
+    orderData=JSON.parse(localStorage.goodsOrders||JSON.stringify(orderData));
     const order = orderData.find(item => item.number === $('orderActionNumber').value);
     if (!order) return;
     const type = $('orderActionType').value;
@@ -45,6 +47,8 @@ $('refundForm').addEventListener('submit',event=>{const latest=JSON.parse(localS
   function submitOrderAction(event) {
     event.preventDefault();
     const type = $('orderActionType').value;
+    goods=JSON.parse(localStorage.goodsProducts||JSON.stringify(goods));
+    orderData=JSON.parse(localStorage.goodsOrders||JSON.stringify(orderData));
     const order = orderData.find(item => item.number === $('orderActionNumber').value);
     const reason = $('orderActionReason').value.trim();
     if (!order || !reason) { $('orderActionError').textContent = '처리 사유를 입력해 주세요.'; return; }
@@ -55,7 +59,7 @@ $('refundForm').addEventListener('submit',event=>{const latest=JSON.parse(localS
       Object.assign(order, { returnStatus: '반품 반려', returnRejectedAt: Date.now(), returnRejectReason: reason });
     } else if (type === 'cancel') {
       if (order.trackingNumber || order.status !== '출고 대기') { $('orderActionError').textContent = '발송 전 주문만 관리자 취소할 수 있습니다.'; return; }
-      if (order.inventoryApplied !== false) order.items.forEach(item => { const product = goods.find(value => value.id === item.id); if (product) product.stock += item.qty; });
+      if (order.inventoryApplied !== false) order.items.forEach(item => { const product = goods.find(value => value.id === item.id); if (product) Inventory.change(product,item.qty,'관리자 주문 취소 재고 복원',Inventory.adminActor(),order.number+':cancel'); });
       Object.assign(order, { status: '전체 취소', adminCancelReason: reason, cancelCompletedAt: Date.now() });
     } else {
       const deduct = $('orderActionForm').elements.actionRefund.value === 'deduct';

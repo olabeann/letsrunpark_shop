@@ -128,3 +128,30 @@ body .shipping-guide{grid-template-columns:100px minmax(0,1fr) auto}.shipping-gu
 
 /* Keep the top navigation visible while the workspace content scrolls beneath it. */
 @media(min-width:701px){.breadcrumb{position:sticky;top:0;z-index:30;background:#fff}}
+
+/* Stock movement journal */
+#stockDialog { width: min(860px, calc(100vw - 40px)); }
+#stockDialog .stock-balance { padding: 20px; background: #f2f6ff; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; }
+#stockBalance { font-size: 30px; color: #3159d9; }
+#stockForm { padding: 20px; border: 1px solid #e0e5ef; border-radius: 12px; margin: 20px 0; }
+#stockForm label { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+#stockPreview { font-weight: 700; color: #3159d9; }
+#stockError { color: #bd2637; }
+#stockDialog table { min-width: 0; width: 100%; table-layout: fixed; }
+body #stockDialog .table-wrap :is(th, td) {
+  padding: 14px 16px;
+  text-align: left;
+  vertical-align: middle;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+body #stockDialog .table-wrap :is(th, td):nth-child(1) { width: 26%; font-variant-numeric: tabular-nums; }
+body #stockDialog .table-wrap :is(th, td):nth-child(2) { width: 12%; text-align: center; }
+body #stockDialog .table-wrap :is(th, td):nth-child(3) { width: 16%; text-align: center; }
+body #stockDialog .table-wrap :is(th, td):nth-child(4) { width: 30%; }
+body #stockDialog .table-wrap :is(th, td):nth-child(5) { width: 16%; text-align: center; }
+@media (max-width: 600px) {
+  #stockDialog table { min-width: 640px; }
+  body #stockDialog .table-wrap :is(th, td) { padding: 12px; }
+}

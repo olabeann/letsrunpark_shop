@@ -2,7 +2,7 @@ let productPage = 1;
   let reorderMode = false;
   const activeGoods = () => goods.filter(product => !product.deletedAt);
   const sortedGoods = () => activeGoods().slice().sort((a, b) => (Number(a.displayOrder) || 0) - (Number(b.displayOrder) || 0) || Number(a.id) - Number(b.id));
-function openEditor(id){const p=goods.find(p=>p.id===id)||{id:'',name:'',price:0,stock:0,image:'',description:'',status:'sale'};$('productEditor').reset();Object.entries(p).forEach(([key,value])=>{if($('productEditor').elements[key])$('productEditor').elements[key].value=value;});CoverImage.load(p.image||'');DetailEditor.load(p.detailHtml||'');$('productSaveError').textContent='';$('editorTitle').textContent=id?'상품 · 재고 수정':'상품 등록';$('productDialog').showModal();}
+function openEditor(id){const p=goods.find(p=>p.id===id)||{id:'',name:'',price:0,stock:0,image:'',description:'',status:'sale'};$('productEditor').reset();Object.entries(p).forEach(([key,value])=>{if($('productEditor').elements[key])$('productEditor').elements[key].value=value;});CoverImage.load(p.image||'');DetailEditor.load(p.detailHtml||'');$('productSaveError').textContent='';$('productEditor').elements.stock.disabled=!!id;$('stockFieldLabel').textContent=id?'현재 재고 (재고 관리에서 변경)':'초기 재고';$('editorTitle').textContent=id?'상품 정보 수정':'상품 등록';$('productDialog').showModal();}
 function renderProducts () {
     const search = $('productSearch').value.trim().toLowerCase();
     const status = $('productStatus').value;
@@ -11,7 +11,8 @@ function renderProducts () {
     if (reorderMode) return renderReorderProducts(filtered);
     productPage = pagination($('productPagination'), filtered.length, productPage, page => { productPage = page; renderProducts(); });
     const rows = filtered.slice((productPage - 1) * PAGE_SIZE, productPage * PAGE_SIZE);
-    $('productsTable').innerHTML = rows.length ? `<table><thead><tr><th>순서</th><th>상품</th><th>판매가격</th><th>재고</th><th>상태</th><th>관리</th></tr></thead><tbody>${rows.map(product => `<tr><td>${product.displayOrder}</td><td><div class="product-title"><span class="thumb">${product.image ? `<img src="${esc(product.image)}" alt="">` : esc(product.art || 'GOODS')}</span><b>${esc(product.name)}</b></div></td><td><b>${money(product.price)}</b></td><td><b>${product.stock}개</b></td><td>${product.status === 'hidden' ? '판매 중지' : product.stock === 0 || product.status === 'soldout' ? '품절' : '판매 중'}</td><td><div class="product-actions"><button data-edit="${product.id}">상품 · 재고 수정</button><button class="danger" data-delete-product="${product.id}">삭제</button></div></td></tr>`).join('')}</tbody></table>` : EmptyStates.html(goods.some(p=>!p.deletedAt)?'adminProductSearch':'adminProducts');
+    $('productsTable').innerHTML = rows.length ? `<table><thead><tr><th>순서</th><th>상품</th><th>판매가격</th><th>재고</th><th>상태</th><th>관리</th></tr></thead><tbody>${rows.map(product => `<tr><td>${product.displayOrder}</td><td><div class="product-title"><span class="thumb">${product.image ? `<img src="${esc(product.image)}" alt="">` : esc(product.art || 'GOODS')}</span><b>${esc(product.name)}</b></div></td><td><b>${money(product.price)}</b></td><td><b>${product.stock}개</b></td><td>${product.status === 'hidden' ? '판매 중지' : product.stock === 0 || product.status === 'soldout' ? '품절' : '판매 중'}</td><td><div class="product-actions"><button data-edit="${product.id}">상품 수정</button><button data-stock="${product.id}">재고 관리 · 이력</button><button class="danger" data-delete-product="${product.id}">삭제</button></div></td></tr>`).join('')}</tbody></table>` : EmptyStates.html(goods.some(p=>!p.deletedAt)?'adminProductSearch':'adminProducts');
+    document.querySelectorAll('[data-stock]').forEach(button=>button.onclick=()=>openStock(Number(button.dataset.stock)));
     document.querySelectorAll('[data-edit]').forEach(button => button.onclick = () => openEditor(Number(button.dataset.edit)));
     document.querySelectorAll('[data-delete-product]').forEach(button => button.onclick = () => deleteProduct(Number(button.dataset.deleteProduct)));
     syncSharedAdminComponents($('productsTable'));
@@ -47,7 +48,9 @@ function deleteProduct (id) {
     const form = Object.fromEntries(new FormData(event.currentTarget));
     const id = Number(form.id) || Date.now();
     const price = Number(form.price);
-    const stock = Number(form.stock);
+    goods=JSON.parse(localStorage.goodsProducts||JSON.stringify(goods));
+    const existing=goods.find(product=>product.id===id);
+    const stock = existing ? existing.stock : Number(form.stock);
     form.detailHtml = DetailEditor.value();
     if (!Number.isInteger(price) || price < 1) { $('productSaveError').textContent = '판매가격은 1원 이상의 정수로 입력해 주세요.'; return; }
     if (!Number.isInteger(stock) || stock < 0) { $('productSaveError').textContent = '재고는 0 이상의 정수로 입력해 주세요.'; return; }
@@ -56,6 +59,7 @@ function deleteProduct (id) {
     if (index >= 0 && goods[index].deletedAt) { $('productSaveError').textContent = '삭제된 상품은 수정할 수 없습니다.'; return; }
     const displayOrder = index >= 0 ? goods[index].displayOrder : Math.max(0, ...activeGoods().map(product => Number(product.displayOrder) || 0)) + 1;
     const value = { ...(index >= 0 ? goods[index] : {}), ...form, id, price, stock, displayOrder, updatedAt: Date.now() };
+    if (!existing) value.stockHistory=[{at:Date.now(),delta:stock,balance:stock,reason:'상품 등록 초기 재고',actor:Inventory.adminActor()}];
     if (stock === 0 && value.status === 'sale') value.status = 'soldout';
     const previous = goods.slice();
     if (index >= 0) goods[index] = value; else goods.push({ ...value, art: 'GOODS' });
@@ -68,3 +72,35 @@ $('addGoods').onclick=()=>openEditor();
 $('productFilter').onsubmit=event=>{event.preventDefault();productPage=1;renderProducts();};
 $('reorderProducts').onclick=()=>{reorderMode=!reorderMode;$('reorderProducts').textContent=reorderMode?'순서 설정 중':'노출 순서 설정';renderProducts();};
 renderProducts();window.addEventListener('admin-data-change',renderProducts);
+
+let stockProductId;
+function renderStock() {
+  const product=goods.find(item=>item.id===stockProductId);
+  if(!product || product.deletedAt) { $('stockDialog').close(); return; }
+  $('stockTitle').textContent=product.name+' · 재고 관리';
+  const history=Inventory.history(product);
+  $('stockBalance').textContent=product.stock+'개';
+  $('stockHistory').innerHTML=history.slice().reverse().map(entry=>`<tr><td>${new Date(entry.at).toLocaleString('ko-KR')}</td><td>${entry.delta>0?'+':''}${entry.delta}개</td><td><b>${entry.balance}개</b></td><td>${esc(entry.reason)}${entry.reference?'<br>'+esc(entry.reference):''}</td><td>${esc(Inventory.actorLabel(entry))}</td></tr>`).join('');
+  renderStockPreview();
+}
+function openStock(id) { goods=JSON.parse(localStorage.goodsProducts||JSON.stringify(goods));stockProductId=id;const product=goods.find(item=>item.id===id);if(product){Inventory.history(product);localStorage.goodsProducts=JSON.stringify(goods);}$('stockForm').reset();$('stockError').textContent='';renderStock();$('stockDialog').showModal(); }
+function renderStockPreview() {
+  const product=goods.find(item=>item.id===stockProductId);if(!product)return;
+  const delta=Number($('stockQuantity').value)*Number($('stockDirection').value);
+  $('stockPreview').textContent='변경 후 예상 재고: '+(product.stock+delta)+'개';
+}
+$('stockQuantity').oninput=renderStockPreview;$('stockDirection').onchange=renderStockPreview;
+$('stockForm').onsubmit=event=>{
+  event.preventDefault();
+  // Re-read at submission so changes since opening this dialog are preserved.
+  goods=JSON.parse(localStorage.goodsProducts||JSON.stringify(goods));
+  const product=goods.find(item=>item.id===stockProductId);
+  if(!product || product.deletedAt){$('stockError').textContent='삭제된 상품입니다.';return;}
+  const delta=Number($('stockQuantity').value)*Number($('stockDirection').value);
+  try {
+    Inventory.change(product,delta,$('stockReason').value);
+    localStorage.goodsProducts=JSON.stringify(goods);
+  } catch(error) { goods=JSON.parse(localStorage.goodsProducts||JSON.stringify(goods));renderProducts();renderStock();$('stockError').textContent=error.message;return; }
+  $('stockForm').reset();$('stockError').textContent='';renderProducts();renderStock();notify('재고 변경을 기록했습니다.');
+};
+window.addEventListener('admin-data-change',()=>{if($('stockDialog').open)renderStock();});
