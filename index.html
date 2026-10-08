@@ -4,195 +4,31 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="렛츠런파크 공식 상품 스토어" />
-  <title>말마프렌즈 온라인 스토어</title>
+  <title>홈 | 말마프렌즈 온라인 스토어</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%230c3b2e' d='M8 54V10h48v44z'/%3E%3Cpath fill='%23f4a340' d='M18 43c4-20 24-28 29-14 2 7-3 16-14 17l-3-9c9-1 11-8 7-10-5-2-12 5-13 16z'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="style.css?v=20261007-1" />
   <link rel="stylesheet" href="developer-policy.css?v=11" />
-<link rel="stylesheet" href="product-image.css?v=4"><link rel="stylesheet" href="empty-states.css?v=1"><script src="empty-states.js?v=1"></script></head>
-<body>
-  <header class="top">
-    <div class="utility"><span>렛츠런파크 공식 온라인 스토어</span></div>
-    <div class="store-head"><a class="brand" href="#store" aria-label="말마프렌즈 온라인 스토어 홈"><img class="brand-logo" src="assets/logo_color.svg" width="99" height="36" alt="" /><span>LETSRUN <b>GOODS</b></span></a><div class="header-actions"><a id="ordersToggle" href="#orders">주문 조회</a><button id="cartToggle" class="cart" aria-label="장바구니" hidden>장바구니 <span id="cartCount">0</span></button></div></div>
-  </header>
-  <main id="store">
-    <section class="intro" aria-label="말마프렌즈 메인 배너">
+<link rel="stylesheet" href="product-image.css?v=4"><link rel="stylesheet" href="empty-states.css?v=1"></head>
+<body data-page="index">
+<div id="storeHeader"></div>
+<main id="store">
+<section class="intro" aria-label="말마프렌즈 메인 배너">
       <picture class="home-banner-picture">
         <source id="homeBannerMobileSource" media="(max-width: 700px)" srcset="assets/home-hero-mobile-default.png?v=2 1x, assets/home-hero-mobile-default@2x.png?v=1 2x" />
         <img id="homeBannerImage" src="assets/home-hero-default.png?v=4" srcset="assets/home-hero-default.png?v=4 1x, assets/home-hero-default@2x.png?v=1 2x" alt="렛츠런 파크의 설렘을 일상으로 가져오세요. 렛츠런파크 말마프렌즈 공식 상품" />
       </picture>
-    </section>
-    <section class="catalog"><div class="section-head"><div><p class="eyebrow">PRODUCT</p><h2>상품</h2><span>마음에 드는 상품을 선택해 상품 정보와 배송 안내를 확인하세요.</span></div></div><select id="statusFilter" hidden><option value="all">전체</option></select><div id="products" class="product-grid"></div></section>
-    <section id="orders" class="orders" hidden><div class="section-head"><div><p class="eyebrow">MY ORDERS</p><h2>주문 조회</h2></div></div><div id="orderList" class="order-list"><p class="empty">아직 주문 내역이 없습니다.</p></div></section>
-  </main>
-  <footer class="site-footer" aria-label="한국마사회 사업자 및 고객센터 정보">
-    <div class="footer-inner">
-      <div class="footer-grid">
-        <section class="footer-office" aria-labelledby="footer-seoul">
-          <h2 id="footer-seoul">(서울) 한국마사회</h2>
-          <p>(13822) 경기도 과천시 경마공원대로 107</p>
-          <p>사업자번호 : 138-82-00451 <span aria-hidden="true">|</span> 통신판매업신고 : 2010-경기과천-0105호</p>
-        </section>
-        <section class="footer-office" aria-labelledby="footer-busan">
-          <h2 id="footer-busan">(부경) 한국마사회</h2>
-          <p>(46745) 부산광역시 강서구 가락대로 929</p>
-          <p>사업자번호 : 606-82-07734 <span aria-hidden="true">|</span> 통신판매업신고 : 2013-부산강서-0029호</p>
-        </section>
-        <section class="footer-office" aria-labelledby="footer-jeju">
-          <h2 id="footer-jeju">(제주) 한국마사회</h2>
-          <p>(11366) 제주특별자치도 제주시 애월읍 평화로 2144</p>
-          <p>사업자번호 : 616-82-06300</p>
-        </section>
-        <section class="footer-contact" aria-label="고객센터 안내">
-          <p>렛츠런파크 고객센터</p>
-          <strong>1566-3333</strong>
-          <p>(화요일~일요일 09시~18시, 월요일/공휴일 휴무)</p>
-          <p class="footer-ars">ARS 경마정보</p>
-          <strong>1566-9977</strong>
-        </section>
-      </div>
-      <p class="footer-copyright">© Copyright 2026 KRA Corporation All Rights Reserved.</p>
-    </div>
-  </footer>
-  <aside id="cartPanel" class="panel" hidden><div class="panel-head"><h2>장바구니</h2><button class="close" data-close="cartPanel">×</button></div><div id="cartItems"></div><div class="summary"><div><span>상품 금액</span><b id="subtotal">0원</b></div><div><span>배송비</span><b id="shipping">0원</b></div><div class="total"><span>총 결제금액</span><b id="total">0원</b></div><button id="checkout" class="primary">주문·결제하기</button></div></aside>
-  <dialog id="productModal"><button class="modal-close" data-close="productModal">×</button><div id="productDetail"></div></dialog>
-  <dialog id="checkoutModal"><button class="modal-close" data-close="checkoutModal">×</button><form id="checkoutForm"><p class="eyebrow">CHECKOUT</p><h2>회원정보</h2><p class="required-guide"><span class="required-mark">*</span> 필수 입력 항목</p><label>이름 <span class="required-mark">*</span><input required name="name" autocomplete="name" placeholder="이름" /></label><label>전화번호 <span class="required-mark">*</span><input required name="phone" type="tel" autocomplete="tel" placeholder="010-0000-0000" /></label><div class="address-fields"><label for="postcode">주소 <span class="required-mark">*</span></label><div class="address-search-row"><input id="postcode" name="postcode" required inputmode="numeric" autocomplete="postal-code" placeholder="우편번호" aria-label="우편번호" /><button id="searchAddress" type="button" class="outline">주소 검색</button></div><input id="baseAddress" name="address" required autocomplete="address-line1" placeholder="기본주소를 입력하거나 검색해 주세요" aria-label="기본주소" /><label class="detail-address-label" for="detailAddress">상세주소 <span class="optional-mark">선택</span></label><input id="detailAddress" name="detailAddress" autocomplete="address-line2" placeholder="동·호수 등 상세주소" aria-label="상세주소" /><p id="addressStatus" role="status" class="address-status"></p></div><label>배송메모<input name="request" placeholder="문 앞에 놓아주세요 (선택)" /></label><div class="payment-note"><h3>구매 전 확인사항</h3><ul id="purchaseNotices"></ul><label class="purchase-agreement"><input id="purchaseAgreement" name="purchaseAgreement" type="checkbox" required /><span>구매·배송·취소·반품 조건을 확인하고 동의합니다. (필수)</span></label><label class="purchase-agreement"><input id="privacyAgreement" name="privacyAgreement" type="checkbox" required /><span>주문 및 배송을 위한 개인정보 수집·이용에 동의합니다. (필수)</span></label></div><button class="primary" disabled>카드 결제하기</button></form></dialog>
-  <dialog id="loginModal" class="login-modal" aria-labelledby="loginTitle" aria-describedby="loginDescription">
-    <button class="modal-close" data-close="loginModal" aria-label="로그인 창 닫기">×</button>
-    <p class="eyebrow">LETSRUN GOODS</p>
-    <h2 id="loginTitle">간편하게 로그인하세요</h2>
-    <p id="loginDescription">회원 전용 스토어입니다. 로그인 후 구매와 주문 조회를 이용할 수 있어요.</p>
-    <button type="button" class="social-login naver-login" data-provider="네이버"><b aria-hidden="true">N</b>네이버로 로그인</button>
-    <button type="button" class="social-login kakao-login" data-provider="카카오"><b aria-hidden="true">●</b>카카오로 로그인</button>
-    <p id="loginStatus" class="login-note" role="status">로그인 방법을 선택해 주세요.</p>
-  </dialog>
-  <dialog id="returnDialog" class="return-dialog" aria-labelledby="returnTitle">
-    <form id="returnForm">
-      <button type="button" class="modal-close" data-close="returnDialog" aria-label="전체 반품 신청 닫기">×</button>
-      <p class="eyebrow">RETURN REQUEST</p>
-      <h2 id="returnTitle">전체 반품 신청</h2>
-      <p class="return-order-number" id="returnOrderNumber"></p>
-      <div class="return-notice"><strong>주문 상품 전체가 반품됩니다.</strong><span>일부 상품이나 일부 수량만 반품할 수 없습니다.</span></div>
-      <label>반품 사유 <span class="required-mark">*</span><select name="returnReason" required><option value="">선택해 주세요</option><option>단순 변심</option><option>상품 불량·파손</option><option>오배송</option><option>기타</option></select></label>
-      <label>상세 사유 <span class="required-mark">*</span><textarea name="returnDetail" rows="3" required placeholder="반품 사유를 자세히 입력해 주세요."></textarea></label>
-      <div class="return-shipping-guide"><strong>신청 후 상품을 직접 보내주세요.</strong><ol><li>반품 신청을 먼저 완료합니다.</li><li>안내된 반품 주소로 상품 전체를 <b>착불</b> 발송합니다.</li><li>발송 후 주문 상세에서 운송장 번호를 등록합니다.</li></ol></div>
-      <div class="return-cost-guide"><b>반품 배송비 안내</b><p>단순 변심은 최초 배송비와 반품 배송비가 환불금에서 차감될 수 있습니다. 상품 불량·파손 또는 오배송은 배송비를 차감하지 않습니다.</p></div>
-      <label class="return-agreement"><input type="checkbox" name="returnAgreement" required><span>전체 상품을 착불로 직접 반송하고, 발송 후 운송장 번호를 등록하겠습니다. <b>(필수)</b></span></label>
-      <p id="returnFormError" class="form-error" role="alert"></p>
-      <div class="return-dialog-actions"><button type="button" class="outline" data-close="returnDialog">닫기</button><button class="primary">전체 반품 신청</button></div>
-    </form>
-  </dialog>
-  <dialog id="returnTrackingDialog" class="return-dialog tracking-dialog" aria-labelledby="returnTrackingTitle">
-    <form id="returnTrackingForm">
-      <button type="button" class="modal-close" data-close="returnTrackingDialog" aria-label="반품 운송장 등록 닫기">×</button>
-      <p class="eyebrow">RETURN SHIPPING</p>
-      <h2 id="returnTrackingTitle">반품 운송장 등록</h2>
-      <p class="return-order-number" id="returnTrackingOrderNumber"></p>
-      <div class="return-notice"><strong>상품을 발송한 후 입력해 주세요.</strong><span>운송장 정보는 반품 상품 도착 확인에 사용됩니다.</span></div>
-      <div class="direct-return-fields"><label>택배사 <span class="required-mark">*</span><select name="returnCarrier" required><option value="">선택해 주세요</option><option>CJ대한통운</option><option>한진택배</option><option>롯데택배</option><option>우체국택배</option><option>로젠택배</option><option>경동택배</option><option>대신택배</option><option>일양로지스</option><option>천일택배</option><option>합동택배</option><option>CU 편의점택배</option><option>GS Postbox</option><option>DHL</option><option>FedEx</option><option>UPS</option><option>기타 택배사</option></select></label><label>반품 운송장 번호 <span class="required-mark">*</span><input name="returnTrackingNumber" required inputmode="text" placeholder="영문·숫자를 입력해 주세요"></label></div>
-      <p id="returnTrackingFormError" class="form-error" role="alert"></p>
-      <div class="return-dialog-actions"><button type="button" class="outline" data-close="returnTrackingDialog">닫기</button><button class="primary">운송장 등록</button></div>
-    </form>
-  </dialog>
-  <div id="storeToast" class="store-toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
-  <div id="addressModal" class="address-overlay" hidden><section class="address-modal" role="dialog" aria-modal="true" aria-labelledby="addressTitle"><div class="panel-head"><h2 id="addressTitle">주소 검색</h2><button type="button" class="close" id="closeAddress" aria-label="주소 검색 닫기">×</button></div><div id="addressSearchContainer"></div></section></div>
-  <script src="https://t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js" defer></script>
-  <!-- Preview catalog: sample prices and stock, not a live inventory feed. -->
-  <script id="storeProductData" type="application/json">
-[
-  {
-    "id": 1,
-    "name": "말마 인형",
-    "description": "귀여운 말마 캐릭터 봉제 인형",
-    "price": 29000,
-    "stock": 18,
-    "status": "sale",
-    "order": 1,
-    "art": "MALMA",
-    "detailHtml": "<h3>말마 인형</h3><p>귀여운 말마 캐릭터 봉제 인형</p><p>스토어 화면과 구매 흐름을 확인하기 위한 샘플 상품입니다. 실제 판매 사양과 구성은 운영 시 확정됩니다.</p>"
-  },
-  {
-    "id": 2,
-    "name": "경주마 인형 A",
-    "description": "경주마의 역동성을 담은 인형",
-    "price": 26000,
-    "stock": 9,
-    "status": "sale",
-    "order": 2,
-    "art": "RACE A",
-    "detailHtml": "<h3>경주마 인형 A</h3><p>경주마의 역동성을 담은 인형</p><p>스토어 화면과 구매 흐름을 확인하기 위한 샘플 상품입니다. 실제 판매 사양과 구성은 운영 시 확정됩니다.</p>"
-  },
-  {
-    "id": 3,
-    "name": "경주마 인형 B",
-    "description": "컬렉션을 완성하는 한정 디자인",
-    "price": 26000,
-    "stock": 0,
-    "status": "soldout",
-    "order": 3,
-    "art": "RACE B",
-    "detailHtml": "<h3>경주마 인형 B</h3><p>컬렉션을 완성하는 한정 디자인</p><p>스토어 화면과 구매 흐름을 확인하기 위한 샘플 상품입니다. 실제 판매 사양과 구성은 운영 시 확정됩니다.</p>"
-  },
-  {
-    "id": 4,
-    "name": "말마 미니 인형",
-    "description": "책상과 선반에 함께 두기 좋은 작은 말마 인형",
-    "price": 18000,
-    "stock": 30,
-    "status": "sale",
-    "order": 4,
-    "art": "MINI MALMA",
-    "detailHtml": "<h3>말마 미니 인형</h3><p>책상과 선반에 함께 두기 좋은 작은 말마 인형</p><p>스토어 화면과 구매 흐름을 확인하기 위한 샘플 상품입니다. 실제 판매 사양과 구성은 운영 시 확정됩니다.</p>"
-  },
-  {
-    "id": 5,
-    "name": "말마 인형 키링",
-    "description": "가방에 달아 매일 함께하는 말마 봉제 키링",
-    "price": 12000,
-    "stock": 45,
-    "status": "sale",
-    "order": 5,
-    "art": "MALMA KEY",
-    "detailHtml": "<h3>말마 인형 키링</h3><p>가방에 달아 매일 함께하는 말마 봉제 키링</p><p>스토어 화면과 구매 흐름을 확인하기 위한 샘플 상품입니다. 실제 판매 사양과 구성은 운영 시 확정됩니다.</p>"
-  },
-  {
-    "id": 6,
-    "name": "경주마 미니 인형",
-    "description": "작은 크기로 만나는 경주마 캐릭터 봉제 인형",
-    "price": 16000,
-    "stock": 24,
-    "status": "sale",
-    "order": 6,
-    "art": "MINI RACE",
-    "detailHtml": "<h3>경주마 미니 인형</h3><p>작은 크기로 만나는 경주마 캐릭터 봉제 인형</p><p>스토어 화면과 구매 흐름을 확인하기 위한 샘플 상품입니다. 실제 판매 사양과 구성은 운영 시 확정됩니다.</p>"
-  },
-  {
-    "id": 7,
-    "name": "말마 쿠션 인형",
-    "description": "소파나 침대에 두기 좋은 포근한 말마 쿠션 인형",
-    "price": 35000,
-    "stock": 15,
-    "status": "sale",
-    "order": 7,
-    "art": "MALMA HUG",
-    "detailHtml": "<h3>말마 쿠션 인형</h3><p>소파나 침대에 두기 좋은 포근한 말마 쿠션 인형</p><p>스토어 화면과 구매 흐름을 확인하기 위한 샘플 상품입니다. 실제 판매 사양과 구성은 운영 시 확정됩니다.</p>"
-  },
-  {
-    "id": 8,
-    "name": "말마 인형 선물 세트",
-    "description": "말마 인형과 봉제 키링을 함께 담은 선물 세트",
-    "price": 39000,
-    "stock": 12,
-    "status": "sale",
-    "order": 8,
-    "art": "MALMA GIFT",
-    "detailHtml": "<h3>말마 인형 선물 세트</h3><p>말마 인형과 봉제 키링을 함께 담은 선물 세트</p><p>스토어 화면과 구매 흐름을 확인하기 위한 샘플 상품입니다. 실제 판매 사양과 구성은 운영 시 확정됩니다.</p>"
-  }
-]
-  </script>
-  <script src="product-content.js?v=1"></script>
-  <script src="app.js?v=20261008-1"></script>
-  <script src="home-banner.js?v=4"></script>
-  <script src="checkout-content.js?v=2"></script><script src="store-flow.js?v=20261008-4"></script>
-  <script src="developer-policy.js?v=31"></script>
+    </section><section class="catalog"><div class="section-head"><div><p class="eyebrow">PRODUCT</p><h2>상품</h2><span>마음에 드는 상품을 선택해 상품 정보와 배송 안내를 확인하세요.</span></div></div><div id="products" class="product-grid"></div></section>
+</main>
+<div id="storeFooter"></div>
+
+<script src="empty-states.js"></script>
+<script src="store-layout.js?v=20261008-split"></script>
+<script src="product-data.js?v=20261008-split"></script>
+<script src="checkout-content.js?v=20261008-split"></script>
+<script src="page-navigation.js?v=20261008-split"></script>
+<script src="store-common.js?v=20261008-split"></script>
+<script src="store-catalog.js?v=20261008-split"></script>
+<script src="home.js?v=20261008-split"></script>
+<script src="developer-policy.js?v=20261008-split"></script>
 </body>
 </html>

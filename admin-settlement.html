@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>매출 · 정산 | 렛츠런파크 관리자</title><link rel="stylesheet" href="admin.css?v=20261007-55"><link rel="stylesheet" href="developer-policy.css?v=11"><link rel="stylesheet" href="policy-v2.css?v=2"><link rel="stylesheet" href="product-image.css?v=4"><link rel="stylesheet" href="empty-states.css?v=1"></head>
+<body data-page="settlement">
+<div id="adminSidebar"></div>
+<div class="workspace"><header class="breadcrumb">전체 지역 <span>›</span> 통합 예약 <span>›</span> <b>운영 관리자</b></header><main id="admin-main">
+<section id="settlementView"><div class="page-heading settlement-page-heading"><div><h1>매출 · 정산</h1><p>결제가 완료된 상품 주문을 기준으로 매출과 취소·환불, 정산 자료를 확인합니다.</p></div><div class="heading-actions"><button id="exportSettlement">엑셀 다운로드 (.csv)</button></div></div><form id="settlementFilter" class="settlement-ledger-filter"><label>주문 시작일<input id="settlementStart" type="date"></label><label>주문 종료일<input id="settlementEnd" type="date"></label><label>배송 지역<select id="settlementRegion"><option value="">전체 지역</option></select></label><label>결제 · 환불 상태<select id="settlementPayment"><option value="">전체 상태</option><option value="paid">정상 결제</option><option value="cancelled">취소 완료</option><option value="return_requested">환불 처리 대기</option><option value="refunded">환불 완료</option></select></label><label>배송 상태<select id="settlementShipping"><option value="">전체 배송 상태</option><option value="배송 준비 중">배송 준비 중</option><option value="발송 완료">발송 완료</option><option value="배송 완료">배송 완료</option><option value="취소 완료">취소 완료</option></select></label><button class="blue">조회</button></form><div class="settlement-cards settlement-ledger-cards"><article><small>총 결제액</small><strong id="settlementGross">0원</strong><span id="settlementPaidCount">결제 0건</span></article><article class="negative"><small>취소 · 환불액</small><strong id="settlementRefund">0원</strong><span id="settlementRefundCount">0건</span></article><article class="negative"><small>PG 수수료</small><strong id="settlementPgFee">0원</strong><span>정산 대상액의 2%</span></article><article class="primary"><small>업체 정산 예정액</small><strong id="settlementPayout">0원</strong><span>정산 대상액 − PG 수수료</span></article></div><div class="settlement-ledger-heading"><div><h2>결제 · 정산 원장</h2><span id="settlementCount">0건</span></div><form id="settlementSearch"><input id="settlementKeyword" type="search" placeholder="주문번호 · 구매자 · 상품명 검색" aria-label="정산 원장 검색"><button class="dark">검색</button></form></div><div id="settlementTable" class="table-wrap settlement-ledger-table"></div><div class="pagination"><span id="settlementPageCount"></span><button disabled>‹</button><button class="current">1</button><button disabled>›</button></div></section>
+<p id="adminStatus" class="admin-status" role="status"></p>
+</main></div>
+
+<script src="empty-states.js"></script>
+<script src="admin-layout.js?v=20261008-split"></script>
+<script src="product-data.js?v=20261008-split"></script>
+<script src="checkout-content.js?v=20261008-split"></script>
+<script src="admin-common.js?v=20261008-split"></script>
+<script src="admin-settlement.js?v=20261008-split"></script>
+<script src="developer-policy.js?v=20261008-split"></script>
+</body>
+</html>

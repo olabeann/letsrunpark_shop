@@ -1,0 +1,21 @@
+const productPage=document.getElementById("productPage");
+function renderProductPage(id){
+  selected=products.find(p=>p.id===id&&!p.deletedAt&&p.status!=='hidden');
+  if(!selected){productPage.innerHTML=EmptyStates.html('productMissing');return;}
+  const p=selected,available=canBuy(p);
+  document.title=p.name+' | 말마프렌즈 온라인 스토어';
+  productPage.innerHTML=`<a class="back-link" href="products.html">← 상품 목록</a><div class="product-layout">${productVisual(p,'detail-art')}<div class="purchase-info"><p class="eyebrow">OFFICIAL GOODS</p><h1 tabindex="-1">${escapeText(p.name)}</h1><p class="product-description">${escapeText(p.description||'렛츠런파크 공식 상품')}</p><p class="detail-price">${won(p.price)}</p><dl class="delivery-info"><div><dt>배송비</dt><dd>${won(storeSettings.shippingFee)} · 주문당 고정 배송비</dd></div><div><dt>판매 상태</dt><dd>${available?'판매 중':'품절'}</dd></div></dl><div class="product-selection-box"><div class="selection-item"><strong class="selection-name">${escapeText(p.name)}</strong><div class="selection-item-bottom"><div class="counter"><button type="button" id="quantityMinus" aria-label="수량 줄이기" disabled>−</button><output id="detailQty" aria-live="polite">${available?1:0}</output><button type="button" id="quantityPlus" aria-label="수량 늘리기" ${!available||p.stock<=1?'disabled':''}>+</button></div><strong id="detailLineTotal" aria-live="polite">${won(available?p.price:0)}</strong></div></div><div class="selection-totals"><strong>총 <span id="detailTotalQty" aria-live="polite">${available?1:0}</span>개</strong><div><span>총 상품 금액</span><strong id="detailTotal" aria-live="polite">${won(available?p.price:0)}</strong></div></div></div><div class="purchase-actions${available?'':' is-sold-out'}">${available?'<button class="outline" id="detailCart">장바구니에 담기</button><button class="primary" id="buyNow">바로 구매</button>':'<button type="button" class="sold-out-button" disabled>품절</button>'}</div></div></div><section class="product-information"><h2>상품 상세정보</h2><div class="product-rich-content">${p.detailHtml?ProductContent.sanitize(p.detailHtml):'<p>'+escapeText(p.description||'렛츠런파크 공식 상품')+'</p>'}</div><h2>배송 안내</h2><p>${escapeText(storeSettings.shippingNotice)}</p><p>배송비는 주문당 ${won(storeSettings.shippingFee)}입니다.</p><h2>취소 안내</h2><p>결제 후 ${storeSettings.cancelHours}시간 이내, 발송 전까지 주문 전체 취소가 가능합니다. 부분 취소·부분 환불은 지원하지 않습니다.</p></section>`;
+  const policyHeading=productPage.querySelector('.product-information h2:last-of-type'),policyText=productPage.querySelector('.product-information p:last-child');
+  policyHeading.textContent='취소·반품 안내';
+  policyText.textContent=`결제 후 ${storeSettings.cancelHours}시간 이내, 운송장 등록 전까지 주문 전체 취소가 가능합니다. 운송장 등록 후 ${storeSettings.returnDays}일 이내에는 주문 전체 반품을 신청할 수 있습니다. 부분 취소·부분 반품은 지원하지 않으며 불량·오배송 등 법정 예외는 고객센터로 문의해 주세요.`;
+  document.getElementById('quantityMinus').onclick=()=>detailQty(-1);
+  document.getElementById('quantityPlus').onclick=()=>detailQty(1);
+  if(available){
+    document.getElementById('detailCart').onclick=addSelected;
+    document.getElementById('buyNow').onclick=()=>startCheckout([{id:p.id,qty:Number(document.getElementById('detailQty').textContent)}],'direct');
+  }
+}
+function detailQty(delta){if(!canBuy(selected))return;const output=document.getElementById('detailQty');const qty=Math.min(selected.stock,Math.max(1,Number(output.textContent)+delta));output.textContent=qty;document.getElementById('detailTotal').textContent=won(selected.price*qty);document.getElementById('detailLineTotal').textContent=won(selected.price*qty);document.getElementById('detailTotalQty').textContent=qty;document.getElementById('quantityMinus').disabled=qty===1;document.getElementById('quantityPlus').disabled=qty>=selected.stock;};
+function addSelected(){const id=selected.id,qty=Number(document.getElementById('detailQty').textContent);requireLogin(()=>{const p=products.find(p=>p.id===id);if(!canBuy(p))return;const existing=cart.find(x=>x.id===id);if(existing){existing.qty=Math.min(existing.qty+qty,p.stock);existing.priceAtAdd=p.price;}else cart.push({id,qty:Math.min(qty,p.stock),priceAtAdd:p.price});save();renderCart();showStoreToast('장바구니에 담겼어요');});};
+
+const productId=Number(new URLSearchParams(location.search).get("id"));renderProductPage(productId);window.addEventListener("store-data-change",()=>renderProductPage(productId));

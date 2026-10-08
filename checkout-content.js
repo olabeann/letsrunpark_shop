@@ -7,6 +7,22 @@ const CheckoutContent = {
     purchasePolicyVersion: 'commerce-policy-v1',
     privacyPolicyVersion: 'privacy-order-v1'
   },
+  nextOrderNumber(timestamp, existingOrders = []) {
+    const parts = new Intl.DateTimeFormat('en-CA', {timeZone:'Asia/Seoul', year:'numeric', month:'2-digit', day:'2-digit'}).formatToParts(new Date(timestamp));
+    const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
+    const day = values.year.slice(-2) + values.month + values.day;
+    const sequenceKey = 'goodsOrderSequence:' + day;
+    const storedOrders = JSON.parse(localStorage.goodsOrders || '[]');
+    const prefix = 'G-' + day + '-';
+    const previous = Math.max(Number(localStorage.getItem(sequenceKey)) || 0, ...[...storedOrders, ...existingOrders].map(order => {
+      const suffix = String(order.number || '').startsWith(prefix) ? String(order.number).slice(prefix.length) : '';
+      return /^\d+$/.test(suffix) ? Number(suffix) : 0;
+    }));
+    const next = previous + 1;
+    if (next > 99999) throw new Error('오늘 발급 가능한 주문번호를 초과했습니다.');
+    localStorage.setItem(sequenceKey, String(next));
+    return prefix + String(next).padStart(5, '0');
+  },
   resolve(text, settings) {
     const values = {'배송안내': settings.shippingNotice, '배송비': Number(settings.shippingFee).toLocaleString('ko-KR') + '원', '취소시간': settings.cancelHours, '반품기간': settings.returnDays};
     return String(text).replace(/\{(배송안내|배송비|취소시간|반품기간)\}/g, (_, key) => values[key]);

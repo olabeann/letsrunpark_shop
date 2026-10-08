@@ -1,3 +1,4 @@
+// Home page only.
 (function(){
   const desktop=document.getElementById('homeBannerImage');
   const mobile=document.getElementById('homeBannerMobileSource');
