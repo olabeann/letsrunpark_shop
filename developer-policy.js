@@ -78,7 +78,7 @@ const specs=[
     "id": "orders-list",
     "scope": "orders",
     "title": "내 주문 목록",
-    "category": "정렬 · 표시개수",
+    "category": "목록 · 상태 · 고객 행동",
     "selector": "#orderList",
     "section": "returns"
   },
@@ -421,6 +421,38 @@ const requirementCopy={
         "삭제 상품: 주문 당시 이름과 삭제 표시 유지",
         "결과: 주문 없음·조회 오류를 구분해 안내"
       ]
+    },
+    {
+      "title": "상태 표시와 버튼 위치",
+      "items": [
+        "목록: 모든 주문에서 주문 상세 보기 제공. 취소·반품·운송장 등록·수정·철회는 주문 상세에서만 진행합니다.",
+        "상태 우선순위: 관리자 예외 환불 → 반품 반려 → 환불 완료 → 반품 발송 대기/반품 확인 중 → 배송 준비 중/발송 완료/취소 완료.",
+        "주문 상세의 반품 영역에는 내부 처리값 신청 완료가 표시될 수 있습니다. 목록 배지는 반품 운송장 유무로 발송 대기·확인 중을 구분합니다.",
+        "배송 완료: 별도 운영 상태로 사용하지 않습니다. 실제 배송 진행과 도착 여부는 택배사 배송조회에서 확인합니다."
+      ]
+    },
+    {
+      "title": "기한·고객 행동 공통 기준",
+      "items": [
+        "고객 취소: 출고 대기·운송장 미등록·반품 미신청이며 현재 시각이 주문 취소 마감 전일 때만 가능. 관리자 취소는 발송 전 시간 제한 없이 가능합니다.",
+        "전체 반품: 발송 운송장이 있고 취소·반품·반려 처리 이력이 없는 주문에서 신청 마감 전까지 가능합니다. 기간 초과 시 불량·오배송 등은 고객센터로 문의합니다.",
+        "반품 기간은 신규 주문에 저장된 값을 사용합니다. 최초 운송장 등록 후 수정해도 기산일이 새로 시작되지 않습니다.",
+        "반품 신청 후 운송장 등록·수정은 신청 상태인 동안 가능합니다. 신규 신청 기한이 지났더라도 접수된 반품의 후속 처리는 진행할 수 있습니다.",
+        "부분 취소·부분 반품·부분 수량 환불은 지원하지 않습니다. 모든 취소·반품은 주문 전체 단위입니다.",
+        "배지와 고객 행동은 다릅니다. 취소·반품 기한 만료가 별도 배지를 만들지는 않으며, 상세 화면에서 가능한 버튼과 안내가 변경됩니다."
+      ]
+    },
+    {
+      "title": "주문번호 구조 · 예약번호와 공통 기준",
+      "items": [
+        "정식 적용 형식: G-YYMMDD-NNNNN. 예약번호 LRP-YYMMDD-NNNNN과 동일한 날짜·5자리 순번 구조를 사용하며, G는 상품 주문(Goods)을 구분합니다.",
+        "예시: G-261008-00001 = 상품 주문 / 2026년 10월 8일 결제 확정 / 해당 날짜의 첫 번째 주문. 날짜는 배송일이 아니라 결제 승인일이며 한국 시간(Asia/Seoul)을 기준으로 합니다.",
+        "발급: 결제 승인 확정 시 주문 한 건에 번호 하나를 발급합니다. 여러 상품·수량을 함께 구매해도 같은 주문번호를 사용하며 상품별 -1, -2 접미사는 붙이지 않습니다.",
+        "순번: 날짜별 00001부터 증가하며 날짜가 바뀌면 새 순번을 시작합니다. 취소·반품·환불·상품 삭제 후에도 기존 번호를 변경하거나 재사용하지 않습니다.",
+        "중복 방지: 정식 서버에서 날짜별 순번을 원자적으로 발급하고 주문번호 고유 제약으로 중복을 방지합니다. 결제 재시도·중복 승인 알림에는 기존 주문번호를 반환하고 새 주문을 중복 생성하지 않습니다.",
+        "별도 식별자: 상품·주문 항목 ID, PG 결제 거래번호, 취소·환불 거래번호, 배송·반품 운송장번호는 주문번호와 별도로 관리합니다. 고객·관리자·정산 화면에서는 같은 주문번호로 연결합니다.",
+        "시연과 정식 구분: 현재 예제는 G-260927-0010(4자리 순번)·G-EXAMPLE-1004이며 신규 시연 주문은 G+타임스탬프를 사용합니다. 이 항목은 정식 개발 적용 기준이며 번호 생성 코드는 아직 변경하지 않았습니다."
+      ]
     }
   ],
   "order-detail": [
@@ -447,6 +479,38 @@ const requirementCopy={
         "운송장: 공백·하이픈을 제거한 영문·숫자, 등록 후 최신 정보 수정",
         "반려: 사유를 고객에게 안내하고 고객센터에서 후속 처리",
         "환불: 사유·차감액·최종 금액과 선택 추가 안내 표시"
+      ]
+    },
+    {
+      "title": "상태 표시와 버튼 위치",
+      "items": [
+        "목록: 모든 주문에서 주문 상세 보기 제공. 취소·반품·운송장 등록·수정·철회는 주문 상세에서만 진행합니다.",
+        "상태 우선순위: 관리자 예외 환불 → 반품 반려 → 환불 완료 → 반품 발송 대기/반품 확인 중 → 배송 준비 중/발송 완료/취소 완료.",
+        "주문 상세의 반품 영역에는 내부 처리값 신청 완료가 표시될 수 있습니다. 목록 배지는 반품 운송장 유무로 발송 대기·확인 중을 구분합니다.",
+        "배송 완료: 별도 운영 상태로 사용하지 않습니다. 실제 배송 진행과 도착 여부는 택배사 배송조회에서 확인합니다."
+      ]
+    },
+    {
+      "title": "기한·고객 행동 공통 기준",
+      "items": [
+        "고객 취소: 출고 대기·운송장 미등록·반품 미신청이며 현재 시각이 주문 취소 마감 전일 때만 가능. 관리자 취소는 발송 전 시간 제한 없이 가능합니다.",
+        "전체 반품: 발송 운송장이 있고 취소·반품·반려 처리 이력이 없는 주문에서 신청 마감 전까지 가능합니다. 기간 초과 시 불량·오배송 등은 고객센터로 문의합니다.",
+        "반품 기간은 신규 주문에 저장된 값을 사용합니다. 최초 운송장 등록 후 수정해도 기산일이 새로 시작되지 않습니다.",
+        "반품 신청 후 운송장 등록·수정은 신청 상태인 동안 가능합니다. 신규 신청 기한이 지났더라도 접수된 반품의 후속 처리는 진행할 수 있습니다.",
+        "부분 취소·부분 반품·부분 수량 환불은 지원하지 않습니다. 모든 취소·반품은 주문 전체 단위입니다.",
+        "배지와 고객 행동은 다릅니다. 취소·반품 기한 만료가 별도 배지를 만들지는 않으며, 상세 화면에서 가능한 버튼과 안내가 변경됩니다."
+      ]
+    },
+    {
+      "title": "주문번호 구조 · 예약번호와 공통 기준",
+      "items": [
+        "정식 적용 형식: G-YYMMDD-NNNNN. 예약번호 LRP-YYMMDD-NNNNN과 동일한 날짜·5자리 순번 구조를 사용하며, G는 상품 주문(Goods)을 구분합니다.",
+        "예시: G-261008-00001 = 상품 주문 / 2026년 10월 8일 결제 확정 / 해당 날짜의 첫 번째 주문. 날짜는 배송일이 아니라 결제 승인일이며 한국 시간(Asia/Seoul)을 기준으로 합니다.",
+        "발급: 결제 승인 확정 시 주문 한 건에 번호 하나를 발급합니다. 여러 상품·수량을 함께 구매해도 같은 주문번호를 사용하며 상품별 -1, -2 접미사는 붙이지 않습니다.",
+        "순번: 날짜별 00001부터 증가하며 날짜가 바뀌면 새 순번을 시작합니다. 취소·반품·환불·상품 삭제 후에도 기존 번호를 변경하거나 재사용하지 않습니다.",
+        "중복 방지: 정식 서버에서 날짜별 순번을 원자적으로 발급하고 주문번호 고유 제약으로 중복을 방지합니다. 결제 재시도·중복 승인 알림에는 기존 주문번호를 반환하고 새 주문을 중복 생성하지 않습니다.",
+        "별도 식별자: 상품·주문 항목 ID, PG 결제 거래번호, 취소·환불 거래번호, 배송·반품 운송장번호는 주문번호와 별도로 관리합니다. 고객·관리자·정산 화면에서는 같은 주문번호로 연결합니다.",
+        "시연과 정식 구분: 현재 예제는 G-260927-0010(4자리 순번)·G-EXAMPLE-1004이며 신규 시연 주문은 G+타임스탬프를 사용합니다. 이 항목은 정식 개발 적용 기준이며 번호 생성 코드는 아직 변경하지 않았습니다."
       ]
     }
   ],
@@ -484,6 +548,15 @@ const requirementCopy={
         "페이지: 조건 변경 시 1페이지",
         "다운로드: 검색 결과 전체"
       ]
+    },
+    {
+      "title": "상태 필터별 포함 조건",
+      "items": [
+        "결제 완료: 전체 취소가 아니고 반품 상태가 없는 주문. 반품 신청 완료: 반품 접수 상태이며 운송장 등록 유무와 무관. 반품 반려: 반려 처리된 주문.",
+        "전액 환불 완료: 전체 취소 주문. 반품 환불 완료: 반품 환불이 완료되고 관리자 예외 환불이 아닌 주문. 관리자 예외 환불: 예외 환불 유형이 기록된 주문.",
+        "배송 필터: 출고 대기 / 출고 완료 / 전체 취소의 원래 배송 상태로 조회합니다. 결제·환불 필터와 함께 선택하면 두 조건을 모두 만족하는 주문만 표시합니다.",
+        "기간·검색·결제·배송 조건은 모두 AND로 적용합니다. 주문일은 생성일 기준이며 검색은 주문번호·상품명 부분 일치, 영문 대소문자를 구분하지 않습니다."
+      ]
     }
   ],
   "admin-orders": [
@@ -519,6 +592,36 @@ const requirementCopy={
         "확정: 취소·반려·환불은 한 번만 처리하고 완료 결과 유지",
         "재고: 취소 시 복원 후 판매 상태 유지, 반품·예외 환불 시 현재 재고 유지"
       ]
+    },
+    {
+      "title": "주문번호 구조 · 예약번호와 공통 기준",
+      "items": [
+        "정식 적용 형식: G-YYMMDD-NNNNN. 예약번호 LRP-YYMMDD-NNNNN과 동일한 날짜·5자리 순번 구조를 사용하며, G는 상품 주문(Goods)을 구분합니다.",
+        "예시: G-261008-00001 = 상품 주문 / 2026년 10월 8일 결제 확정 / 해당 날짜의 첫 번째 주문. 날짜는 배송일이 아니라 결제 승인일이며 한국 시간(Asia/Seoul)을 기준으로 합니다.",
+        "발급: 결제 승인 확정 시 주문 한 건에 번호 하나를 발급합니다. 여러 상품·수량을 함께 구매해도 같은 주문번호를 사용하며 상품별 -1, -2 접미사는 붙이지 않습니다.",
+        "순번: 날짜별 00001부터 증가하며 날짜가 바뀌면 새 순번을 시작합니다. 취소·반품·환불·상품 삭제 후에도 기존 번호를 변경하거나 재사용하지 않습니다.",
+        "중복 방지: 정식 서버에서 날짜별 순번을 원자적으로 발급하고 주문번호 고유 제약으로 중복을 방지합니다. 결제 재시도·중복 승인 알림에는 기존 주문번호를 반환하고 새 주문을 중복 생성하지 않습니다.",
+        "별도 식별자: 상품·주문 항목 ID, PG 결제 거래번호, 취소·환불 거래번호, 배송·반품 운송장번호는 주문번호와 별도로 관리합니다. 고객·관리자·정산 화면에서는 같은 주문번호로 연결합니다.",
+        "시연과 정식 구분: 현재 예제는 G-260927-0010(4자리 순번)·G-EXAMPLE-1004이며 신규 시연 주문은 G+타임스탬프를 사용합니다. 이 항목은 정식 개발 적용 기준이며 번호 생성 코드는 아직 변경하지 않았습니다."
+      ]
+    },
+    {
+      "title": "결제·환불과 배송 상태의 구분",
+      "items": [
+        "결제·환불: 결제 완료 / 전액 환불 완료 / 반품 신청 완료 / 반품 반려 / 반품 환불 완료 / 관리자 예외 환불의 6가지입니다. 상태별 조건과 행동은 아래 상태값에 표시합니다.",
+        "배송 상태: 배송 준비 중 / 발송 완료 / 취소 완료의 3가지입니다. 반품·환불을 해도 최초 발송 상태를 바꾸지 않으므로 두 열을 함께 확인합니다.",
+        "결제 배지 우선순위: 전체 취소 → 관리자 예외 환불 → 반품 환불 완료 → 반품 반려 → 반품 신청 완료 → 결제 완료."
+      ]
+    },
+    {
+      "title": "송장 정보와 상세 처리 위치",
+      "items": [
+        "미등록: 발송 운송장이 없는 주문. 상품 판매 현황에서는 조회만 가능하며 등록은 배송 처리 → 발송 대기에서 진행합니다.",
+        "택배사·운송장·조회: 발송 운송장이 등록된 주문. 조회는 택배사 페이지를 새 창으로 엽니다. 수정은 배송 처리 → 발송 완료에서 진행하며 최초 등록 이후 삭제할 수 없습니다.",
+        "취소된 주문: 전체 취소된 주문의 송장 미등록 안내. 새 송장을 등록할 수 없습니다.",
+        "상세보기: 모든 목록 행에서 제공. 관리자 취소·반품 반려·반품 환불·예외 환불 버튼은 상세에서 조건에 따라 표시합니다. 목록에서 결제 상태를 직접 변경하지 않습니다.",
+        "반품 운송장은 고객이 등록하며 이 목록의 송장 정보는 최초 상품 발송 운송장입니다. 상세에서 두 운송장을 구분해 확인합니다."
+      ]
     }
   ],
   "shipping-stages": [
@@ -553,6 +656,18 @@ const requirementCopy={
       "items": [
         "조회: 택배사 공식 조회 새 창 연결, 기타 택배사는 검색 연결",
         "다운로드: 검색 결과 전체 CSV"
+      ]
+    },
+    {
+      "title": "주문번호 구조 · 예약번호와 공통 기준",
+      "items": [
+        "정식 적용 형식: G-YYMMDD-NNNNN. 예약번호 LRP-YYMMDD-NNNNN과 동일한 날짜·5자리 순번 구조를 사용하며, G는 상품 주문(Goods)을 구분합니다.",
+        "예시: G-261008-00001 = 상품 주문 / 2026년 10월 8일 결제 확정 / 해당 날짜의 첫 번째 주문. 날짜는 배송일이 아니라 결제 승인일이며 한국 시간(Asia/Seoul)을 기준으로 합니다.",
+        "발급: 결제 승인 확정 시 주문 한 건에 번호 하나를 발급합니다. 여러 상품·수량을 함께 구매해도 같은 주문번호를 사용하며 상품별 -1, -2 접미사는 붙이지 않습니다.",
+        "순번: 날짜별 00001부터 증가하며 날짜가 바뀌면 새 순번을 시작합니다. 취소·반품·환불·상품 삭제 후에도 기존 번호를 변경하거나 재사용하지 않습니다.",
+        "중복 방지: 정식 서버에서 날짜별 순번을 원자적으로 발급하고 주문번호 고유 제약으로 중복을 방지합니다. 결제 재시도·중복 승인 알림에는 기존 주문번호를 반환하고 새 주문을 중복 생성하지 않습니다.",
+        "별도 식별자: 상품·주문 항목 ID, PG 결제 거래번호, 취소·환불 거래번호, 배송·반품 운송장번호는 주문번호와 별도로 관리합니다. 고객·관리자·정산 화면에서는 같은 주문번호로 연결합니다.",
+        "시연과 정식 구분: 현재 예제는 G-260927-0010(4자리 순번)·G-EXAMPLE-1004이며 신규 시연 주문은 G+타임스탬프를 사용합니다. 이 항목은 정식 개발 적용 기준이며 번호 생성 코드는 아직 변경하지 않았습니다."
       ]
     }
   ],
@@ -819,37 +934,42 @@ const stateCopy={
     [
       "배송 준비 중",
       "PREPARING",
-      "운송장 미등록 · 고객 기한 내 취소 또는 관리자 취소 가능"
+      "표시: 결제 승인 후 출고 대기이며 반품·환불 상태가 없는 주문. 가능: 상세 조회, 설정 취소 시간 이내(기본 24시간)·운송장 미등록일 때 주문 전체 취소. 불가: 부분 취소, 발송 전 반품 신청. 시간이 지나도 배지는 유지되지만 고객 취소 버튼은 사라집니다."
     ],
     [
       "발송 완료",
       "SHIPPED",
-      "운송장 등록 완료 · 고객 취소 불가 · 전체 반품 신청 가능"
+      "표시: 관리자가 택배사·최초 발송 운송장을 등록하여 출고 완료된 주문. 가능: 상세 조회, 배송조회, 최초 운송장 등록일부터 주문에 저장된 반품 기간(기본 14일) 이내 전체 반품 신청. 불가: 고객 취소, 부분 반품. 반품 기간이 지나도 배지는 유지되며 신청 버튼만 사라집니다."
     ],
     [
       "취소 완료",
       "CANCELLED",
-      "발송 전 전액 취소 · 재고 복원"
+      "표시: 발송 전 고객 또는 관리자가 주문 전체 취소를 완료한 경우. 결제금액 전액 취소 및 적용된 재고 복원. 가능: 상세·취소금액 확인. 불가: 취소 철회, 배송조회, 반품 신청."
     ],
     [
-      "반품 신청 완료",
+      "반품 발송 대기",
       "RETURN_REQUESTED",
-      "고객 직접 반송·관리자 처리 대기"
+      "표시: 전체 반품 신청 완료이며 반품 운송장이 아직 없는 주문. 가능: 반품 주소·사유 확인, 주문 상품 전체 직접 반송(착불), 반품 운송장 등록, 반품 신청 철회. 불가: 부분 반품, 중복 신청. 신청 철회 후 기존 배송 상태로 돌아가며 남은 신청 기간 안에서만 다시 신청할 수 있습니다."
+    ],
+    [
+      "반품 확인 중",
+      "RETURN_IN_TRANSIT",
+      "표시: 반품 신청 완료 후 고객이 반품 택배사·운송장을 등록한 주문. 가능: 반품 운송장 수정, 반품 배송조회, 처리 내역 확인. 불가: 운송장 삭제, 고객 직접 신청 철회, 중복 반품 신청. 관리자 실물 도착 확인 후 환불 또는 반려로 변경됩니다."
     ],
     [
       "반품 반려",
       "RETURN_REJECTED",
-      "사유 고객 표시 · 재신청 불가"
+      "표시: 반품 운송장 등록 후 관리자가 반품을 반려하고 사유를 기록한 주문. 가능: 상세·반려 사유 확인, 고객센터 문의. 불가: 고객 직접 재신청, 반품 운송장 수정, 취소. 재신청·재발송 등 후속 처리는 고객센터에서 안내합니다."
     ],
     [
-      "반품 환불 완료",
+      "환불 완료",
       "REFUNDED",
-      "전체 환불 또는 배송비 차감 환불 완료"
+      "표시: 관리자가 반품 상품 도착을 확인하고 환불을 확정한 주문. 가능: 결제금액·배송비 차감·최종 환불액·환불 안내 확인, 등록된 반품 배송조회. 불가: 반품 신청, 철회, 운송장 수정, 환불액 수정. 반품 환불은 재고를 자동 복원하지 않습니다."
     ],
     [
       "관리자 예외 환불",
       "EXCEPTION_REFUNDED",
-      "발송 후 반품 절차 없이 관리자 환불 완료"
+      "표시: 발송 후 관리자가 반품 절차 없이 예외 환불을 확정한 주문. 다른 상태보다 우선 표시. 가능: 상세·차감액·환불액·관리자 안내 확인. 불가: 고객 취소, 신규 반품 신청, 환불액 수정. 재고는 자동 복원하지 않습니다."
     ]
   ],
   "sales-guide": [
@@ -929,6 +1049,142 @@ const stateCopy={
       "hidden",
       "고객 화면 미노출"
     ]
+  ],
+  "orders-list": [
+    [
+      "배송 준비 중",
+      "PREPARING",
+      "표시: 결제 승인 후 출고 대기이며 반품·환불 상태가 없는 주문. 가능: 상세 조회, 설정 취소 시간 이내(기본 24시간)·운송장 미등록일 때 주문 전체 취소. 불가: 부분 취소, 발송 전 반품 신청. 시간이 지나도 배지는 유지되지만 고객 취소 버튼은 사라집니다."
+    ],
+    [
+      "발송 완료",
+      "SHIPPED",
+      "표시: 관리자가 택배사·최초 발송 운송장을 등록하여 출고 완료된 주문. 가능: 상세 조회, 배송조회, 최초 운송장 등록일부터 주문에 저장된 반품 기간(기본 14일) 이내 전체 반품 신청. 불가: 고객 취소, 부분 반품. 반품 기간이 지나도 배지는 유지되며 신청 버튼만 사라집니다."
+    ],
+    [
+      "취소 완료",
+      "CANCELLED",
+      "표시: 발송 전 고객 또는 관리자가 주문 전체 취소를 완료한 경우. 결제금액 전액 취소 및 적용된 재고 복원. 가능: 상세·취소금액 확인. 불가: 취소 철회, 배송조회, 반품 신청."
+    ],
+    [
+      "반품 발송 대기",
+      "RETURN_REQUESTED",
+      "표시: 전체 반품 신청 완료이며 반품 운송장이 아직 없는 주문. 가능: 반품 주소·사유 확인, 주문 상품 전체 직접 반송(착불), 반품 운송장 등록, 반품 신청 철회. 불가: 부분 반품, 중복 신청. 신청 철회 후 기존 배송 상태로 돌아가며 남은 신청 기간 안에서만 다시 신청할 수 있습니다."
+    ],
+    [
+      "반품 확인 중",
+      "RETURN_IN_TRANSIT",
+      "표시: 반품 신청 완료 후 고객이 반품 택배사·운송장을 등록한 주문. 가능: 반품 운송장 수정, 반품 배송조회, 처리 내역 확인. 불가: 운송장 삭제, 고객 직접 신청 철회, 중복 반품 신청. 관리자 실물 도착 확인 후 환불 또는 반려로 변경됩니다."
+    ],
+    [
+      "반품 반려",
+      "RETURN_REJECTED",
+      "표시: 반품 운송장 등록 후 관리자가 반품을 반려하고 사유를 기록한 주문. 가능: 상세·반려 사유 확인, 고객센터 문의. 불가: 고객 직접 재신청, 반품 운송장 수정, 취소. 재신청·재발송 등 후속 처리는 고객센터에서 안내합니다."
+    ],
+    [
+      "환불 완료",
+      "REFUNDED",
+      "표시: 관리자가 반품 상품 도착을 확인하고 환불을 확정한 주문. 가능: 결제금액·배송비 차감·최종 환불액·환불 안내 확인, 등록된 반품 배송조회. 불가: 반품 신청, 철회, 운송장 수정, 환불액 수정. 반품 환불은 재고를 자동 복원하지 않습니다."
+    ],
+    [
+      "관리자 예외 환불",
+      "EXCEPTION_REFUNDED",
+      "표시: 발송 후 관리자가 반품 절차 없이 예외 환불을 확정한 주문. 다른 상태보다 우선 표시. 가능: 상세·차감액·환불액·관리자 안내 확인. 불가: 고객 취소, 신규 반품 신청, 환불액 수정. 재고는 자동 복원하지 않습니다."
+    ]
+  ],
+  "admin-orders": [
+    [
+      "결제 완료",
+      "PAID",
+      "결제 승인 후 전체 취소·반품 상태가 없는 주문. 배송 준비 중이면 관리자가 상세에서 시간 제한 없이 전체 취소 가능. 운송장 등록 후에는 반품 절차 없는 주문에 관리자 예외 환불 가능. 고객은 설정 기한 내 발송 전 전체 취소, 발송 후 기간 내 전체 반품 신청 가능."
+    ],
+    [
+      "전액 환불 완료",
+      "CANCELLED",
+      "발송 전 주문 전체 취소 완료(status=전체 취소). 적용된 재고를 복원하며 배송 상태는 취소 완료. 상세에서 취소 결과 조회만 가능하고 재취소·반품·송장 등록 불가."
+    ],
+    [
+      "반품 신청 완료",
+      "RETURN_REQUESTED",
+      "고객이 전체 반품을 접수(returnStatus=신청 완료). 반품 운송장 미등록: 고객 등록·철회 가능, 관리자 환불·반려 버튼 없음. 등록 후: 고객 운송장 수정·배송조회 가능, 철회 불가. 관리자는 상세에서 실물 도착 확인 후 반품 환불 또는 사유 입력 후 반려. 관리자 배지는 운송장 유무와 관계없이 동일."
+    ],
+    [
+      "반품 반려",
+      "RETURN_REJECTED",
+      "관리자가 반품 운송장이 있는 신청을 반려하고 사유를 저장. 고객 상세에 사유 표시, 직접 재신청·철회·운송장 수정 불가. 관리자 목록·상세에서 결과 확인만 가능하며 후속 처리는 고객센터 안내."
+    ],
+    [
+      "반품 환불 완료",
+      "REFUNDED",
+      "반품 도착 확인 후 관리자 환불 확정. 전액 또는 배송비 차감 환불이며 재고 자동 복원 없음. 고객·관리자 모두 차감액·최종 환불액·안내 확인 가능. 재환불·금액 수정·반품 재신청 불가."
+    ],
+    [
+      "관리자 예외 환불",
+      "EXCEPTION_REFUNDED",
+      "발송 운송장이 있고 반품 절차가 없는 주문을 관리자가 사유 입력 후 직접 환불. 전액 또는 배송비 차감, 재고 자동 복원 없음. 고객은 환불 결과·안내 조회 가능. 재환불·금액 수정·신규 반품 불가."
+    ],
+    [
+      "배송 준비 중",
+      "PREPARING",
+      "출고 대기 주문. 발송 운송장 미등록이며 배송 처리의 발송 대기에서 최초 등록 가능. 등록하면 발송 완료로 전환. 고객 취소는 주문에 저장된 기한 내만 가능, 관리자 발송 전 취소는 기한 제한 없음."
+    ],
+    [
+      "발송 완료",
+      "SHIPPED",
+      "관리자가 최초 발송 운송장 등록을 완료(출고 완료). 반품 신청·반려·환불 이후에도 배송 배지는 발송 완료를 유지하며 결제·환불 열로 처리 상태를 구분. 배송 처리에서 송장 수정·조회 가능. 별도 배송 완료 상태는 사용하지 않음."
+    ],
+    [
+      "취소 완료",
+      "CANCELLED_SHIPPING",
+      "발송 전 주문 전체 취소 완료. 발송 대상에서 제외되며 송장 등록 불가. 결제·환불 열은 전액 환불 완료, 송장 정보는 취소된 주문 표시."
+    ]
+  ],
+  "sales-filter": [
+    [
+      "결제 완료",
+      "PAID",
+      "결제 승인 후 전체 취소·반품 상태가 없는 주문. 배송 준비 중이면 관리자가 상세에서 시간 제한 없이 전체 취소 가능. 운송장 등록 후에는 반품 절차 없는 주문에 관리자 예외 환불 가능. 고객은 설정 기한 내 발송 전 전체 취소, 발송 후 기간 내 전체 반품 신청 가능."
+    ],
+    [
+      "전액 환불 완료",
+      "CANCELLED",
+      "발송 전 주문 전체 취소 완료(status=전체 취소). 적용된 재고를 복원하며 배송 상태는 취소 완료. 상세에서 취소 결과 조회만 가능하고 재취소·반품·송장 등록 불가."
+    ],
+    [
+      "반품 신청 완료",
+      "RETURN_REQUESTED",
+      "고객이 전체 반품을 접수(returnStatus=신청 완료). 반품 운송장 미등록: 고객 등록·철회 가능, 관리자 환불·반려 버튼 없음. 등록 후: 고객 운송장 수정·배송조회 가능, 철회 불가. 관리자는 상세에서 실물 도착 확인 후 반품 환불 또는 사유 입력 후 반려. 관리자 배지는 운송장 유무와 관계없이 동일."
+    ],
+    [
+      "반품 반려",
+      "RETURN_REJECTED",
+      "관리자가 반품 운송장이 있는 신청을 반려하고 사유를 저장. 고객 상세에 사유 표시, 직접 재신청·철회·운송장 수정 불가. 관리자 목록·상세에서 결과 확인만 가능하며 후속 처리는 고객센터 안내."
+    ],
+    [
+      "반품 환불 완료",
+      "REFUNDED",
+      "반품 도착 확인 후 관리자 환불 확정. 전액 또는 배송비 차감 환불이며 재고 자동 복원 없음. 고객·관리자 모두 차감액·최종 환불액·안내 확인 가능. 재환불·금액 수정·반품 재신청 불가."
+    ],
+    [
+      "관리자 예외 환불",
+      "EXCEPTION_REFUNDED",
+      "발송 운송장이 있고 반품 절차가 없는 주문을 관리자가 사유 입력 후 직접 환불. 전액 또는 배송비 차감, 재고 자동 복원 없음. 고객은 환불 결과·안내 조회 가능. 재환불·금액 수정·신규 반품 불가."
+    ],
+    [
+      "배송 준비 중",
+      "PREPARING",
+      "출고 대기 주문. 발송 운송장 미등록이며 배송 처리의 발송 대기에서 최초 등록 가능. 등록하면 발송 완료로 전환. 고객 취소는 주문에 저장된 기한 내만 가능, 관리자 발송 전 취소는 기한 제한 없음."
+    ],
+    [
+      "발송 완료",
+      "SHIPPED",
+      "관리자가 최초 발송 운송장 등록을 완료(출고 완료). 반품 신청·반려·환불 이후에도 배송 배지는 발송 완료를 유지하며 결제·환불 열로 처리 상태를 구분. 배송 처리에서 송장 수정·조회 가능. 별도 배송 완료 상태는 사용하지 않음."
+    ],
+    [
+      "취소 완료",
+      "CANCELLED_SHIPPING",
+      "발송 전 주문 전체 취소 완료. 발송 대상에서 제외되며 송장 등록 불가. 결제·환불 열은 전액 환불 완료, 송장 정보는 취소된 주문 표시."
+    ]
   ]
 };
 let shell,opened=false,panelCollapsed=false,activeId='',observer,raf=0;
@@ -938,19 +1194,48 @@ const shortcutKeys=isMac?'<kbd>⌥</kbd>+<kbd>⌘</kbd>+<kbd>K</kbd>':'<kbd>Ctrl
 const $=(s,r=document)=>r.querySelector(s), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function visible(el){if(!el)return false;const st=getComputedStyle(el),r=el.getBoundingClientRect();return st.display!=='none'&&st.visibility!=='hidden'&&r.width>0&&r.height>0;}
 function bounds(selector){const rects=[...document.querySelectorAll(selector)].filter(visible).map(el=>el.getBoundingClientRect());if(!rects.length)return null;return rects.reduce((a,r)=>({left:Math.min(a.left,r.left),top:Math.min(a.top,r.top),right:Math.max(a.right,r.right),bottom:Math.max(a.bottom,r.bottom)}),rects[0]);}
-function scope(){if($('.sidebar')){if(!$('#accountsView')?.hidden)return'adminAccounts';if(!$('#settlementView')?.hidden)return'adminSettlement';if(!$('#operationsView')?.hidden)return'adminOperations';return $('[data-view].active')?.dataset.view==='shipping'?'adminShipping':'adminSales';}const h=location.hash.slice(1);if(h.startsWith('product/'))return'product';if(h==='checkout')return'checkout';if(h.startsWith('complete/'))return'complete';if(h.startsWith('orders/'))return'orderDetail';if(h==='orders')return'orders';return'home';}
-function current(){const s=scope(),store=['home','product','checkout','complete','orders','orderDetail'].includes(s);return specs.filter(x=>(x.scope===s||(store&&x.scope==='store')||(s.startsWith('admin')&&x.scope==='admin'))&&visible($(x.selector)));}
+function scope(){
+ if($('.sidebar')){
+  const accountView=$('#sharedAccountsView')||$('#accountsView');
+  if(accountView&&!accountView.hidden)return 'adminAccounts';
+  const active=$('[data-view].active')?.dataset.view;
+  const menuScopes={sales:'adminSales',shipping:'adminShipping',settlement:'adminSettlement',operations:'adminOperations'};
+  if(menuScopes[active])return menuScopes[active];
+  const settlement=$('#settlementView'),operations=$('#operationsView');
+  if(settlement&&!settlement.hidden)return 'adminSettlement';
+  if(operations&&!operations.hidden)return 'adminOperations';
+  return 'adminSales';
+ }
+ const h=location.hash.slice(1);
+ if(h.startsWith('product/'))return 'product';if(h==='checkout')return 'checkout';if(h.startsWith('complete/'))return 'complete';if(h.startsWith('orders/'))return 'orderDetail';if(h==='orders')return 'orders';return 'home';
+}
+function current(){
+ const s=scope(),store=['home','product','checkout','complete','orders','orderDetail'].includes(s);
+ const orderScreen=['adminSales','adminShipping','adminSettlement'].includes(s);
+ return specs.filter(x=>{
+  if(x.id==='admin-order-detail')return orderScreen;
+  return (x.scope===s||(store&&x.scope==='store')||(s.startsWith('admin')&&x.scope==='admin'))&&visible($(x.selector));
+ });
+}
 function ensure(){if(shell)return;shell=document.createElement('div');shell.className='dev-spec-shell';shell.hidden=true;shell.innerHTML=`<div class="dev-spec-tint"></div><div class="dev-spec-marks"></div><button type="button" class="dev-spec-reopen" hidden>요구사항 보기</button><aside class="dev-spec-panel" role="dialog" aria-modal="true" aria-labelledby="devSpecTitle"><header><div><small>화면별 개발 요청 · ${shortcutLabel}</small><h2 id="devSpecTitle">현재 화면 요구사항</h2><p class="dev-spec-subtitle"></p></div><div class="dev-spec-panel-actions"><button type="button" class="dev-spec-minimize" aria-label="요구사항 패널 접기" title="패널 접기">→</button><button type="button" class="dev-spec-close" aria-label="요구사항 닫기" title="요구사항 닫기">×</button></div></header><div class="dev-spec-legend"><span><i></i> 화면 연결 영역</span><b></b></div><div class="dev-spec-list"></div><footer><span>사용자 관점의 개발 요청사항</span>${shortcutKeys}</footer></aside>`;document.body.append(shell);$('.dev-spec-close',shell).onclick=closePolicy;$('.dev-spec-minimize',shell).onclick=()=>setPanelCollapsed(true);$('.dev-spec-reopen',shell).onclick=()=>setPanelCollapsed(false);$('.dev-spec-marks',shell).onclick=e=>{const b=e.target.closest('[data-spec-id]');if(b)activate(b.dataset.specId,true)};shell.addEventListener('pointerdown',e=>{if(e.target.closest('.dev-spec-close')){e.preventDefault();closePolicy();return}const card=e.target.closest('[data-card-toggle]');if(card){e.preventDefault();activate(card.dataset.cardToggle,true)}},true);addEventListener('resize',schedule,{passive:true});addEventListener('scroll',schedule,{passive:true,capture:true});addEventListener('hashchange',()=>opened&&setTimeout(refresh,30));}
+// Modal dialogs make siblings inert; keep the policy controls inside the active modal.
+function syncPolicyHost(){
+ if(!shell||!opened)return;
+ const modal=[...document.querySelectorAll('dialog:modal')].at(-1);
+ const host=modal||document.body;
+ if(shell.parentElement!==host)host.append(shell);
+}
 function requestItem(text){const split=text.indexOf('：')>=0?text.indexOf('：'):text.indexOf(':');return split<0?esc(text):'<strong>'+esc(text.slice(0,split))+'</strong><span>'+esc(text.slice(split+1).trim())+'</span>';}
 function card(x,i){const groups=requirementCopy[x.id]||[],states=stateCopy[x.id]||[];return `<article class="dev-spec-card" data-card-id="${x.id}"><button class="dev-spec-card-head" data-card-toggle="${x.id}" aria-expanded="false"><span class="dev-spec-number">${i+1}</span><span><small>${esc(x.category)}</small><b>${esc(x.title)}</b></span><i>＋</i></button><div class="dev-spec-card-body">${groups.map(group=>`<section class="dev-spec-request-group"><h3>${esc(group.title)}</h3><ul class="dev-spec-requirements">${group.items.map(item=>`<li>${requestItem(item)}</li>`).join('')}</ul></section>`).join('')}${states.length?`<h3 class="dev-spec-state-title">상태값</h3><ul class="dev-spec-states">${states.map(state=>`<li><b>${esc(state[0])}</b><code>${esc(state[1])}</code><span>${esc(state[2])}</span></li>`).join('')}</ul>`:''}</div></article>`}
-function refresh(preferred){if(!opened)return;const list=current();$('.dev-spec-subtitle',shell).textContent=`${document.title.replace(/\s*\|.*$/,'')} · 요구사항 ${list.length}개`;$('.dev-spec-legend b',shell).textContent=`${list.length}개 영역`;$('.dev-spec-list',shell).innerHTML=list.map(card).join('')||'<p class="dev-spec-empty">현재 화면에 연결된 요구사항이 없습니다.</p>';shell.querySelectorAll('[data-card-toggle]').forEach(b=>b.onclick=()=>activate(b.dataset.cardToggle,true));activeId=(list.find(x=>x.id===preferred)||list.find(x=>x.section===preferred)||list[0])?.id||'';draw(list);if(activeId)activate(activeId,false);observer?.disconnect();observer=new MutationObserver(records=>{if(records.some(record=>!shell.contains(record.target)))schedule()});observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class']});}
+function refresh(preferred){if(!opened)return;syncPolicyHost();const list=current();$('.dev-spec-subtitle',shell).textContent=`${document.title.replace(/\s*\|.*$/,'')} · 요구사항 ${list.length}개`;$('.dev-spec-legend b',shell).textContent=`${list.length}개 영역`;$('.dev-spec-list',shell).innerHTML=list.map(card).join('')||'<p class="dev-spec-empty">현재 화면에 연결된 요구사항이 없습니다.</p>';shell.querySelectorAll('[data-card-toggle]').forEach(b=>b.onclick=()=>activate(b.dataset.cardToggle,true));activeId=(list.find(x=>x.id===preferred)||list.find(x=>x.section===preferred)||list[0])?.id||'';draw(list);if(activeId)activate(activeId,false);observer?.disconnect();observer=new MutationObserver(records=>{if(records.some(record=>!shell.contains(record.target)))schedule(true)});observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class','open']});}
 function positionPanel(id,list=current()){if(!shell||panelCollapsed)return;if(innerWidth<=760){shell.classList.remove('is-panel-left');$('.dev-spec-minimize',shell).textContent='→';return}const item=list.find(x=>x.id===id),r=item&&bounds(item.selector);if(!r)return;const panelWidth=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--spec-panel'))||400;const overlap=(left,right)=>Math.max(0,Math.min(r.right,right)-Math.max(r.left,left));const onLeft=overlap(innerWidth-panelWidth,innerWidth)>overlap(0,panelWidth);shell.classList.toggle('is-panel-left',onLeft);$('.dev-spec-minimize',shell).textContent=onLeft?'←':'→';}
 function draw(list=current()){if(!opened)return;const layer=$('.dev-spec-marks',shell),panel=$('.dev-spec-panel',shell)?.getBoundingClientRect(),panelLeft=shell.classList.contains('is-panel-left');const availableLeft=panelCollapsed?4:(panelLeft?panel.right+10:4),availableRight=panelCollapsed?innerWidth-4:(panelLeft?innerWidth-4:panel.left-10);layer.innerHTML=list.map((x,i)=>{const r=bounds(x.selector);if(!r)return'';const l=Math.max(availableLeft,r.left),t=Math.max(4,r.top),right=Math.min(availableRight,r.right),bottom=Math.min(innerHeight-4,r.bottom);if(right-l<20||bottom-t<16)return'';return `<button class="dev-spec-mark${x.id===activeId?' active':''}" data-spec-id="${x.id}" aria-label="${esc(x.title)}" style="left:${l}px;top:${t}px;width:${right-l}px;height:${bottom-t}px"><span>${i+1}</span><em>${esc(x.title)}</em></button>`}).join('');}
-function schedule(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{positionPanel(activeId);draw()})}
+let refreshPending=false;
+function schedule(update=false){refreshPending=refreshPending||update===true;cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{if(refreshPending){refreshPending=false;refresh(activeId);return;}positionPanel(activeId);draw()})}
 function activate(id,scroll){const list=current();if(!list.some(x=>x.id===id))return;activeId=id;positionPanel(id,list);shell.querySelectorAll('.dev-spec-card').forEach(c=>{const on=c.dataset.cardId===id;c.classList.toggle('active',on);c.querySelector('.dev-spec-card-head').setAttribute('aria-expanded',on);c.querySelector('.dev-spec-card-head i').textContent=on?'−':'＋'});draw(list);if(scroll)$(`[data-card-id="${CSS.escape(id)}"]`,shell)?.scrollIntoView({block:'nearest',behavior:'smooth'});}
 function setPanelCollapsed(collapsed){if(!shell)return;panelCollapsed=collapsed;shell.classList.toggle('is-panel-collapsed',collapsed);$('.dev-spec-reopen',shell).hidden=!collapsed;schedule();(collapsed?$('.dev-spec-reopen',shell):$('.dev-spec-minimize',shell)).focus({preventScroll:true});}
-function open(preferred){ensure();opened=true;shell.hidden=false;setPanelCollapsed(false);document.documentElement.classList.add('dev-spec-open');document.body.classList.add('dev-spec-open');refresh(preferred);$('.dev-spec-close',shell).focus({preventScroll:true});}
-function closePolicy(){if(!shell)return;opened=false;panelCollapsed=false;shell.classList.remove('is-panel-collapsed');shell.hidden=true;observer?.disconnect();document.documentElement.classList.remove('dev-spec-open');document.body.classList.remove('dev-spec-open');}
+function open(preferred){ensure();opened=true;shell.hidden=false;setPanelCollapsed(false);document.documentElement.classList.add('dev-spec-open');document.body.classList.add('dev-spec-open');refresh(preferred||($('#detailDialog')?.open?'admin-order-detail':undefined));$('.dev-spec-close',shell).focus({preventScroll:true});}
+function closePolicy(){if(!shell)return;opened=false;panelCollapsed=false;shell.classList.remove('is-panel-collapsed');shell.hidden=true;observer?.disconnect();if(shell.parentElement!==document.body)document.body.append(shell);document.documentElement.classList.remove('dev-spec-open');document.body.classList.remove('dev-spec-open');}
 document.addEventListener('click',e=>{if(e.target.closest('.dev-spec-close')){e.preventDefault();closePolicy();return}if(opened&&e.target.closest('[data-view],a[href^="#"]'))setTimeout(refresh,30)});
-document.addEventListener('keydown',e=>{const platformModifier=isMac?(e.metaKey&&!e.ctrlKey):(e.ctrlKey&&!e.metaKey);if(e.altKey&&platformModifier&&e.key.toLowerCase()==='k'){e.preventDefault();opened?closePolicy():open()}else if(e.key==='Escape'&&opened){e.preventDefault();closePolicy()}});
+document.addEventListener('keydown',e=>{const platformModifier=isMac?(e.metaKey&&!e.ctrlKey):(e.ctrlKey&&!e.metaKey);if(e.altKey&&platformModifier&&(e.code==='KeyK'||e.key.toLowerCase()==='k')){e.preventDefault();opened?closePolicy():open()}else if(e.key==='Escape'&&opened){e.preventDefault();e.stopImmediatePropagation();closePolicy()}},true);
 })();
