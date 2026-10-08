@@ -120,7 +120,7 @@ python3 -m http.server 8000 --directory dist
 | [dist/admin-accounts.js](dist/admin-accounts.js) | 예약 프로젝트의 계정·권한 연동 |
 | [dist/admin-layout.js](dist/admin-layout.js) / [dist/admin-common.js](dist/admin-common.js) | 관리자 공통 메뉴·데이터·표 스타일 |
 | [dist/product-data.js](dist/product-data.js) | 사용자·관리자의 초기 상품 데이터 |
-| [기획 자료 v2.1](outputs/planning-v2.1/README.md) | IA 구조도, 기능명세서, 개발 전달 자료 안내 |
+| [기획 자료 v2.1](최종_전달자료_2026-09-29/README.md) | IA 구조도, 기능명세서, 개발 전달 자료 안내 |
 | [견적산정용 개발 전달서 v2.3](outputs/planning-v2.3/03_견적산정용_개발전달서.md) | 최신 로컬 견적 산정 범위 정리 |
 
 화면 경로는 저장소의 현재 시연 코드를 기준으로 정리했습니다. 배포된 버전에 따라 화면 내용이 다를 수 있습니다.
@@ -148,3 +148,14 @@ git subtree push --prefix=dist origin codex/pages-deploy
 각 HTML에는 해당 페이지의 본문과 필요한 대화상자만 있습니다. 각 페이지는 전용 JavaScript를 로드하며, 헤더·푸터·관리자 메뉴는 `store-layout.js`·`admin-layout.js`에서 공유합니다. 데이터, 로그인, 장바구니와 재사용 위젯만 공통 파일에 두었습니다. `app.js`, `store-flow.js`, `admin-ui.js`, `admin-policy-v2.js`는 페이지별 파일로 통합·이관 후 제거했습니다. 별도 빌드 없이 해당 HTML과 JavaScript를 직접 수정합니다. 시연 로그인은 같은 탭의 세션에 유지됩니다.
 
 구조와 주요 흐름 검사는 `node --test tests/*.test.cjs`로 실행합니다. 페이지별 본문 분리, 스크립트 경로·선언 충돌, 결제 진행 데이터 전달과 송장 등록 규칙을 검사합니다.
+
+## 저장소 정리
+
+- `dist/`: 실제 사용자·관리자 화면과 필요한 공통 코드.
+- `tests/`: 페이지 구조와 주문 흐름 검사.
+- `outputs/`: 기획 원본과 정책 점검 기록.
+- `최종_전달자료_2026-09-29/`: 전달용 문서 묶음.
+- `_archive/`: 내용이 다른 과거 자료만 보관.
+- `scripts/document-tools/`: 문서 생성 도구.
+
+내용이 완전히 같은 복사본 30개와 임시 파일 747개를 제거했습니다. `tmp/`와 Python 캐시는 Git에서 제외합니다.
