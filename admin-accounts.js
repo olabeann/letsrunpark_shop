@@ -1,5 +1,12 @@
 function mountSharedAccounts() {
     const view=$('sharedAccountsView');
+    const sharedAccountsUrl = new URL('https://olabeann.github.io/letsrunpark-reser/account-admin.html?v=20261007-commerce1');
+    // Local files and local servers cannot restyle the remote account document.
+    // Offer the hosted shop screen instead of embedding a second admin shell.
+    if (location.origin !== sharedAccountsUrl.origin) {
+      view.innerHTML = '<div class="page-heading"><div><h1>관리자 계정 · 권한</h1><p>계정 · 권한 관리는 배포된 관리자 화면에서 이용할 수 있습니다.</p></div></div><p>로컬 화면에서는 계정 관리 페이지를 연결할 수 없습니다. 아래 버튼으로 이동해 주세요.</p><a class="shared-accounts-link" href="https://olabeann.github.io/letsrunpark_shop/admin-accounts.html">계정 · 권한 화면 열기 →</a>';
+      return;
+    }
     const frame = view.querySelector('iframe');
     frame.addEventListener('load', () => {
       // Both GitHub Pages projects share an origin and the same account storage.
@@ -35,6 +42,6 @@ function mountSharedAccounts() {
       frame.contentWindow.addEventListener('resize', syncDialogViewport);
       syncDialogViewport();
     });
-    frame.src='https://olabeann.github.io/letsrunpark-reser/account-admin.html?v=20261007-commerce1';
+    frame.src=sharedAccountsUrl.href;
 }
 mountSharedAccounts();
