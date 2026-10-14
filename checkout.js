@@ -25,10 +25,10 @@ const purchaseAgreement=document.getElementById('purchaseAgreement');
 const privacyAgreement=document.getElementById('privacyAgreement');
 const paymentButton=checkoutForm.querySelector('button.primary');
 function renderPurchaseNotices(){
-  const text=CheckoutContent.resolve(storeSettings.purchaseNoticesText,storeSettings);
-  document.getElementById('purchaseNotices').innerHTML=text.split(/\r?\n/).map(line=>line.trim()).filter(Boolean).map(line=>`<li>${escapeText(line)}</li>`).join('');
-  purchaseAgreement.nextElementSibling.textContent=storeSettings.purchaseAgreementText+' (필수)';
-  privacyAgreement.nextElementSibling.textContent=storeSettings.privacyAgreementText+' (필수)';
+  const text=String(storeSettings.purchaseNoticesText ?? '');
+  document.getElementById('purchaseNotices').textContent=text;
+  purchaseAgreement.nextElementSibling.textContent=CheckoutContent.consent.purchaseText+' (필수)';
+  privacyAgreement.nextElementSibling.textContent=CheckoutContent.consent.privacyText+' (필수)';
   purchaseAgreement.checked=false;privacyAgreement.checked=false;updatePaymentAvailability();
 }
 function updatePaymentAvailability(){paymentButton.disabled=!(purchaseAgreement.checked&&privacyAgreement.checked);}
@@ -46,7 +46,7 @@ checkoutForm.onsubmit=e=>{e.preventDefault();products=JSON.parse(localStorage.go
   if(!cartValid(checkoutDraft?.items))return renderCheckoutPage();
   const f=Object.fromEntries(new FormData(checkoutForm)),items=checkoutDraft.items.map(x=>({...x,name:products.find(p=>p.id===x.id).name,price:products.find(p=>p.id===x.id).price}));
   const sub=items.reduce((s,x)=>s+products.find(p=>p.id===x.id).price*x.qty,0);
-  const approvedAt=Date.now(),order={...f,baseAddress:f.address,address:[f.address,f.detailAddress.trim()].filter(Boolean).join(' '),number:CheckoutContent.nextOrderNumber(approvedAt,orders),date:new Date(approvedAt).toLocaleDateString('ko-KR'),createdAt:approvedAt,approvedAt,cancelUntil:approvedAt+storeSettings.cancelHours*3600000,returnDays:storeSettings.returnDays,policySnapshot:{...storeSettings},items,subtotal:sub,shippingFee:shippingFee(sub),total:sub+shippingFee(sub),status:'출고 대기',purchaseConsent:{version:storeSettings.purchasePolicyVersion,text:storeSettings.purchaseAgreementText,notices:CheckoutContent.resolve(storeSettings.purchaseNoticesText,storeSettings),agreedAt:approvedAt},privacyConsent:{version:storeSettings.privacyPolicyVersion,text:storeSettings.privacyAgreementText,agreedAt:approvedAt},demo:true};
+  const approvedAt=Date.now(),order={...f,baseAddress:f.address,address:[f.address,f.detailAddress.trim()].filter(Boolean).join(' '),number:CheckoutContent.nextOrderNumber(approvedAt,orders),date:new Date(approvedAt).toLocaleDateString('ko-KR'),createdAt:approvedAt,approvedAt,cancelUntil:approvedAt+storeSettings.cancelHours*3600000,returnDays:storeSettings.returnDays,policySnapshot:{...storeSettings},items,subtotal:sub,shippingFee:shippingFee(sub),total:sub+shippingFee(sub),status:'출고 대기',purchaseConsent:{version:storeSettings.purchasePolicyVersion,agreementVersion:CheckoutContent.consent.purchaseVersion,text:CheckoutContent.consent.purchaseText,notices:String(storeSettings.purchaseNoticesText ?? ''),agreedAt:approvedAt},privacyConsent:{version:CheckoutContent.consent.privacyVersion,text:CheckoutContent.consent.privacyText,agreedAt:approvedAt},demo:true};
   items.forEach(x=>{const p=products.find(p=>p.id===x.id);Inventory.change(p,-x.qty,'주문 결제','고객',order.number+':purchase');});
   if(checkoutDraft.source==='cart'){cart=cart.map(x=>({...x,qty:x.qty-(items.find(i=>i.id===x.id)?.qty||0)})).filter(x=>x.qty>0);}
   orders.unshift(order);checkoutDraft=null;sessionStorage.removeItem('goodsCheckout');save();renderCart();checkoutForm.reset();StorePages.go('complete/'+order.number);

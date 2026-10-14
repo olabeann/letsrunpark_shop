@@ -30,7 +30,36 @@ const existingOrderNumbers=new Set(orderData.map(order=>order.number));
 orderData.push(...shippingDemoOrders.filter(order=>!existingOrderNumbers.has(order.number)));
 
 const dateText=o=>{if(!o.createdAt)return o.date||'—';const date=new Date(o.createdAt);return `${date.toLocaleDateString('ko-KR')}\n${date.toLocaleTimeString('ko-KR')}`;};
-const state=o=>o.status==='출고 대기'?'배송 준비 중':o.status==='출고 완료'?'발송 완료':o.status==='전체 취소'?'취소 완료':o.status;
+function paymentStateKey(order) {
+ return order.status === '전체 취소' || order.returnStatus === '환불 완료' || order.refundKind === '관리자 예외 환불' ? 'refunded' : 'paid';
+}
+function completedRefundAmount(order) {
+ if (order.status === '전체 취소') return Number(order.total);
+ return order.refundAmount == null ? Math.max(0, Number(order.total) - Number(order.shippingDeduction || 0)) : Number(order.refundAmount);
+}
+function paymentStateLabel(order) {
+ if (paymentStateKey(order) === 'paid') return '결제 완료';
+ return completedRefundAmount(order) >= Number(order.total) ? '전액 환불 완료' : '환불 완료';
+}
+function shippingStateLabel(order) {
+ if (order.status === '전체 취소') return '배송 대상 아님';
+ if (['출고 대기','배송 준비 중'].includes(order.status)) return '배송 준비 중';
+ if (['출고 완료','배송 완료','발송 완료'].includes(order.status)) return '발송 완료';
+ return '확인 필요';
+}
+function returnStateKey(order) {
+ if (order.refundKind === '관리자 예외 환불') return 'none';
+ return ({'신청 완료':'requested','반품 반려':'rejected','환불 완료':'completed'})[order.returnStatus] || 'none';
+}
+function returnStateLabel(order) {
+ return ({none:'해당 없음',requested:'반품 신청 완료',rejected:'반품 반려',completed:'반품 처리 완료'})[returnStateKey(order)];
+}
+function refundTypeLabel(order) {
+ if (paymentStateKey(order) !== 'refunded') return '해당 없음';
+ if (order.status === '전체 취소') return '주문 취소';
+ return order.refundKind === '관리자 예외 환불' ? '관리자 예외 환불' : '반품 환불';
+}
+const state=shippingStateLabel;
 function persist(){localStorage.goodsOrders=JSON.stringify(orderData);localStorage.goodsProducts=JSON.stringify(goods);localStorage.goodsSettings=JSON.stringify(settings);}
 function notify(message){$('adminStatus').textContent=message;}
 function updatePendingCount(){const count=orderData.filter(order=>order.status==='출고 대기').length,badge=$('pendingCount');badge.textContent=count;badge.hidden=count<1;}
