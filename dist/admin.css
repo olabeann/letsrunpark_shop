@@ -155,3 +155,48 @@ body #stockDialog .table-wrap :is(th, td):nth-child(5) { width: 16%; text-align:
   #stockDialog table { min-width: 640px; }
   body #stockDialog .table-wrap :is(th, td) { padding: 12px; }
 }
+
+/* Sales list keeps payment, shipping, and return states separate; tracking is in detail. */
+.orders-table--sales{min-width:1100px}
+.orders-table--sales :is(th,td):nth-child(1){width:13%}
+.orders-table--sales :is(th,td):nth-child(2){width:23%}
+.orders-table--sales :is(th,td):nth-child(3){width:12%}
+.orders-table--sales :is(th,td):nth-child(4){width:11%}
+.orders-table--sales :is(th,td):nth-child(5){width:12%}
+.orders-table--sales :is(th,td):nth-child(6){width:11%}
+.orders-table--sales :is(th,td):nth-child(7){width:11%}
+.orders-table--sales :is(th,td):nth-child(8){width:7%}
+
+/* Sales search includes five filters, a keyword field, and two action buttons. */
+body[data-page="sales"] #filterForm{display:grid;grid-template-columns:repeat(2,minmax(120px,140px)) repeat(3,minmax(110px,130px)) minmax(200px,1fr) 64px 42px;gap:12px;align-items:end}
+body[data-page="sales"] #filterForm>label{min-width:0}
+body[data-page="sales"] #filterForm :is(input,select){width:100%;min-width:0}
+body[data-page="sales"] #filterForm .search-field{grid-column:auto;justify-self:stretch;width:auto;max-width:none;margin-left:0;min-width:0;flex:auto}
+body[data-page="sales"] #filterForm>button{white-space:nowrap;min-width:0;margin:0}
+@media(max-width:1400px) and (min-width:1101px){
+ body[data-page="sales"] #filterForm{grid-template-columns:repeat(5,minmax(0,1fr)) 64px 42px}
+ body[data-page="sales"] #filterForm .search-field{grid-column:1/6;grid-row:2}
+ body[data-page="sales"] #filterForm>button{grid-row:2}
+}
+@media(max-width:1100px){
+ body[data-page="sales"] #filterForm{grid-template-columns:repeat(2,minmax(0,1fr))}
+ body[data-page="sales"] #filterForm .search-field{grid-column:auto;grid-row:auto}
+ body[data-page="sales"] #filterForm>button{grid-column:auto;grid-row:auto}
+ body[data-page="sales"] #filterForm>button.dark{width:100%}
+ body[data-page="sales"] #resetFilters{justify-self:end}
+}
+@media(max-width:560px){
+ body[data-page="sales"] #filterForm{grid-template-columns:minmax(0,1fr)}
+}
+
+/* Settlement retrieves all statuses for the selected month. */
+body[data-page="settlement"] #settlementFilter{grid-template-columns:minmax(180px,250px) 96px}
+@media(max-width:480px){body[data-page="settlement"] #settlementFilter{grid-template-columns:minmax(0,1fr)}body[data-page="settlement"] #settlementFilter button{width:100%}}
+
+.settlement-order-link{color:#1769ff;font-weight:700;text-decoration:none;text-underline-offset:3px}.settlement-order-link:hover{text-decoration:underline}.settlement-order-link:focus-visible{outline:2px solid #1769ff;outline-offset:3px;border-radius:2px}
+
+button.settlement-order-link{border:0;background:none;padding:0;text-align:left;font:inherit;font-weight:700;cursor:pointer}.dialog-footer .order-sales-link{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:8px;background:#1769ff;color:#fff;font-size:13px;font-weight:700;text-decoration:none}
+
+/* Override generic table buttons: order numbers retain their text-link appearance. */
+body #settlementTable td button.settlement-order-link{display:inline;width:auto;min-width:0;height:auto;min-height:0;margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;color:#1769ff;font:inherit;font-weight:700;text-align:left;white-space:nowrap}
+body #settlementTable td button.settlement-order-link:hover{border:0;background:transparent;color:#1769ff;text-decoration:underline}

@@ -1,4 +1,12 @@
 let settlementPage=1;
+function settlementOrderUrl(number) { return 'admin.html?order=' + encodeURIComponent(number); }
+function openSettlementOrder(number) {
+ const order = orderData.find(item => item.number === number);
+ if (!order) { notify('해당 주문을 찾을 수 없습니다. 정산 내역을 다시 조회해 주세요.'); return; }
+ $('orderDetail').innerHTML = renderAdminOrderDetail(order, true, settlementOrderUrl(number));
+ bindClose();
+ if (!$('detailDialog').open) $('detailDialog').showModal();
+}
   function paymentLabel (order) {
     if (order.status === '전체 취소') return '전액 환불 완료';
     if (order.refundKind === '관리자 예외 환불') return '관리자 예외 환불';
@@ -11,7 +19,7 @@ let settlementPage=1;
   function rebuildSettlementFilter() {
     const current = new Date();
     const value = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}`;
-    $('settlementFilter').innerHTML = `<label>승인월<input id="settlementMonth" type="month" value="${value}"></label><label>결제 · 환불 상태<select id="settlementPayment"><option value="">전체 상태</option><option value="paid">정상 결제</option><option value="cancelled">취소 완료</option><option value="return_requested">환불 처리 대기</option><option value="refunded">환불 완료</option></select></label><button class="blue">조회</button>`;
+    $('settlementFilter').innerHTML = `<label>승인월<input id="settlementMonth" type="month" value="${value}"></label><button class="blue">조회</button>`;
     $('settlementFilter').onsubmit = event => { event.preventDefault(); settlementPage = 1; renderSettlement(); };
     $('settlementSearch').onsubmit = event => { event.preventDefault(); settlementPage = 1; renderSettlement(); };
   }
@@ -19,19 +27,18 @@ let settlementPage=1;
   function settlementRows() {
     const month = $('settlementMonth').value;
     const keyword = $('settlementKeyword').value.trim().toLowerCase();
-    const payment = $('settlementPayment').value;
     const rows = [];
     orderData.forEach(order => {
       const names = (order.items || []).map(item => item.name).join(' / ');
       const search = `${order.number} ${names}`.toLowerCase();
       if (keyword && !search.includes(keyword)) return;
-      if (monthKey(order.approvedAt || order.createdAt) === month && (!payment || payment === 'paid')) rows.push({ date: day(order.approvedAt || order.createdAt), order, type: '승인', amount: Number(order.total) || 0, fee: -Math.round((Number(order.total) || 0) * .02), status: '정상 결제' });
+      if (monthKey(order.approvedAt || order.createdAt) === month) rows.push({ date: day(order.approvedAt || order.createdAt), order, type: '승인', amount: Number(order.total) || 0, fee: -Math.round((Number(order.total) || 0) * .02), status: '정상 결제' });
       const refundDate = order.refundCompletedAt || order.cancelCompletedAt || order.cancelledAt;
-      if (monthKey(refundDate) === month && (!payment || (payment === 'cancelled' && order.status === '전체 취소') || (payment === 'refunded' && order.returnStatus === '환불 완료'))) {
+      if (monthKey(refundDate) === month) {
         const refund = order.status === '전체 취소' ? Number(order.total) || 0 : Number(order.refundAmount) || 0;
         rows.push({ date: day(refundDate), order, type: '환불', amount: -refund, fee: Math.round(refund * .02), status: order.status === '전체 취소' ? '취소 완료' : paymentLabel(order) });
       }
-      if (order.returnStatus === '신청 완료' && monthKey(order.approvedAt || order.createdAt) === month && (!payment || payment === 'return_requested')) rows.push({ date: day(order.returnRequestedAt), order, type: '처리 대기', amount: 0, fee: 0, status: '환불 처리 대기' });
+      if (order.returnStatus === '신청 완료' && monthKey(order.approvedAt || order.createdAt) === month) rows.push({ date: day(order.returnRequestedAt), order, type: '처리 대기', amount: 0, fee: 0, status: '환불 처리 대기' });
     });
     return rows.sort((a, b) => b.date.localeCompare(a.date));
   }
@@ -63,7 +70,7 @@ let settlementPage=1;
     $('settlementCount').textContent = `${all.length}건`;
     settlementPage = pagination(document.querySelector('#settlementView .pagination'), all.length, settlementPage, page => { settlementPage = page; renderSettlement(); });
     const rows = all.slice((settlementPage - 1) * PAGE_SIZE, settlementPage * PAGE_SIZE);
-    $('settlementTable').innerHTML = rows.length ? `<table class="settlement-table"><thead><tr><th>주문번호 · 상품명</th><th>처리일</th><th>구분</th><th>금액</th><th>PG 수수료 조정</th><th>정산 반영액</th><th>상태</th></tr></thead><tbody>${rows.map(row => `<tr><td><b>${esc(row.order.number)}</b><small>${esc((row.order.items || []).map(item => item.name + (item.deletedProduct ? ' (삭제된 상품)' : '')).join(' / '))}</small></td><td>${row.date}</td><td>${row.type}</td><td class="${row.amount < 0 ? 'refund-value' : ''}">${row.amount < 0 ? '-' : ''}${money(Math.abs(row.amount))}</td><td>${row.fee ? `${row.fee < 0 ? '-' : '+'}${money(Math.abs(row.fee))}` : '—'}</td><td><b>${row.amount + row.fee < 0 ? '-' : ''}${money(Math.abs(row.amount + row.fee))}</b></td><td><span class="badge">${esc(row.status)}</span></td></tr>`).join('')}</tbody></table>` : EmptyStates.html('settlement');
+    $('settlementTable').innerHTML = rows.length ? `<table class="settlement-table"><thead><tr><th>주문번호 · 상품명</th><th>처리일</th><th>구분</th><th>금액</th><th>PG 수수료 조정</th><th>정산 반영액</th><th>상태</th></tr></thead><tbody>${rows.map(row => `<tr><td><button type="button" class="settlement-order-link" data-settlement-order="${esc(row.order.number)}" aria-haspopup="dialog" aria-controls="detailDialog" aria-label="주문 ${esc(row.order.number)} 상세보기">${esc(row.order.number)}</button><small>${esc((row.order.items || []).map(item => item.name + (item.deletedProduct ? ' (삭제된 상품)' : '')).join(' / '))}</small></td><td>${row.date}</td><td>${row.type}</td><td class="${row.amount < 0 ? 'refund-value' : ''}">${row.amount < 0 ? '-' : ''}${money(Math.abs(row.amount))}</td><td>${row.fee ? `${row.fee < 0 ? '-' : '+'}${money(Math.abs(row.fee))}` : '—'}</td><td><b>${row.amount + row.fee < 0 ? '-' : ''}${money(Math.abs(row.amount + row.fee))}</b></td><td><span class="badge">${esc(row.status)}</span></td></tr>`).join('')}</tbody></table>` : EmptyStates.html('settlement');
     syncSharedAdminComponents($('settlementTable'));
   };
 
@@ -103,4 +110,5 @@ let settlementPage=1;
   };
 
 
+$('settlementTable').addEventListener('click', event => { const button = event.target.closest('[data-settlement-order]'); if (button) openSettlementOrder(button.dataset.settlementOrder); });
 $('exportSettlement').textContent='정산 엑셀 다운로드 (.xlsx)';$('settlementKeyword').placeholder='주문번호 · 상품명 검색';rebuildSettlementFilter();renderSettlement();window.addEventListener('admin-data-change',renderSettlement);

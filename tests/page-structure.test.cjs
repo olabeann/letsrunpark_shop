@@ -14,7 +14,7 @@ const views={
  'order-complete.html':['completePage'],
  'admin.html':['salesView','detailDialog','refundDialog'],
  'admin-shipping.html':['salesView','detailDialog','refundDialog'],
- 'admin-settlement.html':['settlementView'],
+ 'admin-settlement.html':['settlementView','detailDialog'],
  'admin-products.html':['operationsView','operationProducts','productDialog'],
  'admin-banner.html':['operationsView','operationBanner'],
  'admin-settings.html':['operationsView','operationSettings','inlineSettingsForm'],

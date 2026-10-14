@@ -1,7 +1,14 @@
-// Shared checkout copy defaults and numeric placeholders.
+// Shared checkout copy defaults. Notices are displayed as plain text.
 const CheckoutContent = {
+  consent: Object.freeze({
+    purchaseText: "구매 전 확인사항을 확인하고 동의합니다.",
+    privacyText: "주문 및 배송을 위한 개인정보 수집·이용에 동의합니다.",
+    purchaseVersion: "purchase-consent-v1",
+    privacyVersion: "privacy-order-v1"
+  }),
   defaults: {
-    purchaseNoticesText: '상품과 수량, 배송지 정보를 확인해 주세요. 결제 시 재고가 부족하면 구매할 수 없습니다.\n{배송안내}\n배송비는 주문당 {배송비}입니다.\n결제 후 {취소시간}시간 이내, 운송장 등록 전까지 주문 전체 취소 및 전액 환불이 가능합니다.\n운송장 등록 후 {반품기간}일 이내 주문 전체 반품을 신청할 수 있습니다. 불량·오배송 등 법정 예외는 고객센터로 문의해 주세요.',
+    purchaseNoticesFormat: 'plain-text-v1',
+    purchaseNoticesText: '상품과 수량, 배송지 정보를 확인해 주세요. 결제 시 재고가 부족하면 구매할 수 없습니다.\n주 1회 모아서 발송합니다. 주문 마감과 발송일은 상품 상세 안내를 확인해 주세요.\n배송비는 주문당 3,000원입니다.\n결제 후 24시간 이내, 운송장 등록 전까지 주문 전체 취소 및 전액 환불이 가능합니다.\n운송장 등록 후 14일 이내 주문 전체 반품을 신청할 수 있습니다. 불량·오배송 등 법정 예외는 고객센터로 문의해 주세요.',
     purchaseAgreementText: '구매·배송·취소·반품 조건을 확인하고 동의합니다.',
     privacyAgreementText: '주문 및 배송을 위한 개인정보 수집·이용에 동의합니다.',
     purchasePolicyVersion: 'commerce-policy-v1',
@@ -23,8 +30,18 @@ const CheckoutContent = {
     localStorage.setItem(sequenceKey, String(next));
     return prefix + String(next).padStart(5, '0');
   },
-  resolve(text, settings) {
-    const values = {'배송안내': settings.shippingNotice, '배송비': Number(settings.shippingFee).toLocaleString('ko-KR') + '원', '취소시간': settings.cancelHours, '반품기간': settings.returnDays};
-    return String(text).replace(/\{(배송안내|배송비|취소시간|반품기간)\}/g, (_, key) => values[key]);
+  // One-time conversion of previously saved templates; new input stays literal.
+  migrateLegacySettings(settings) {
+    if (settings.purchaseNoticesFormat === 'plain-text-v1') return settings;
+    const values = {'배송안내': settings.shippingNotice ?? '주 1회 모아서 발송합니다. 주문 마감과 발송일은 상품 상세 안내를 확인해 주세요.', '배송비': Number(settings.shippingFee ?? 3000).toLocaleString('ko-KR') + '원', '취소시간': settings.cancelHours ?? 24, '반품기간': settings.returnDays ?? 14};
+    return {...settings, purchaseNoticesFormat: 'plain-text-v1', ...(typeof settings.purchaseNoticesText === 'string' ? {purchaseNoticesText: settings.purchaseNoticesText.replace(/\{(배송안내|배송비|취소시간|반품기간)\}/g, (token, key) => values[key] == null ? token : values[key])} : {})};
   }
 };
+
+// Preserve custom legacy copy while removing saved template tokens once.
+if (localStorage.goodsSettings) {
+  const savedSettings = JSON.parse(localStorage.goodsSettings);
+  if (savedSettings.purchaseNoticesFormat !== 'plain-text-v1') {
+    localStorage.goodsSettings = JSON.stringify(CheckoutContent.migrateLegacySettings(savedSettings));
+  }
+}
