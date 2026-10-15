@@ -191,17 +191,18 @@
 
   function renderOtpSettings() {
     var required = byId("account-otp-required").checked;
-    byId("account-otp-badge").textContent = required ? "인증 필수" : "선택 인증";
-    byId("account-otp-badge").classList.toggle("is-enabled", required);
+    byId("account-otp-badge").textContent = pendingOtpRegistered ? "등록 완료" : "미등록";
+    byId("account-otp-badge").classList.toggle("is-enabled", pendingOtpRegistered);
     byId("account-otp-status").textContent = pendingOtpRegistered
       ? "OTP 등록이 완료되었습니다. 변경 사항은 계정 저장을 눌러 반영해주세요."
-      : "이 화면에서 OTP를 등록하고 인증해주세요.";
+      : "계정 발급 시 담당자의 인증 앱을 연결하고 OTP를 확인해 주세요.";
     byId("account-otp-setup").hidden = pendingOtpRegistered;
     byId("account-otp-reset").hidden = !pendingOtpRegistered;
     byId("account-otp-code").disabled = !canManageCommercePermission();
-    byId("account-otp-verify").disabled = !canManageCommercePermission();
+    byId("account-otp-verify").disabled = !canManageCommercePermission() || !/^[0-9]{6}$/.test(byId("account-otp-code").value);
     byId("account-otp-reset").disabled = !canManageCommercePermission();
   }
+  byId("account-otp-code").addEventListener("input", renderOtpSettings);
   byId("account-otp-verify").addEventListener("click", function () {
     if (!canManageCommercePermission()) return;
     if (byId("account-otp-code").value !== "123456") {
