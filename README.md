@@ -226,21 +226,19 @@ git subtree push --prefix=dist origin codex/pages-deploy
 
 ### 개발 확인용 주문 상태 예시
 
-사용자·관리자 화면은 공통 `dist/order-demo-data.js`에서 아래 12개 주문을 추가합니다. 기존 브라우저에도 없는 주문번호만 추가하므로 저장소를 지울 필요가 없습니다. 기존 구매·예시 주문 및 관리자가 처리한 결과는 덮어쓰지 않습니다. 모두 가상 주문이며 재고 차감은 적용하지 않습니다. 목록에서 구매자명에 표시된 **[예시]** 또는 **G-DEMO**를 검색하면 확인할 수 있습니다.
+공통 `dist/order-demo-data.js`는 UI가 달라지는 8가지 예시만 제공합니다. 반품 사유만 다른 주문은 중복 생성하지 않으며 전액/차감 선택은 환불 모달에서 전환해 확인합니다. 환불 완료 결과는 결제 배지와 차감 표시가 달라 두 가지를 유지합니다.
 
-| 주문번호 (G-DEMO- 접두사) | 확인할 화면 |
+| 주문번호 (G-DEMO- 접두사) | UI 차이 |
 | --- | --- |
-| RETURN-READY-CHANGE | 반품처리(환불) 활성 · 단순 변심 · 배송비 차감 기본값 |
-| RETURN-READY-DEFECT | 반품처리(환불) 활성 · 상품 불량 · 전액 환불 기본값 |
-| RETURN-WAIT-CHANGE | 단순 변심 · 반품 운송장 미등록 · 버튼 비활성 |
-| RETURN-WAIT-WRONG | 오배송 · 반품 운송장 미등록 · 버튼 비활성 |
-| RETURN-DONE-FULL | 반품 처리 완료 · 전액 환불 · 처리 이력 |
-| RETURN-DONE-DEDUCT | 반품 처리 완료 · 배송비 6,000원 차감 · 처리 이력 |
-| SHIP-PENDING | 결제 완료 · 배송 준비 중 · 발송 전 취소 가능 |
-| SHIP-SENT | 결제 완료 · 발송 완료 · 예외 환불 가능 |
-| CANCELLED | 전액 환불 완료 · 배송 대상 아님 |
-| EXCEPTION-FULL | 관리자 예외 전액 환불 · 반품 해당 없음 |
-| EXCEPTION-DEDUCT | 관리자 예외 배송비 차감 환불 · 반품 해당 없음 |
-| RETURN-LEGACY-REJECT | 기존 반려 이력 조회 · 신규 반려 동작 없음 |
+| RETURN-READY-CHANGE | 반품처리(환불) 버튼 활성 · 환불 모달 |
+| RETURN-WAIT-CHANGE | 반품처리(환불) 버튼 비활성 · 송장 등록 대기 안내 |
+| RETURN-DONE-FULL | 전액 환불 완료 배지 · 차감 없음 · 처리 이력 |
+| RETURN-DONE-DEDUCT | 환불 완료 배지 · 배송비 차감액 · 처리 이력 |
+| SHIP-PENDING | 배송 준비 · 관리자 주문 취소 버튼 |
+| SHIP-SENT | 발송 완료 · 관리자 예외 환불 버튼 |
+| CANCELLED | 배송 대상 아님 · 주문 취소 환불 내역 |
+| EXCEPTION-FULL | 반품 해당 없음 · 예외 환불 사유 및 내역 |
 
-[활성 반품 버튼 예시 바로 열기](https://olabeann.github.io/letsrunpark_shop/admin.html?order=G-DEMO-RETURN-READY-CHANGE). 로그인 후 해당 주문 상세로 이동합니다. 예시의 발송·반품 송장은 가상 번호입니다. 최초 추가 시점을 기준으로 날짜를 생성하며 이후 접속 시 날짜나 처리 상태를 되돌리지 않습니다.
+기존 브라우저에서도 더 이상 필요 없는 예시 4건(RETURN-READY-DEFECT, RETURN-WAIT-WRONG, EXCEPTION-DEDUCT, RETURN-LEGACY-REJECT)은 위 코드가 만든 `demo: true` 주문만 제거합니다. 실제 주문과 기존 반려 이력은 수정하지 않습니다. 남은 예시는 설명용 이름만 정리하며 직접 처리한 결과를 초기화하지 않습니다. 모두 가상 주문으로 재고 차감은 적용하지 않습니다.
+
+[활성 반품 버튼 예시 바로 열기](https://olabeann.github.io/letsrunpark_shop/admin.html?order=G-DEMO-RETURN-READY-CHANGE). 목록에서 **G-DEMO**를 검색하면 확인할 수 있습니다. 가상 송장을 사용하며 날짜는 최초 생성 시점으로 유지합니다.
