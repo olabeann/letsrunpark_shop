@@ -94,12 +94,12 @@ test('developer policy panel renders payment, shipping and returns in separate s
  vm.runInContext(source.slice(groupStart,groupEnd)+'globalThis.sections=groupedStateCopy;',ctx);
  const start=source.indexOf('function card('),end=source.indexOf('\nfunction ',start+1);
  vm.runInContext(source.slice(start,end),ctx);
- assert.deepEqual(Array.from(ctx.sections['admin-orders'],section=>section.states.length),[3,3,4]);
- assert.deepEqual(Array.from(ctx.sections['sales-filter'],section=>section.states.length),[2,3,4]);
+ assert.deepEqual(Array.from(ctx.sections['admin-orders'],section=>section.states.length),[3,3,3]);
+ assert.deepEqual(Array.from(ctx.sections['sales-filter'],section=>section.states.length),[2,3,3]);
  for(const id of ['admin-orders','admin-order-detail']) {
   const html=ctx.card({id,title:'정책',category:'상태'},0);
   assert.equal((html.match(/class="dev-spec-state-title"/g)||[]).length,3);
-  for(const title of ['결제·환불 상태값 (3가지)','배송 상태값 (3가지)','반품 상태값 (4가지)'])assert.ok(html.includes(title));
+  for(const title of ['결제·환불 상태값 (3가지)','배송 상태값 (3가지)','반품 상태값 (3가지)'])assert.ok(html.includes(title));
  }
 });
 
@@ -112,8 +112,36 @@ test('settlement reuses order content and exposes only close without sales navig
 });
 test('return filter is available in sales and hidden by the shipping-only screen',()=>{
  for(const file of ['admin.html','admin-shipping.html']) {
-  const html=read(file);assert.equal((html.match(/id="returnFilter"/g)||[]).length,1);
-  for(const value of ['none','requested','rejected','completed'])assert.ok(html.includes(`value="${value}"`));
+  const html=read(file);assert.ok(!html.includes('value="rejected"'));assert.equal((html.match(/id="returnFilter"/g)||[]).length,1);
+  for(const value of ['none','requested','completed'])assert.ok(html.includes(`value="${value}"`));
  }
  assert.match(read('admin-shipping.js'),/\$\('returnFilter'\)\.closest\('label'\)\.hidden=true/);
+});
+
+test('return requests expose refund and CS guidance without a rejection action',()=>{
+ const c=harness();
+ for(const tracking of ['', 'RETURN123']) {
+  const html=c.renderAdminOrderDetail({number:'RETURN',status:'출고 완료',trackingNumber:'SHIP123',returnStatus:'신청 완료',returnTrackingNumber:tracking,total:100,items:[]});
+  assert.doesNotMatch(html,/id="rejectReturn"/);
+  assert.match(html,/반품 불가 판단과 고객 안내는 CS에서 처리/);
+  const button=html.match(/<button[^>]*id="completeRefund"[^>]*>/)[0];
+  assert.equal(button.includes(' disabled'),!tracking);
+  assert.ok(html.indexOf('id="completeRefund"') < html.indexOf('<h3>결제정보</h3>'));
+  assert.match(html,/반품처리\(환불\)/);
+  if(!tracking)assert.match(html,/반품 운송장 등록 대기 중/);
+  const readonly=c.renderAdminOrderDetail({returnStatus:'신청 완료',returnTrackingNumber:tracking,total:100,items:[]},true);
+  assert.doesNotMatch(readonly,/id="completeRefund"/);
+ }
+});
+
+test('retired rejection and unknown actions cannot mutate an order or fall through to refund',()=>{
+ const ctx={};vm.createContext(ctx);
+ const start=detail.indexOf('function submitOrderAction('),end=detail.indexOf('function showDetail',start);
+ vm.runInContext(detail.slice(start,end),ctx);
+ for(const type of ['reject','unknown','']) {
+  ctx.$=id=>{assert.equal(id,'orderActionType');return {value:type};};
+  let prevented=false;
+  ctx.submitOrderAction({preventDefault(){prevented=true;}});
+  assert.ok(prevented);
+ }
 });

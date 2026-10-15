@@ -9,11 +9,12 @@
 
 .dev-spec-panel>.dev-spec-summary{margin:0;padding:10px 18px;border-bottom:1px solid var(--spec-line);background:#fafbfe}
 
-.dev-spec-card .dev-spec-card-body section.dev-spec-request-group{margin:0;padding:12px 0;border:0;border-radius:0;background:transparent}
+.dev-spec-card .dev-spec-card-body section.dev-spec-request-group{margin:0;padding:20px 0;border:0;border-radius:0;background:transparent}
 .dev-spec-card .dev-spec-request-group+ .dev-spec-request-group{border-top:1px solid #edf0f5}
-.dev-spec-card .dev-spec-request-group h3{margin:0 0 9px;color:#253248;font-size:12px;font-weight:800}
-.dev-spec-request-group .dev-spec-requirements{gap:9px}
-.dev-spec-request-group .dev-spec-requirements li{display:grid;grid-template-columns:68px minmax(0,1fr);gap:8px;padding-left:0;font-size:12px;line-height:1.7}
+.dev-spec-card .dev-spec-request-group h3{margin:0 0 16px;color:#172033;font-size:14px;font-weight:800;line-height:1.5;word-break:keep-all;overflow-wrap:anywhere}
+.dev-spec-request-group .dev-spec-requirements{gap:16px}
+.dev-spec-request-group .dev-spec-requirements li{display:grid;grid-template-columns:minmax(0,1fr);gap:5px;padding-left:0;font-size:13px;line-height:1.75}
 .dev-spec-request-group .dev-spec-requirements li::before{display:none}
-.dev-spec-request-group .dev-spec-requirements li strong{color:#536173;font-size:11px;font-weight:700}
+.dev-spec-request-group .dev-spec-requirements li strong{color:#253248;font-size:13px;font-weight:700;word-break:keep-all;overflow-wrap:anywhere}
 .dev-spec-request-group .dev-spec-requirements li span{color:#354255;word-break:keep-all;overflow-wrap:anywhere}
+.dev-spec-request-group .dev-spec-requirements li .dev-spec-request-text{grid-column:1/-1;padding:10px 12px;border-radius:8px;background:#f5f7fb;color:#536173;font-size:12px;line-height:1.75}
