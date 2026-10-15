@@ -19,19 +19,39 @@ test('return destination rejects external and unrelated pages',()=>{
  const {auth}=setup();for(const value of ['https://evil.example/admin.html','//evil.example/admin.html','../admin.html','index.html','javascript:alert(1)'])assert.equal(auth.destination(value),'admin.html');
  assert.equal(auth.destination('admin-products.html#stock'),'admin-products.html#stock');
 });
-test('valid password signs in directly and preserves the return destination',()=>{
+test('password and OTP verification preserve the return destination',()=>{
  const app=setup();app.load();const e=app.elements;
  e['admin-login-id'].value='admin';e['admin-login-password'].value='wrong';app.submit('admin-login-form');assert.equal(app.auth.current(),null);assert.equal(e['admin-login-error'].hidden,false);
- e['admin-login-password'].value='1234';app.submit('admin-login-form');assert.equal(app.auth.current(),'admin');assert.equal(app.location.redirect,'admin-shipping.html?status=pending');assert.equal(app.storage.has('letsrunParkOtpDemoV1'),false);
+ e['admin-login-password'].value='1234';app.submit('admin-login-form');assert.equal(app.auth.current(),null);
+ e['admin-otp-code'].value='000000';app.submit('admin-otp-form');assert.equal(app.auth.current(),null);
+ e['admin-otp-code'].value='123456';app.submit('admin-otp-form');assert.equal(app.auth.current(),'admin');assert.equal(app.location.redirect,'admin-shipping.html?status=pending');assert.equal(app.storage.has('letsrunParkOtpDemoV1'),false);
  app.auth.logout();assert.equal(app.auth.current(),'signed-out');assert.equal(app.location.href,'admin-login.html');
 });
-test('login never presents or changes OTP regardless of account OTP settings',()=>{
+test('OTP requirements are respected without modifying enrollment',()=>{
  for(const required of [false,true])for(const registered of [false,true]){
   const app=setup(null,[{loginId:'admin',type:'super',otpRequired:required,otpRegistered:registered}]);
   const original=app.storage.get('letsrunParkDepartmentAccountsV3');app.load();app.elements['admin-login-id'].value='admin';app.elements['admin-login-password'].value='1234';app.submit('admin-login-form');
-  assert.equal(app.auth.current(),'admin');assert.equal(app.storage.get('letsrunParkDepartmentAccountsV3'),original);assert.equal(app.elements['admin-otp-form'],undefined);
+  if(required||registered){
+   assert.equal(app.auth.current(),null);assert.equal(app.elements['admin-otp-form'].hidden,false);
+   app.elements['admin-otp-code'].value='123456';app.submit('admin-otp-form');
+  }
+  assert.equal(app.auth.current(),'admin');assert.equal(app.storage.get('letsrunParkDepartmentAccountsV3'),original);
  }
 });
 test('inactive account cannot sign in',()=>{
  const app=setup(null,[{loginId:'admin',active:false}]);app.load();app.elements['admin-login-id'].value='admin';app.elements['admin-login-password'].value='1234';app.submit('admin-login-form');assert.equal(app.auth.current(),null);assert.match(app.elements['admin-login-error'].textContent,/중지/);
+});
+
+test('back cancels pending OTP and requires password again',()=>{
+ const app=setup();app.load();const e=app.elements;
+ e['admin-login-id'].value='admin';e['admin-login-password'].value='1234';app.submit('admin-login-form');
+ e['admin-otp-back'].click();e['admin-otp-code'].value='123456';app.submit('admin-otp-form');
+ assert.equal(app.auth.current(),null);assert.equal(e['admin-login-form'].hidden,false);assert.equal(e['admin-login-password'].value,'');
+});
+test('account disabled while OTP is open cannot complete login',()=>{
+ const app=setup();app.load();const e=app.elements;
+ e['admin-login-id'].value='admin';e['admin-login-password'].value='1234';app.submit('admin-login-form');
+ app.storage.set('letsrunParkDepartmentAccountsV3',JSON.stringify([{loginId:'admin',active:false}]));
+ e['admin-otp-code'].value='123456';app.submit('admin-otp-form');
+ assert.equal(app.auth.current(),null);assert.match(e['admin-otp-error'].textContent,/중지/);
 });

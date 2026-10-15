@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>관리자 로그인 | 렛츠런파크</title><link rel="stylesheet" href="admin-login.css?v=20261015-account-otp2"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>관리자 로그인 | 렛츠런파크</title><link rel="stylesheet" href="admin-login.css?v=20261015-login-otp3"></head>
 <body>
   <section class="admin-login" id="admin-login" aria-labelledby="admin-login-title">
     <div class="admin-login__visual" aria-hidden="true"><div><small>LET'S RUN PARK</small><strong>통합 예약 운영</strong><p>지역과 부서별 프로그램부터<br>예약·티켓·정산까지 한곳에서 관리합니다.</p></div></div>
@@ -16,8 +16,18 @@
         <button type="submit">로그인</button>
         <ul class="admin-login__demo-accounts"><li><strong>admin / 1234</strong> — 통합 운영 관리자 (전체 지역·부서 관리)</li><li><strong>seoul_brand / brand1234</strong> — 브랜드총괄부 공용 계정</li><li><strong>seoul_park / park1234</strong> — 공원화사업추진TF 공용 계정</li><li><strong>busan_ops / busan1234</strong> — 부산운영지원부 공용 계정</li><li><strong>jeju_ops / jeju1234</strong> — 제주운영지원부 공용 계정</li></ul>
       </form>
+      <form class="admin-login__form" id="admin-otp-form" aria-labelledby="admin-otp-title" hidden novalidate>
+        <small class="admin-login__eyebrow">2-STEP VERIFICATION</small>
+        <h1 id="admin-otp-title">OTP 인증</h1>
+        <p>인증 앱의 6자리 인증번호를 입력해주세요.</p>
+        <label><span>6자리 인증번호</span><input id="admin-otp-code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="6자리 숫자" aria-describedby="admin-otp-error" required></label>
+        <p class="admin-login__error" id="admin-otp-error" role="alert" hidden></p>
+        <button type="submit">인증하고 로그인</button>
+        <button class="otp-back" type="button" id="admin-otp-back">아이디·비밀번호 다시 입력</button>
+        <aside>시연용 인증번호: 123456<br>실제 인증 앱 검증은 서버 연동 후 제공됩니다.<br>OTP 등록·초기화는 계정·권한에서 관리합니다.</aside>
+      </form>
     </div>
   </section>
 <script src="admin-auth.js?v=20261015-login1"></script>
-<script src="admin-login.js?v=20261015-account-otp2"></script>
+<script src="admin-login.js?v=20261015-login-otp3"></script>
 </body></html>

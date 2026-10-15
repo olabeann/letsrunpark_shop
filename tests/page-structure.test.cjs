@@ -39,7 +39,8 @@ for(const [file,expected] of Object.entries(views))test(`${file} owns only its i
 test('OTP enrollment UI exists only in account permissions',()=>{
  const login=fs.readFileSync(path.join(root,'admin-login.html'),'utf8');
  const accounts=fs.readFileSync(path.join(root,'admin-accounts.html'),'utf8');
- assert.doesNotMatch(login,/OTP|admin-otp|otp-demo-qr/);
+ assert.doesNotMatch(login,/admin-otp-setup|admin-otp-copy|otp-demo-qr/);
+ assert.match(login,/id="admin-otp-form"/);
  for(const id of ['account-otp-setup','account-otp-code','account-otp-verify','account-otp-reset'])assert.ok(accounts.includes(`id="${id}"`));
  assert.doesNotMatch(accounts,/최초 로그인|로그인 시 OTP/);
 });
