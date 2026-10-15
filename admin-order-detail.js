@@ -15,16 +15,16 @@ $('refundForm').addEventListener('submit',event=>{const latest=JSON.parse(localS
   }
 
   function openOrderAction(type, order) {
+    if (!['cancel', 'exception'].includes(type)) return;
     $('detailDialog').close();
     $('orderActionForm').reset();
     $('orderActionNumber').value = order.number;
     $('orderActionType').value = type;
-    const rejected = type === 'reject';
-    $('orderActionTitle').textContent = rejected ? '반품 반려' : type === 'cancel' ? '관리자 주문 취소' : '관리자 예외 환불';
-    $('orderActionDescription').textContent = rejected ? '반려 사유는 고객에게 표시되며, 반려 후 고객이 다시 신청할 수 없습니다.' : type === 'cancel' ? '발송 전 주문은 시간 제한 없이 전액 취소하며 재고를 복원합니다.' : '발송 후 예외적으로 환불합니다. 반품 신청·운송장 없이 처리할 수 있으며 재고는 복원하지 않습니다.';
-    $('orderActionRefundOptions').hidden = rejected || type === 'cancel';
-    $('orderActionDeductionRow').hidden = rejected || type === 'cancel';
-    $('orderActionExtraRow').hidden = rejected || type === 'cancel';
+    $('orderActionTitle').textContent = type === 'cancel' ? '관리자 주문 취소' : '관리자 예외 환불';
+    $('orderActionDescription').textContent = type === 'cancel' ? '발송 전 주문은 시간 제한 없이 전액 취소하며 재고를 복원합니다.' : '발송 후 예외적으로 환불합니다. 반품 신청·운송장 없이 처리할 수 있으며 재고는 복원하지 않습니다.';
+    $('orderActionRefundOptions').hidden = type === 'cancel';
+    $('orderActionDeductionRow').hidden = type === 'cancel';
+    $('orderActionExtraRow').hidden = type === 'cancel';
     $('orderActionDeduction').value = order.policySnapshot?.returnShippingFee ?? settings.returnShippingFee;
     $('orderActionError').textContent = '';
     updateOrderActionPreview();
@@ -37,7 +37,7 @@ $('refundForm').addEventListener('submit',event=>{const latest=JSON.parse(localS
     const order = orderData.find(item => item.number === $('orderActionNumber').value);
     if (!order) return;
     const type = $('orderActionType').value;
-    if (type === 'reject') { $('orderActionPreview').textContent = '입력한 반려 사유가 고객 주문 상세에 표시됩니다.'; return; }
+    if (!['cancel', 'exception'].includes(type)) return;
     const deduct = type === 'exception' && $('orderActionForm').elements.actionRefund.value === 'deduct';
     const amount = deduct ? Math.min(order.total, Math.max(0, Number($('orderActionDeduction').value) || 0)) : 0;
     $('orderActionDeductionRow').hidden = type !== 'exception' || !deduct;
@@ -47,6 +47,7 @@ $('refundForm').addEventListener('submit',event=>{const latest=JSON.parse(localS
   function submitOrderAction(event) {
     event.preventDefault();
     const type = $('orderActionType').value;
+    if (!['cancel', 'exception'].includes(type)) return;
     goods=JSON.parse(localStorage.goodsProducts||JSON.stringify(goods));
     orderData=JSON.parse(localStorage.goodsOrders||JSON.stringify(orderData));
     const order = orderData.find(item => item.number === $('orderActionNumber').value);
@@ -54,10 +55,7 @@ $('refundForm').addEventListener('submit',event=>{const latest=JSON.parse(localS
     if (!order || !reason) { $('orderActionError').textContent = '처리 사유를 입력해 주세요.'; return; }
     if (order.status === '전체 취소' || ['환불 완료', '반품 반려'].includes(order.returnStatus)) { $('orderActionError').textContent = '이미 처리가 완료된 주문입니다.'; return; }
     if (type === 'exception' && (!order.trackingNumber || order.returnStatus)) { $('orderActionError').textContent = '발송 후 반품 절차가 없는 주문만 예외 환불할 수 있습니다.'; return; }
-    if (type === 'reject') {
-      if (order.returnStatus !== '신청 완료' || !order.returnTrackingNumber) { $('orderActionError').textContent = '반품 운송장이 등록된 신청 건만 반려할 수 있습니다.'; return; }
-      Object.assign(order, { returnStatus: '반품 반려', returnRejectedAt: Date.now(), returnRejectReason: reason });
-    } else if (type === 'cancel') {
+    if (type === 'cancel') {
       if (order.trackingNumber || order.status !== '출고 대기') { $('orderActionError').textContent = '발송 전 주문만 관리자 취소할 수 있습니다.'; return; }
       if (order.inventoryApplied !== false) order.items.forEach(item => { const product = goods.find(value => value.id === item.id); if (product) Inventory.change(product,item.qty,'관리자 주문 취소 재고 복원',Inventory.adminActor(),order.number+':cancel'); });
       Object.assign(order, { status: '전체 취소', adminCancelReason: reason, cancelCompletedAt: Date.now() });
@@ -82,7 +80,6 @@ function showDetail (number) {
     $('orderDetail').innerHTML = renderAdminOrderDetail(order);
     bindClose();
     $('adminCancelOrder')?.addEventListener('click', () => openOrderAction('cancel', order));
-    $('rejectReturn')?.addEventListener('click', () => openOrderAction('reject', order));
     $('exceptionRefund')?.addEventListener('click', () => openOrderAction('exception', order));
     $('completeRefund')?.addEventListener('click', () => openRefundDialog(order.number));
     if(!$('detailDialog').open)$('detailDialog').showModal();
