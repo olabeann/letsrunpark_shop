@@ -96,6 +96,8 @@ function seedReturnExamples(){
   orders.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));save();localStorage.goodsReturnExampleVersion='3';
 }
 seedReturnExamples();
+OrderDemoData.seed(orders);
+save();
 
 function reloadStoreData(){products=JSON.parse(localStorage.goodsProducts||'null')||sampleProducts;cart=JSON.parse(localStorage.goodsCart||'[]');orders=JSON.parse(localStorage.goodsOrders||'[]');Object.assign(storeSettings,CheckoutContent.defaults,JSON.parse(localStorage.goodsSettings||'{}'));loginPreviewActive=sessionStorage.goodsPreviewLogin==='1';renderCart();window.dispatchEvent(new Event('store-data-change'));}
 window.addEventListener('storage',event=>{if(['goodsProducts','goodsOrders','goodsCart','goodsSettings'].includes(event.key))reloadStoreData();});

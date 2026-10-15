@@ -1,0 +1,54 @@
+const {test} = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const read = file => fs.readFileSync(__dirname + '/../dist/' + file, 'utf8');
+function setup() {
+  const ctx = {URLSearchParams, esc: String, money: String, dateText: () => ''};
+  vm.createContext(ctx);
+  vm.runInContext(read('order-demo-data.js') + '\nglobalThis.seed = OrderDemoData.seed;', ctx);
+  const common = read('admin-common.js');
+  vm.runInContext(common.slice(common.indexOf('function paymentStateKey('), common.indexOf('function persist(')) + '\nglobalThis.state=state;', ctx);
+  vm.runInContext(read('admin-order-view.js'), ctx);
+  return ctx;
+}
+test('fixtures cover active/disabled return buttons and all current state labels', () => {
+  const c = setup(), orders = c.seed([], Date.now());
+  assert.equal(orders.length, 12);
+  for (const [label, expected] of [
+    ['paymentStateLabel', ['결제 완료', '환불 완료', '전액 환불 완료']],
+    ['state', ['배송 준비 중', '발송 완료', '배송 대상 아님']],
+    ['returnStateLabel', ['해당 없음', '반품 신청 완료', '반품 처리 완료', '반품 반려']]
+  ]) assert.deepEqual([...new Set(orders.map(o => c[label](o)))].sort(), expected.sort());
+  for (const order of orders) {
+    const html = c.renderAdminOrderDetail(order);
+    const button = html.match(/<button[^>]*id="completeRefund"[^>]*>/);
+    if (order.returnStatus === '신청 완료') {
+      assert.ok(button);
+      assert.equal(button[0].includes(' disabled'), !order.returnTrackingNumber);
+    } else assert.equal(button, null);
+    assert.equal(order.total, order.subtotal + order.shippingFee);
+    assert.equal(order.inventoryApplied, false);
+    if (order.refundAmount) assert.equal(order.total, order.refundAmount + order.shippingDeduction);
+  }
+});
+test('existing purchases and processed fixtures survive repeat visits from either app', () => {
+  const c = setup(), existing = {number: 'REAL-1', total: 123}, orders = [existing];
+  c.seed(orders, Date.now());
+  orders[1].returnStatus = '환불 완료';
+  const before = JSON.stringify(orders);
+  c.seed(orders, Date.now() + 86400000);
+  assert.equal(JSON.stringify(orders), before);
+  assert.equal(orders[0], existing);
+  assert.equal(new Set(orders.map(o => o.number)).size, orders.length);
+});
+test('both customer and admin pages load fixtures before common initialization', () => {
+  for (const file of fs.readdirSync(__dirname + '/../dist').filter(f => f.endsWith('.html'))) {
+    const html = read(file);
+    for (const common of ['admin-common.js', 'store-common.js']) {
+      if (!html.includes('src="' + common)) continue;
+      assert.ok(html.indexOf('src="order-demo-data.js') >= 0, file);
+      assert.ok(html.indexOf('src="order-demo-data.js') < html.indexOf('src="' + common), file);
+    }
+  }
+});

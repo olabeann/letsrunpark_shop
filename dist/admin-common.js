@@ -105,6 +105,7 @@ function bindClose(){document.querySelectorAll('[data-close]').forEach(b=>b.oncl
   }
 
 
+OrderDemoData.seed(orderData);
 const adminReturnExample=orderData.find(o=>o.number==='G-260911-0002');
 if(adminReturnExample&&!adminReturnExample.returnStatus)Object.assign(adminReturnExample,{status:'배송 완료',returnStatus:'신청 완료',returnReason:'단순 변심',returnDetail:'상품을 확인했으나 생각했던 크기와 달라 전체 반품을 요청합니다.',returnMethod:'고객 직접 반송(착불)',returnRequestedAt:Date.now()-86400000});
 orderData.forEach(order=>{if(order.returnStatus&&['수거 접수','직접 발송'].includes(order.returnMethod))order.returnMethod='고객 직접 반송(착불)';});

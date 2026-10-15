@@ -223,3 +223,24 @@ git subtree push --prefix=dist origin codex/pages-deploy
 계정 · 권한 화면은 `dist/admin-accounts.html`과 전용 CSS·JavaScript에서 직접 표시합니다. iframe이나 원격 페이지를 불러오지 않으며, 예약 프로젝트와 동일한 `letsrunParkDepartmentAccountsV3` 저장 형식을 사용합니다. 동일 출처에서는 계정 설정을 공유합니다.
 
 반품 불가 판단과 고객 안내는 CS에서 처리합니다. 관리자 반품 반려 버튼과 신규 반려 상태 변경은 제공하지 않습니다. CS 협의 전에는 환불 완료 처리하지 않으며, 기존 반려 이력은 주문 목록 전체 조회와 상세에서 유지합니다.
+
+### 개발 확인용 주문 상태 예시
+
+사용자·관리자 화면은 공통 `dist/order-demo-data.js`에서 아래 12개 주문을 추가합니다. 기존 브라우저에도 없는 주문번호만 추가하므로 저장소를 지울 필요가 없습니다. 기존 구매·예시 주문 및 관리자가 처리한 결과는 덮어쓰지 않습니다. 모두 가상 주문이며 재고 차감은 적용하지 않습니다. 목록에서 구매자명에 표시된 **[예시]** 또는 **G-DEMO**를 검색하면 확인할 수 있습니다.
+
+| 주문번호 (G-DEMO- 접두사) | 확인할 화면 |
+| --- | --- |
+| RETURN-READY-CHANGE | 반품처리(환불) 활성 · 단순 변심 · 배송비 차감 기본값 |
+| RETURN-READY-DEFECT | 반품처리(환불) 활성 · 상품 불량 · 전액 환불 기본값 |
+| RETURN-WAIT-CHANGE | 단순 변심 · 반품 운송장 미등록 · 버튼 비활성 |
+| RETURN-WAIT-WRONG | 오배송 · 반품 운송장 미등록 · 버튼 비활성 |
+| RETURN-DONE-FULL | 반품 처리 완료 · 전액 환불 · 처리 이력 |
+| RETURN-DONE-DEDUCT | 반품 처리 완료 · 배송비 6,000원 차감 · 처리 이력 |
+| SHIP-PENDING | 결제 완료 · 배송 준비 중 · 발송 전 취소 가능 |
+| SHIP-SENT | 결제 완료 · 발송 완료 · 예외 환불 가능 |
+| CANCELLED | 전액 환불 완료 · 배송 대상 아님 |
+| EXCEPTION-FULL | 관리자 예외 전액 환불 · 반품 해당 없음 |
+| EXCEPTION-DEDUCT | 관리자 예외 배송비 차감 환불 · 반품 해당 없음 |
+| RETURN-LEGACY-REJECT | 기존 반려 이력 조회 · 신규 반려 동작 없음 |
+
+[활성 반품 버튼 예시 바로 열기](https://olabeann.github.io/letsrunpark_shop/admin.html?order=G-DEMO-RETURN-READY-CHANGE). 로그인 후 해당 주문 상세로 이동합니다. 예시의 발송·반품 송장은 가상 번호입니다. 최초 추가 시점을 기준으로 날짜를 생성하며 이후 접속 시 날짜나 처리 상태를 되돌리지 않습니다.
