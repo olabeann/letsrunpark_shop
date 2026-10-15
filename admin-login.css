@@ -7,3 +7,5 @@
 .admin-login__demo-accounts{list-style:none;margin:20px 0 0;padding:12px 14px;border-radius:9px;background:#f4f7fb;font-size:11px;color:#69717a;display:flex;flex-direction:column;gap:6px}
 .admin-login__demo-accounts strong{color:#34393f}
 .admin-login__panel{overflow:auto}.admin-login__form[hidden]{display:none!important}
+
+.admin-login__form>button.otp-back{margin-top:12px;background:#f4f7fb;color:#536173}
