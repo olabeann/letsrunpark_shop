@@ -208,3 +208,29 @@ body #settlementTable td button.settlement-order-link:hover{border:0;background:
 
 .dialog-footer.return-action-footer{border-top:0;margin-top:6px;padding-top:4.5px}
 #returnRefundHelp{margin-bottom:6px}
+
+/* Shared layout for cancellation, return refunds and exceptional refunds. */
+#refundDialog.refund-processing-dialog,#orderActionDialog.refund-processing-dialog{width:min(700px,94vw);max-height:90dvh;padding:24px;border:0;border-radius:12px}
+.refund-processing-dialog .dialog-heading{align-items:center;margin-bottom:20px;padding-bottom:18px}
+.refund-processing-dialog .dialog-heading>div{min-width:0}
+.refund-processing-dialog .dialog-heading h2{font-size:20px;line-height:1.4}
+.refund-processing-dialog .dialog-heading>div p{margin:6px 0 0;overflow-wrap:anywhere}
+.refund-processing-dialog .dialog-heading>button{display:grid;place-items:center;flex-shrink:0;width:32px;height:32px;padding:0;font-size:24px}
+.refund-processing-dialog .refund-arrival-notice{margin:0 0 20px;padding:12px 14px;border:0;border-radius:8px;background:#fff7ef;color:#76503a;font-size:12px;line-height:1.7}
+.refund-processing-dialog .refund-options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 18px;padding:0;border:0}
+.refund-processing-dialog .refund-options legend{margin-bottom:10px;font-size:13px}
+.refund-processing-dialog .refund-options label{align-items:center;gap:8px;margin:0;padding:14px;min-width:0}
+.refund-processing-dialog .refund-options label:has(input:checked){background:#f0f5ff;border-color:var(--blue)}
+.refund-processing-dialog .refund-options b{font-size:13px}
+.refund-processing-dialog form>label{font-size:13px;gap:8px;margin:16px 0}
+#refundDialog.refund-processing-dialog textarea,#orderActionDialog.refund-processing-dialog textarea{width:100%;min-height:72px;padding:11px 12px;border:1px solid #d8dce2;border-radius:7px;resize:vertical;line-height:1.6;font:inherit}
+.refund-processing-dialog textarea[readonly]{background:#f7f8fa;color:#414852}
+.refund-processing-dialog .unit-input input{width:100%;min-width:0}
+.refund-processing-dialog .refund-summary{margin:20px 0;padding:14px 16px}
+.refund-processing-dialog .dialog-footer{position:sticky;bottom:-24px;margin-top:20px;padding:16px 0 0;background:white;box-shadow:0 24px 0 white;z-index:1}
+.refund-processing-dialog .dialog-footer button{min-width:72px}
+@media(max-width:600px){
+#refundDialog.refund-processing-dialog,#orderActionDialog.refund-processing-dialog{padding:20px}
+.refund-processing-dialog .refund-options{grid-template-columns:1fr}
+.refund-processing-dialog .dialog-footer{bottom:-20px;box-shadow:0 20px 0 white}
+}
