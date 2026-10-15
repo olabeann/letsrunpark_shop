@@ -1,20 +1,71 @@
 <!doctype html>
 <html lang="ko">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>계정 · 권한 | 렛츠런파크 관리자</title><link rel="stylesheet" href="admin.css?v=20261008-stock-align"><link rel="stylesheet" href="developer-policy.css?v=11"><link rel="stylesheet" href="policy-v2.css?v=2"><link rel="stylesheet" href="product-image.css?v=4"><link rel="stylesheet" href="empty-states.css?v=1"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>계정 · 권한 | 렛츠런파크 관리자</title><link rel="stylesheet" href="admin.css?v=20261015-logout1"><link rel="stylesheet" href="developer-policy.css?v=11"><link rel="stylesheet" href="policy-v2.css?v=2"><link rel="stylesheet" href="product-image.css?v=4"><link rel="stylesheet" href="empty-states.css?v=1"><script src="admin-auth.js?v=20261015-login1"></script><script>AdminAuth.guard();</script><link rel="stylesheet" href="admin-accounts.css?v=20261015-native1"></head>
 <body data-page="accounts">
 <div id="adminSidebar"></div>
 <div class="workspace"><header class="breadcrumb">전체 지역 <span>›</span> 통합 예약 <span>›</span> <b>운영 관리자</b></header><main id="admin-main">
-<section id="sharedAccountsView"><iframe title="관리자 계정 · 권한" class="shared-accounts-frame"></iframe></section>
+<section id="sharedAccountsView">
+    <div class="page-head">
+      <div><span class="page-kicker">DEPARTMENT ACCOUNTS</span><h1>관리자 계정 · 권한</h1><p>담당 부서별 공용 계정을 발급하고 로그인 정보와 커머스 권한을 관리합니다.</p></div>
+      <div class="page-head__actions"><button class="admin-button admin-button--primary" id="issue-account" type="button">＋ 부서 계정 발급</button></div>
+    </div>
+
+    <section class="account-policy-note"><i>i</i><p><strong>계정별 이용 범위</strong><span>통합 관리자는 모든 지역·부서를 관리합니다. 부서 계정은 자기 부서 프로그램만 관리하고 다른 부서 프로그램은 조회만 할 수 있습니다. 커머스 권한은 통합 관리자가 계정별로 부여·해제합니다.</span></p></section>
+
+    <section class="account-panel admin-panel">
+      <div class="account-toolbar">
+        <label><span>지역</span><select id="account-location-filter"><option value="">전체 지역</option><option>서울</option><option>부산경남</option><option>제주</option></select></label>
+        <label class="account-search"><span>계정 검색</span><input id="account-search" type="search" placeholder="지역·부서명 또는 로그인 ID"></label>
+      </div>
+      <div class="table-scroll"><table class="account-table"><thead><tr><th>관리 범위</th><th>로그인 ID</th><th>계정 유형</th><th>커머스 권한</th><th>OTP 인증</th><th>관리</th></tr></thead><tbody id="admin-account-body"></tbody></table></div>
+    </section>
+  </section>
 <p id="adminStatus" class="admin-status" role="status"></p>
 </main></div>
 
+  <dialog class="kiosk-dialog account-dialog" id="account-dialog">
+    <form method="dialog">
+      <header><div><small>DEPARTMENT ACCOUNT</small><h2 id="account-dialog-title">부서 계정 발급</h2><p>로그인 정보와 담당 부서, 커머스 이용 권한을 설정합니다.</p></div><button value="close" aria-label="닫기">×</button></header>
+      <div class="account-form">
+        <div class="account-form-grid">
+          <label><span>지역</span><select id="account-location"><option>서울</option><option>부산경남</option><option>제주</option></select></label>
+          <label><span>담당 부서</span><select id="account-department"></select></label>
+          <label><span>로그인 ID</span><input id="account-login-id" autocomplete="off" placeholder="예: seoul_brand"></label>
+          <label><span>임시 비밀번호</span><div class="password-control"><input id="account-password" type="text" autocomplete="off" placeholder="8자 이상 임시 비밀번호"></div><small>입력 중에는 확인할 수 있으며 저장하면 즉시 사라집니다. 발급한 값을 해당 부서 담당자에게 별도로 전달하세요.</small></label>
+        </div>
+        <section class="fixed-access-policy" aria-labelledby="fixed-access-policy-title">
+          <div class="fixed-access-policy__head"><strong id="fixed-access-policy-title">이용할 수 있는 범위</strong><span>계정 종류에 따라 자동으로 정해집니다.</span></div>
+          <div class="fixed-access-policy__cards" id="fixed-access-policy-cards"></div>
+        </section>
+        <section class="commerce-account-permission" aria-labelledby="commerce-permission-title">
+          <strong id="commerce-permission-title">커머스 관리자 권한</strong>
+          <label><input id="account-commerce-permission" type="checkbox"><span>커머스 권한 부여</span></label>
+          <p id="account-commerce-help">상품·주문·배송·반품·정산과 스토어 운영 기능을 관리할 수 있습니다.</p>
+        </section>
+<section class="otp-settings otp-card" aria-labelledby="account-otp-title"><div class="otp-card-heading"><h2 id="account-otp-title">2단계 인증 (OTP)</h2><span id="account-otp-badge" class="otp-badge">등록 대기</span></div><label class="otp-required-option"><input id="account-otp-required" type="checkbox" checked><span>로그인 시 OTP 인증 필수</span></label><p id="account-otp-status" role="status"></p><p>발급 담당자는 OTP를 대신 등록하지 않습니다. 로그인 ID와 임시 비밀번호를 담당자에게 전달해 주세요.</p></section>
+        <p class="account-security"><i>i</i> 부서별 이용 범위는 계정을 저장하면 자동으로 적용됩니다.</p>
+      </div>
+      <footer><button class="account-delete-text" id="delete-admin-account" type="button" hidden>계정 삭제</button><button class="admin-button admin-button--ghost" value="close">닫기</button><button class="admin-button admin-button--primary" id="save-admin-account" type="button">계정 저장</button></footer>
+    </form>
+  </dialog>
+  <dialog class="cancel-dialog" id="account-delete-dialog" aria-labelledby="account-delete-title">
+    <form method="dialog">
+      <header><div><small>ACCOUNT DELETE</small><h2 id="account-delete-title">관리자 계정을 삭제할까요?</h2></div><button value="close" aria-label="닫기">×</button></header>
+      <div class="cancel-dialog__body">
+        <div class="operation-closure-summary"><strong id="account-delete-scope"></strong><span id="account-delete-impact"></span></div>
+        <p class="operation-closure-message"><i>!</i><span id="account-delete-message">삭제한 계정은 복구할 수 없습니다.</span></p>
+      </div>
+      <footer><button class="admin-button admin-button--ghost" id="account-delete-close" value="close">취소</button><button class="admin-button admin-button--danger" id="confirm-account-delete" type="button">계정 삭제</button></footer>
+    </form>
+  </dialog>
+<div class="account-toast" id="account-toast" role="status"></div>
 <script src="empty-states.js"></script>
-<script src="admin-layout.js?v=20261008-split"></script>
+<script src="admin-layout.js?v=20261015-login1"></script>
 <script src="product-data.js?v=20261008-split"></script>
 <script src="inventory.js?v=20261008-account-label"></script>
 <script src="checkout-content.js?v=20261008-split"></script>
 <script src="admin-common.js?v=20261008-split"></script>
-<script src="admin-accounts.js?v=20261013-origin"></script>
+<script src="admin-accounts.js?v=20261015-native1"></script>
 <script src="developer-policy.js?v=20261008-split"></script>
 </body>
 </html>
