@@ -12,6 +12,7 @@ const views={
  'orders.html':['orders','orderList'],
  'order-detail.html':['orders','orderList','returnDialog','returnTrackingDialog'],
  'order-complete.html':['completePage'],
+ 'admin-login.html':['admin-login','admin-login-form','admin-otp-form'],
  'admin.html':['salesView','detailDialog','refundDialog'],
  'admin-shipping.html':['salesView','detailDialog','refundDialog'],
  'admin-settlement.html':['settlementView','detailDialog'],
