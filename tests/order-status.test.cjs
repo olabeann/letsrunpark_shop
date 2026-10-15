@@ -145,3 +145,43 @@ test('retired rejection and unknown actions cannot mutate an order or fall throu
   assert.ok(prevented);
  }
 });
+
+test('admin contact masking covers phone formats and administrative address levels',()=>{
+ const c=harness();
+ for(const phone of ['010-1234-5678','01012345678','010 1234 5678'])assert.equal(c.maskAdminPhone(phone),'010-****-5678');
+ assert.equal(c.maskAdminPhone('02-123-4567'),'02-****-4567');
+ assert.equal(c.maskAdminPhone('031-1234-5678'),'031-****-5678');
+ assert.equal(c.maskAdminPhone('invalid'),'****');
+ assert.equal(c.maskAdminPhone(null),'');
+ for(const [address,expected] of [
+  ['서울특별시 강남구 역삼동 123-4 101호','서울특별시 강남구 ****'],
+  ['경기도 성남시 분당구 판교역로 166, 804호','경기도 성남시 분당구 ****'],
+  ['경기도 양평군 양평읍 중앙로 10','경기도 양평군 ****'],
+  ['세종특별자치시 한솔동 123','세종특별자치시 ****'],
+  ['(12345) 부산광역시 강서구 가락대로 929','부산광역시 강서구 ****'],
+  ['역삼동 123-4','****'],['','']
+ ])assert.equal(c.maskAdminAddress(address),expected);
+});
+
+test('admin order details mask recipient contacts without changing stored order data',()=>{
+ const c=harness();
+ const order={number:'PRIVATE',name:'구매자',phone:'010-1234-5678',recipient:'수령인',recipientPhone:'010-9876-5432',address:'서울특별시 강남구 역삼동 123-4',total:100,items:[]};
+ const original=JSON.stringify(order);
+ for(const readOnly of [false,true]){
+  const html=c.renderAdminOrderDetail(order,readOnly);
+  assert.match(html,/수\*인/);
+  assert.doesNotMatch(html,/수령인/);
+  assert.match(html,/010-\*\*\*\*-5432/);
+  assert.match(html,/서울특별시 강남구 \*\*\*\*/);
+  assert.doesNotMatch(html,/9876|역삼동|123-4/);
+ }
+ assert.equal(JSON.stringify(order),original);
+});
+
+
+test('admin names mask exactly one central character including short names',()=>{
+ const c=harness();
+ for(const [name,expected] of [['홍길동','홍*동'],['남궁민수','남궁*수'],['이름','이*'],['김','*'],['',''],[null,'']]){
+  assert.equal(c.maskAdminName(name),expected);
+ }
+});
