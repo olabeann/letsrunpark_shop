@@ -1,7 +1,7 @@
 const refundArrivalNotice=document.createElement('p');refundArrivalNotice.className='refund-arrival-notice';refundArrivalNotice.textContent='반품 상품이 실제로 도착했는지 확인한 후 환불해 주세요. 사용 흔적·고객 과실 훼손 등 상태 판단이 필요한 경우 환불 완료 처리 없이 고객센터 전화 문의로 안내합니다. 환불 완료 후에도 재고는 자동으로 복원되지 않습니다.';$('refundForm').querySelector('.refund-options').insertAdjacentElement('beforebegin',refundArrivalNotice);
 const refundOverrideRow=document.createElement('label');refundOverrideRow.id='refundOverrideRow';refundOverrideRow.hidden=true;refundOverrideRow.innerHTML='<span>기본 배송비 처리 변경 사유 <em>*</em></span><textarea id="refundOverrideReason" name="refundOverrideReason" rows="3" placeholder="기본값과 다르게 처리하는 이유를 입력해 주세요."></textarea><small>내부 처리 이력에만 저장되며 고객에게 표시되지 않습니다.</small>';$('shippingDeductionRow').insertAdjacentElement('afterend',refundOverrideRow);
 function refundValues(){const order=orderData.find(o=>o.number===$('refundForm').dataset.number),deduct=$('refundForm').elements.shippingTreatment.value==='deduct',raw=deduct?Number($('shippingDeduction').value||0):0,deduction=Math.max(0,Math.min(order?.total||0,raw)),defaults=refundDefault(order),overridden=deduct!==defaults.deduct||(deduct&&deduction!==defaults.deduction);return {order,deduct,deduction,refund:Math.max(0,(order?.total||0)-deduction),defaults,overridden};}
-function updateRefundSummary(){const {order,deduct,deduction,refund,overridden}=refundValues();if(!order)return;$('shippingDeduction').disabled=!deduct;$('refundOverrideRow').hidden=!overridden;$('refundOverrideReason').required=overridden;if(!overridden)$('refundOverrideReason').value='';$('refundPaidAmount').textContent=money(order.total);$('refundDeductionAmount').textContent=deduction?'-'+money(deduction):'차감 없음';$('refundFinalAmount').textContent=money(refund);$('customerRefundNote').value=deduction?`${order.returnReason||'반품'}에 의한 전체 반품으로 배송비 ${deduction.toLocaleString('ko-KR')}원을 차감한 후 ${refund.toLocaleString('ko-KR')}원을 환불해 드렸습니다.`:`${order.returnReason||'전체 반품'} 건은 반품 배송비 차감 없이 결제금액 ${refund.toLocaleString('ko-KR')}원을 전액 환불해 드렸습니다.`;}
+function updateRefundSummary(){const {order,deduct,deduction,refund,overridden}=refundValues();if(!order)return;$('shippingDeduction').disabled=!deduct;$('shippingDeductionRow').hidden=!deduct;$('refundOverrideRow').hidden=!overridden;$('refundOverrideReason').required=overridden;if(!overridden)$('refundOverrideReason').value='';$('refundPaidAmount').textContent=money(order.total);$('refundDeductionAmount').textContent=deduction?'-'+money(deduction):'차감 없음';$('refundFinalAmount').textContent=money(refund);$('customerRefundNote').value=deduction?`${order.returnReason||'반품'}에 의한 전체 반품으로 배송비 ${deduction.toLocaleString('ko-KR')}원을 차감한 후 ${refund.toLocaleString('ko-KR')}원을 환불해 드렸습니다.`:`${order.returnReason||'전체 반품'} 건은 반품 배송비 차감 없이 결제금액 ${refund.toLocaleString('ko-KR')}원을 전액 환불해 드렸습니다.`;}
 function openRefundDialog(number){const order=orderData.find(o=>o.number===number);if(!order||order.returnStatus!=='신청 완료'||!order.returnTrackingNumber)return alert('고객의 반품 운송장번호가 등록된 후 환불 처리할 수 있습니다.');const defaults=refundDefault(order);$('detailDialog').close();$('refundForm').reset();$('refundExtraNote').value='';$('refundForm').dataset.number=number;$('refundOrderNumber').textContent='주문번호 '+number;$('shippingDeduction').value=defaults.deduction;$('shippingDeduction').max=order.total;$('refundFormError').textContent='';$('refundForm').elements.shippingTreatment.value=defaults.deduct?'deduct':'none';updateRefundSummary();$('refundDialog').showModal();}
 $('refundForm').querySelectorAll('[name="shippingTreatment"]').forEach(input=>input.onchange=updateRefundSummary);$('shippingDeduction').oninput=updateRefundSummary;
 $('refundForm').onsubmit=event=>{event.preventDefault();const {order,deduct,deduction,refund,defaults,overridden}=refundValues(),note=$('customerRefundNote').value.trim(),overrideReason=$('refundOverrideReason').value.trim(),error=$('refundFormError');if(!order||order.returnStatus!=='신청 완료'){error.textContent='반품 신청 상태가 변경되었습니다. 목록을 다시 확인해 주세요.';return;}if((deduct&&deduction<=0)||deduction>order.total){error.textContent='차감할 배송비를 0원보다 크고 결제금액 이하로 입력해 주세요.';return;}if(overridden&&!overrideReason){error.textContent='기본 배송비 처리와 다르게 적용한 사유를 입력해 주세요.';$('refundOverrideReason').focus();return;}if(!note){error.textContent='고객에게 표시할 환불 안내를 입력해 주세요.';return;}if(!confirm(`최종 환불액 ${refund.toLocaleString('ko-KR')}원으로 완료하시겠습니까?\n완료 후에는 되돌리거나 금액을 수정할 수 없으며, 오처리 시 고객이 기존 고객센터 번호로 직접 문의해야 합니다.`))return;const latest=JSON.parse(localStorage.goodsOrders||'[]'),target=latest.find(o=>o.number===order.number);if(!target||target.returnStatus!=='신청 완료'){error.textContent='반품 신청 상태가 변경되었습니다. 목록을 다시 확인해 주세요.';return;}const completedAt=Date.now(),refundDecision={shippingTreatment:deduct?'deduct':'none',defaultShippingTreatment:defaults.deduct?'deduct':'none',shippingDeduction:deduction,defaultShippingDeduction:defaults.deduction,overridden,overrideReason:overridden?overrideReason:'',processedBy:'통합 운영 관리자',processedAt:completedAt,locked:true,correctionRoute:'EXTERNAL_CUSTOMER_CENTER_PHONE'};Object.assign(target,{returnStatus:'환불 완료',shippingDeduction:deduction,refundAmount:refund,customerRefundNote:note,refundCompletedAt:completedAt,refundDecision,refundHistory:[...(target.refundHistory||[]),refundDecision]});localStorage.goodsOrders=JSON.stringify(latest);orderData=latest;$('refundDialog').close();renderOrders();showDetail(target.number);notify('환불 완료로 확정했습니다. 이후 오처리는 고객센터 전화 문의로 처리합니다.');};
@@ -20,6 +20,8 @@ $('refundForm').addEventListener('submit',event=>{const latest=JSON.parse(localS
     $('orderActionForm').reset();
     $('orderActionNumber').value = order.number;
     $('orderActionType').value = type;
+    $('orderActionOrderNumber').textContent = '주문번호 ' + order.number;
+    $('orderActionSubmit').textContent = type === 'cancel' ? '취소 확정' : '환불 확정';
     $('orderActionTitle').textContent = type === 'cancel' ? '관리자 주문 취소' : '관리자 예외 환불';
     $('orderActionDescription').textContent = type === 'cancel' ? '발송 전 주문은 시간 제한 없이 전액 취소하며 재고를 복원합니다.' : '발송 후 예외적으로 환불합니다. 반품 신청·운송장 없이 처리할 수 있으며 재고는 복원하지 않습니다.';
     $('orderActionRefundOptions').hidden = type === 'cancel';
@@ -41,7 +43,12 @@ $('refundForm').addEventListener('submit',event=>{const latest=JSON.parse(localS
     const deduct = type === 'exception' && $('orderActionForm').elements.actionRefund.value === 'deduct';
     const amount = deduct ? Math.min(order.total, Math.max(0, Number($('orderActionDeduction').value) || 0)) : 0;
     $('orderActionDeductionRow').hidden = type !== 'exception' || !deduct;
-    $('orderActionPreview').textContent = type === 'cancel' ? `전액 ${money(order.total)}을 환불하고 재고를 복원합니다.` : `고객 안내: ${amount ? `배송비 ${money(amount)}을 차감한 ` : ''}최종 환불액은 ${money(order.total - amount)}입니다.`;
+    $('orderActionPaidAmount').textContent = money(order.total);
+    $('orderActionDeductionAmount').textContent = amount ? '-' + money(amount) : '차감 없음';
+    $('orderActionFinalAmount').textContent = money(order.total - amount);
+    $('orderActionPreview').value = type === 'cancel'
+      ? `주문 전체 취소로 결제금액 ${money(order.total)}을 전액 환불합니다.`
+      : `${amount ? `배송비 ${money(amount)}을 차감한 후 ` : ''}${money(order.total - amount)}을 환불해 드렸습니다.`;
   }
 
   function submitOrderAction(event) {
@@ -105,6 +112,7 @@ function refundDefault(order){
 
 
 $('customerRefundNote').readOnly=true;
+$('customerRefundNote').rows=2;
 $('customerRefundNote').closest('label').querySelector('span').textContent='고객 환불 안내 (자동 생성)';
 $('customerRefundNote').closest('label').insertAdjacentHTML('afterend','<label><span>고객 추가 안내 (선택)</span><textarea id="refundExtraNote" rows="3"></textarea></label>');
 mountActionDialog();
