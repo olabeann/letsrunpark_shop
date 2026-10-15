@@ -129,6 +129,8 @@
     pendingOtpRegistered = !!(account && account.otpRegistered);
     byId("account-otp-required").checked = !account || account.otpRequired !== false;
     byId("account-otp-required").disabled = !canManageCommercePermission();
+    byId("account-otp-code").value = "";
+    byId("account-otp-feedback").textContent = "";
     renderOtpSettings();
     byId("account-dialog").showModal();
   }
@@ -180,7 +182,7 @@
       key: activeAccountKey || "department-account-" + Date.now(), loginId: loginId, type: isSuper ? "super" : "department", access: isSuper ? { ownDepartment: "crud", otherDepartments: "crud" } : { ownDepartment: "crud", otherDepartments: "read" },
       location: location, department: department, permissions: Object.assign({}, existing && existing.permissions, { programs: true, reservations: true, refunds: true, settlement: true, commerce: isSuper || (canManageCommercePermission() ? byId("account-commerce-permission").checked : hasCommercePermission(existing)) }),
       otpRequired: canManageCommercePermission() ? byId("account-otp-required").checked : !existing || existing.otpRequired !== false,
-      otpRegistered: !!(existing && existing.otpRegistered), active: true, lastLogin: existing ? existing.lastLogin : "미접속"
+      otpRegistered: canManageCommercePermission() ? pendingOtpRegistered : !!(existing && existing.otpRegistered), active: true, lastLogin: existing ? existing.lastLogin : "미접속"
     });
     var index = accounts.findIndex(function (account) { return account.key === saved.key; });
     if (index === -1) accounts.push(saved); else accounts[index] = saved;
@@ -191,10 +193,33 @@
     var required = byId("account-otp-required").checked;
     byId("account-otp-badge").textContent = required ? "인증 필수" : "선택 인증";
     byId("account-otp-badge").classList.toggle("is-enabled", required);
-    byId("account-otp-status").textContent = required
-      ? pendingOtpRegistered ? "OTP가 등록된 계정입니다. 로그인할 때 인증 코드를 확인합니다." : "담당자가 최초 로그인에서 본인 휴대폰으로 OTP를 등록해야 합니다."
-      : "OTP 등록을 필수로 요구하지 않습니다. 이미 OTP를 등록한 계정은 기존 인증을 유지합니다.";
+    byId("account-otp-status").textContent = pendingOtpRegistered
+      ? "OTP 등록이 완료되었습니다. 변경 사항은 계정 저장을 눌러 반영해주세요."
+      : "이 화면에서 OTP를 등록하고 인증해주세요.";
+    byId("account-otp-setup").hidden = pendingOtpRegistered;
+    byId("account-otp-reset").hidden = !pendingOtpRegistered;
+    byId("account-otp-code").disabled = !canManageCommercePermission();
+    byId("account-otp-verify").disabled = !canManageCommercePermission();
+    byId("account-otp-reset").disabled = !canManageCommercePermission();
   }
+  byId("account-otp-verify").addEventListener("click", function () {
+    if (!canManageCommercePermission()) return;
+    if (byId("account-otp-code").value !== "123456") {
+      byId("account-otp-feedback").textContent = "인증번호를 확인해주세요. 시연용 번호: 123456";
+      return;
+    }
+    pendingOtpRegistered = true;
+    byId("account-otp-code").value = "";
+    byId("account-otp-feedback").textContent = "인증되었습니다. 계정 저장을 눌러 등록을 완료해주세요.";
+    renderOtpSettings();
+  });
+  byId("account-otp-reset").addEventListener("click", function () {
+    if (!canManageCommercePermission()) return;
+    pendingOtpRegistered = false;
+    byId("account-otp-code").value = "";
+    byId("account-otp-feedback").textContent = "초기화는 계정 저장 시 반영됩니다. 새로 등록할 수도 있습니다.";
+    renderOtpSettings();
+  });
   byId("account-otp-required").addEventListener("change", renderOtpSettings);
   load(); render();
   byId("issue-account").addEventListener("click", function () { openDialog(null); });

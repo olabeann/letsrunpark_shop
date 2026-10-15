@@ -12,7 +12,7 @@ const views={
  'orders.html':['orders','orderList'],
  'order-detail.html':['orders','orderList','returnDialog','returnTrackingDialog'],
  'order-complete.html':['completePage'],
- 'admin-login.html':['admin-login','admin-login-form','admin-otp-form'],
+ 'admin-login.html':['admin-login','admin-login-form'],
  'admin.html':['salesView','detailDialog','refundDialog'],
  'admin-shipping.html':['salesView','detailDialog','refundDialog'],
  'admin-settlement.html':['settlementView','detailDialog'],
@@ -34,4 +34,12 @@ for(const [file,expected] of Object.entries(views))test(`${file} owns only its i
  for(const script of scripts){assert.ok(fs.existsSync(path.join(root,script)),`missing ${script}`);combined+=fs.readFileSync(path.join(root,script),'utf8')+'\n';}
  new vm.Script(combined,{filename:file}); // Detect collisions across shared and page-specific scripts.
  for(const old of ['app.js','store-flow.js','admin-ui.js','admin-policy-v2.js'])assert.ok(!scripts.includes(old),`legacy bundle ${old}`);
+});
+
+test('OTP enrollment UI exists only in account permissions',()=>{
+ const login=fs.readFileSync(path.join(root,'admin-login.html'),'utf8');
+ const accounts=fs.readFileSync(path.join(root,'admin-accounts.html'),'utf8');
+ assert.doesNotMatch(login,/OTP|admin-otp|otp-demo-qr/);
+ for(const id of ['account-otp-setup','account-otp-code','account-otp-verify','account-otp-reset'])assert.ok(accounts.includes(`id="${id}"`));
+ assert.doesNotMatch(accounts,/최초 로그인|로그인 시 OTP/);
 });

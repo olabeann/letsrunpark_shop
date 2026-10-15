@@ -220,6 +220,6 @@ git subtree push --prefix=dist origin codex/pages-deploy
 
 ### 관리자 로그인 화면
 
-관리자 로그인은 `dist/admin-login.html`에서 별도 제공하며, 전용 스타일과 동작은 `admin-login.css`, `admin-login.js`에 있습니다. `admin-auth.js`는 예약 프로젝트와 같은 세션 키를 사용합니다. 로그인 전 관리자 페이지에 접근하면 로그인 화면으로 이동하고, 로그인 완료 후 원래 페이지로 돌아갑니다. 로그아웃도 스토어 로그인 화면으로 연결됩니다. 기존 시연 계정과 OTP 번호 `123456`을 사용하며, 실제 인증은 서버 연동이 필요합니다.
+관리자 로그인은 `dist/admin-login.html`에서 별도 제공하며, 전용 스타일과 동작은 `admin-login.css`, `admin-login.js`에 있습니다. `admin-auth.js`는 예약 프로젝트와 같은 세션 키를 사용합니다. 로그인 전 관리자 페이지에 접근하면 로그인 화면으로 이동하고, 로그인 완료 후 원래 페이지로 돌아갑니다. 로그아웃도 스토어 로그인 화면으로 연결됩니다. 기존 시연 계정의 아이디·비밀번호로 로그인합니다. OTP 등록·인증·초기화는 계정·권한의 계정 정보에서만 진행하며 로그인 화면에는 OTP 단계가 없습니다. 계정·권한의 시연용 OTP 번호는 `123456`이며, 실제 인증은 서버 연동이 필요합니다.
 
 계정 · 권한 화면은 `dist/admin-accounts.html`과 전용 CSS·JavaScript에서 직접 표시합니다. iframe이나 원격 페이지를 불러오지 않으며, 예약 프로젝트와 동일한 `letsrunParkDepartmentAccountsV3` 저장 형식을 사용합니다. 동일 출처에서는 계정 설정을 공유합니다.

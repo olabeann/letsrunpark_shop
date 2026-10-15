@@ -29,3 +29,15 @@ test('issuing an account validates input and clears the temporary password after
  e['account-location'].value='서울';e['account-department'].value='홍보부';e['account-password'].value='temporary1234';e['save-admin-account'].click();
  const accounts=JSON.parse(stored.get('letsrunParkDepartmentAccountsV3'));assert.equal(accounts.length,6);assert.equal(accounts[5].loginId,'seoul_new');assert.equal(e['account-password'].value,'');assert.equal(accounts[5].password,undefined);
 });
+
+test('OTP verification and reset are staged in account permissions and persisted on save',()=>{
+ const {elements:e,stored}=mount();
+ const open=()=>{e['account-search'].value='seoul_brand';e['account-search'].input();e['admin-account-body'].children[0].button.click();};
+ const saved=()=>JSON.parse(stored.get('letsrunParkDepartmentAccountsV3')).find(a=>a.loginId==='seoul_brand');
+ open();assert.equal(e['account-otp-setup'].hidden,false);
+ e['account-otp-code'].value='000000';e['account-otp-verify'].click();assert.match(e['account-otp-feedback'].textContent,/확인/);assert.equal(e['account-otp-setup'].hidden,false);
+ e['account-otp-code'].value='123456';e['account-otp-verify'].click();assert.equal(e['account-otp-setup'].hidden,true);assert.equal(stored.size,0);
+ e['account-dialog'].close();open();assert.equal(e['account-otp-setup'].hidden,false);
+ e['account-otp-code'].value='123456';e['account-otp-verify'].click();e['save-admin-account'].click();assert.equal(saved().otpRegistered,true);
+ open();assert.equal(e['account-otp-reset'].hidden,false);e['account-otp-reset'].click();assert.equal(saved().otpRegistered,true);e['save-admin-account'].click();assert.equal(saved().otpRegistered,false);
+});
