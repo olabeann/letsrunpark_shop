@@ -5,6 +5,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 const root=path.join(__dirname,'../dist');
 const views={
+ 'admin-discounts.html':['discount-form','discount-policy-list'],
  'index.html':['products','homeBannerImage'],
  'products.html':['products'],
  'product.html':['productPage'],

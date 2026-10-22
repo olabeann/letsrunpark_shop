@@ -6,9 +6,10 @@ const vm=require('node:vm');
 const read=name=>fs.readFileSync(path.join(__dirname,'../dist',name),'utf8');
 const source=read('checkout.js');
 function harness() {
- const nodes=new Map(),purchase={checked:false,nextElementSibling:{},addEventListener(){},reportValidity(){this.invalid=true;}},privacy={checked:false,nextElementSibling:{},addEventListener(){},reportValidity(){this.invalid=true;}};
+ const textNode=()=>({replaceChildren(...children){this.children=children;this.textContent=children.map(x=>x.textContent).join('');}});
+ const nodes=new Map(),purchase={checked:false,nextElementSibling:textNode(),addEventListener(){},reportValidity(){this.invalid=true;}},privacy={checked:false,nextElementSibling:textNode(),addEventListener(){},reportValidity(){this.invalid=true;}};
  const ctx={purchaseAgreement:purchase,privacyAgreement:privacy,paymentButton:{disabled:true},storeSettings:{purchaseNoticesText:'안내',purchaseAgreementText:'OLD ADMIN PURCHASE',privacyAgreementText:'OLD ADMIN PRIVACY'},
-  document:{getElementById:id=>{if(!nodes.has(id))nodes.set(id,{innerHTML:''});return nodes.get(id);}},escapeText:String,
+  document:{createTextNode:textContent=>({textContent}),createElement:tagName=>({tagName}),getElementById:id=>{if(!nodes.has(id))nodes.set(id,{innerHTML:''});return nodes.get(id);}},escapeText:String,
   checkoutForm:{elements:{address:{value:'배송지'}},addEventListener(){}},products:[{id:1,price:100}],orders:[],checkoutDraft:{items:[{id:1,priceAtCheckout:100}]},
   localStorage:{},sessionStorage:{},cartValid:()=>true,renderCheckoutPage(){},alert(){},requireLogin(){ctx.ready=true;}};
  vm.createContext(ctx);vm.runInContext(read('checkout-content.js')+'\nglobalThis.CheckoutContent=CheckoutContent;',ctx);

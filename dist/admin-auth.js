@@ -1,7 +1,7 @@
 // Browser-only demo session shared with the reservation prototype.
 const AdminAuth = {
  sessionKey:'letsrunPlayAdminSessionV1',
- pages:['admin.html','admin-shipping.html','admin-settlement.html','admin-products.html','admin-banner.html','admin-settings.html','admin-accounts.html'],
+ pages:['admin-discounts.html','admin.html','admin-shipping.html','admin-settlement.html','admin-products.html','admin-banner.html','admin-settings.html','admin-accounts.html'],
  destination(value){
   const fallback='admin.html';
   try{
