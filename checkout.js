@@ -36,11 +36,18 @@ function updatePaymentAvailability(){paymentButton.disabled=!(purchaseAgreement.
 purchaseAgreement.addEventListener('change',updatePaymentAvailability);
 privacyAgreement.addEventListener('change',updatePaymentAvailability);
 checkoutForm.addEventListener('reset',()=>{paymentButton.disabled=true;});
-function currentDiscountQuote(){return GoodsDiscounts.quote(selectedDiscountId,checkoutDraft?.items||[],products);}
+// One persistent preview account per browser. Production must use the authenticated server member ID.
+function discountAccountContext(){
+ let accountId=localStorage.getItem('goodsPreviewAccountId');
+ if(!accountId){accountId='preview-'+crypto.randomUUID();localStorage.setItem('goodsPreviewAccountId',accountId);}
+ return {accountId,orders:JSON.parse(localStorage.getItem('goodsOrders')||'[]')};
+}
+function currentDiscountQuote(){return GoodsDiscounts.quote(selectedDiscountId,checkoutDraft?.items||[],products,Date.now(),discountAccountContext());}
 function renderDiscountSelector(){
- const offers=GoodsDiscounts.read().map(policy=>({policy,...GoodsDiscounts.calculate(policy,checkoutDraft.items,products)})).filter(x=>x.amount>0).sort((a,b)=>b.amount-a.amount);
+ const context=discountAccountContext();
+ const offers=GoodsDiscounts.read().filter(policy=>GoodsDiscounts.calculate(policy,checkoutDraft.items,products).amount>0).map(policy=>({policy,remaining:GoodsDiscounts.remainingQty(policy,context),...GoodsDiscounts.calculate(policy,checkoutDraft.items,products,Date.now(),context)})).sort((a,b)=>b.amount-a.amount);
  const quote=currentDiscountQuote();displayedDiscountQuote=JSON.stringify(quote);
- return `<fieldset class="checkout-discount discount-options"><legend>할인 선택</legend><label class="discount-check"><input type="radio" name="checkoutDiscount" value="" ${!selectedDiscountId?'checked':''}><span class="discount-option-copy"><strong>할인 미적용</strong></span></label>${offers.map(({policy:d})=>`<label class="discount-check"><input type="radio" name="checkoutDiscount" value="${escapeText(d.id)}" ${d.id===selectedDiscountId?'checked':''}><span class="discount-option-copy"><strong>${escapeText(d.name)} · ${d.type==='percent'?d.value+'%':won(d.value)} 할인</strong>${d.noticeText?`<small class="discount-option-notice">${escapeText(d.noticeText)}</small>`:''}</span><span class="discount-limit-badge">최대 ${d.maxQty}개 적용 가능</span></label>`).join('')}${offers.length?'':'<p class="discount-help">적용 가능한 할인이 없습니다.</p>'}</fieldset>`;
+ return `<fieldset class="checkout-discount discount-options"><legend>할인 선택</legend><label class="discount-check"><input type="radio" name="checkoutDiscount" value="" ${!selectedDiscountId?'checked':''}><span class="discount-option-copy"><strong>할인 미적용</strong></span></label>${offers.map(({policy:d,remaining})=>`<label class="discount-check"><input type="radio" name="checkoutDiscount" value="${escapeText(d.id)}" ${d.id===selectedDiscountId?'checked':''} ${remaining?'':'disabled'}><span class="discount-option-copy"><strong>${escapeText(d.name)} · ${d.type==='percent'?d.value+'%':won(d.value)} 할인</strong>${d.noticeText?`<small class="discount-option-notice">${escapeText(d.noticeText)}</small>`:''}</span><span class="discount-account-limit">계정당 최대 ${d.maxQty}개 · ${remaining?`남은 수량 ${remaining}개`:'한도 소진'}</span></label>`).join('')}${offers.length?'':'<p class="discount-help">적용 가능한 할인이 없습니다.</p>'}</fieldset>`;
 }
 function renderCheckoutPage(){
   renderPurchaseNotices();
@@ -60,7 +67,7 @@ checkoutForm.onsubmit=e=>{e.preventDefault();products=JSON.parse(localStorage.go
   const discount=currentDiscountQuote();
   if(JSON.stringify(discount)!==displayedDiscountQuote){renderCheckoutPage();return alert('할인 조건이 변경되었거나 종료되었습니다. 결제금액을 다시 확인해 주세요.');}
   items.forEach(item=>{const applied=discount.allocations.find(x=>x.id===item.id);item.discountAmount=applied?.amount||0;item.discountQty=applied?.qty||0;});
-  const approvedAt=Date.now(),order={...f,baseAddress:f.address,address:[f.address,f.detailAddress.trim()].filter(Boolean).join(' '),number:CheckoutContent.nextOrderNumber(approvedAt,orders),date:new Date(approvedAt).toLocaleDateString('ko-KR'),createdAt:approvedAt,approvedAt,cancelUntil:approvedAt+storeSettings.cancelHours*3600000,returnDays:storeSettings.returnDays,policySnapshot:{...storeSettings},items,subtotal:sub,shippingFee:shippingFee(sub),total:sub+shippingFee(sub)-discount.amount,discountAmount:discount.amount,discountSnapshot:discount.policy,discountAllocations:discount.allocations,status:'출고 대기',purchaseConsent:{version:storeSettings.purchasePolicyVersion,agreementVersion:CheckoutContent.consent.purchaseVersion,text:CheckoutContent.consent.purchaseText,notices:String(storeSettings.purchaseNoticesText ?? ''),agreedAt:approvedAt},privacyConsent:{version:CheckoutContent.consent.privacyVersion,text:CheckoutContent.consent.privacyText,agreedAt:approvedAt},demo:true};
+  const approvedAt=Date.now(),order={...f,accountId:discountAccountContext().accountId,baseAddress:f.address,address:[f.address,f.detailAddress.trim()].filter(Boolean).join(' '),number:CheckoutContent.nextOrderNumber(approvedAt,orders),date:new Date(approvedAt).toLocaleDateString('ko-KR'),createdAt:approvedAt,approvedAt,cancelUntil:approvedAt+storeSettings.cancelHours*3600000,returnDays:storeSettings.returnDays,policySnapshot:{...storeSettings},items,subtotal:sub,shippingFee:shippingFee(sub),total:sub+shippingFee(sub)-discount.amount,discountAmount:discount.amount,discountSnapshot:discount.policy,discountAllocations:discount.allocations,status:'출고 대기',purchaseConsent:{version:storeSettings.purchasePolicyVersion,agreementVersion:CheckoutContent.consent.purchaseVersion,text:CheckoutContent.consent.purchaseText,notices:String(storeSettings.purchaseNoticesText ?? ''),agreedAt:approvedAt},privacyConsent:{version:CheckoutContent.consent.privacyVersion,text:CheckoutContent.consent.privacyText,agreedAt:approvedAt},demo:true};
   items.forEach(x=>{const p=products.find(p=>p.id===x.id);Inventory.change(p,-x.qty,'주문 결제','고객',order.number+':purchase');});
   if(checkoutDraft.source==='cart'){cart=cart.map(x=>({...x,qty:x.qty-(items.find(i=>i.id===x.id)?.qty||0)})).filter(x=>x.qty>0);}
   orders.unshift(order);checkoutDraft=null;sessionStorage.removeItem('goodsCheckout');save();renderCart();checkoutForm.reset();StorePages.go('complete/'+order.number);
@@ -68,4 +75,4 @@ checkoutForm.onsubmit=e=>{e.preventDefault();products=JSON.parse(localStorage.go
 
 requireLogin(renderCheckoutPage);window.addEventListener("store-data-change",renderCheckoutPage);
 
-window.addEventListener('storage',event=>{if(event.key===GoodsDiscounts.key)renderCheckoutPage();});
+window.addEventListener('storage',event=>{if(event.key===GoodsDiscounts.key||event.key==='goodsOrders')renderCheckoutPage();});

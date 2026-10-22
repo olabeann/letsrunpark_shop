@@ -16,18 +16,23 @@ const GoodsDiscounts = {
   return '';
  },
  status(d,now=Date.now()){const today=this.day(now);return !d.active?'비활성':today<d.startDate?'예정':today>d.endDate?'종료':'활성';},
- calculate(d,items,products,now=Date.now()){
+ usedQty(d,accountId,orders=[]){
+  if(!accountId)return 0;
+  return orders.filter(o=>o.accountId===accountId&&o.discountSnapshot?.id===d.id&&o.status!=='전체 취소'&&o.returnStatus!=='환불 완료').reduce((sum,o)=>sum+(o.discountAllocations||o.items||[]).reduce((n,x)=>n+Math.max(0,Number(o.discountAllocations?x.qty:x.discountQty)||0),0),0);
+ },
+ remainingQty(d,context={}){return Math.max(0,d.maxQty-this.usedQty(d,context.accountId,context.orders));},
+ calculate(d,items,products,now=Date.now(),context={}){
   const empty={amount:0,allocations:[]};
   if(!d||this.validate(d)||this.status(d,now)!=='활성')return empty;
-  let remaining=d.maxQty;
+  let remaining=this.remainingQty(d,context);
   const candidates=items.map((item,index)=>{const product=products.find(p=>p.id===item.id);if(!product||(!d.allProducts&&!d.productIds.includes(product.id))||!Number.isSafeInteger(item.qty)||item.qty<1)return null;
    const unit=Math.min(product.price,Math.floor(d.type==='percent'?product.price*d.value/100:d.value));return {id:item.id,index,qty:item.qty,unit};
   }).filter(x=>x&&x.unit>0).sort((a,b)=>b.unit-a.unit||a.index-b.index);
   const allocations=[];for(const x of candidates){const qty=Math.min(remaining,x.qty);if(qty>0){allocations.push({id:x.id,qty,unitDiscount:x.unit,amount:x.unit*qty});remaining-=qty;}}
   return {amount:allocations.reduce((s,x)=>s+x.amount,0),allocations};
  },
- quote(id,items,products,now=Date.now()){
-  const policy=this.read().find(d=>d.id===id),result=this.calculate(policy,items,products,now);
+ quote(id,items,products,now=Date.now(),context={}){
+  const policy=this.read().find(d=>d.id===id),result=this.calculate(policy,items,products,now,context);
   return {...result,policy:result.amount?JSON.parse(JSON.stringify(policy)):null};
  }
 };

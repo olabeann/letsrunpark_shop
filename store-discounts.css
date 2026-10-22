@@ -43,3 +43,7 @@
 .order-item-discount{margin:8px 0;font-size:12px;line-height:1.7;color:#387a30;overflow-wrap:anywhere}
 .order-item-discount span,.order-item-discount strong{display:block}
 .order-item-discount strong{font-size:13px;font-weight:600}
+
+#checkoutDiscountArea .discount-account-limit{font-size:12px;color:var(--grey);font-weight:400;line-height:1.5}
+#checkoutDiscountArea .discount-check:has(input:disabled){color:var(--grey);background:var(--paper);cursor:default}
+@media(max-width:600px){#checkoutDiscountArea .discount-account-limit{margin-left:24px}}
