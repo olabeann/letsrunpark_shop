@@ -1197,6 +1197,77 @@ const requirementCopy={
     }
   ]
 };
+// Discount and checkout requirements, aligned with the current prototype.
+specs.push(
+ {id:'discount-list',scope:'adminDiscounts',title:'할인 관리 목록',category:'정렬 · 권한 · 표시',selector:'#discount-policy-list',section:'mvp'},
+ {id:'discount-editor',scope:'adminDiscounts',title:'할인 등록 · 수정',category:'입력 · 적용 정책',selector:'#discountDialog[open]',section:'data'},
+ {id:'checkout-discount',scope:'checkout',title:'할인 선택 · 계정당 한도',category:'선택 · 누적 사용량',selector:'#checkoutDiscountArea',section:'transitions'}
+);
+const discountRules=[
+ {title:'할인 계산',items:[
+  '방식: 정률은 상품 1개 가격에 할인율을 적용한 뒤 원 미만을 버립니다. 정액은 상품 1개당 적용하며 상품 가격을 초과하지 않습니다.',
+  '대상: 전체 상품 또는 지정 상품에 적용합니다. 전체는 이후 등록한 신규 상품도 포함합니다.',
+  '중복: 주문당 할인 1종만 선택합니다. 여러 상품이면 개당 할인액이 큰 상품부터 남은 수량까지 적용하며 초과 수량은 정상가입니다.',
+  '기간: 한국 시간 시작일 00:00부터 종료일 23:59:59까지 적용합니다. 활성 체크와 기간 조건을 모두 만족해야 합니다.',
+  '배송비: 상품 할인과 별개입니다. 현재 고정 배송비 정책을 유지하며 할인 전 상품금액을 배송비 계산에 전달합니다.'
+ ]},
+ {title:'계정당 누적 한도',items:[
+  '기준: 할인 ID별 계정당 누적 상품 수량입니다. 재주문 시 기존 사용량을 차감하며 날짜가 바뀌거나 할인 기간을 수정해도 초기화하지 않습니다.',
+  '복원: 전체 취소 또는 환불 완료 주문은 사용량에서 제외합니다. 반품 신청·진행 중에는 사용량을 유지합니다.',
+  '편집: 기존 최대 수량을 줄이면 남은 수량은 0 미만으로 내려가지 않습니다. 저장된 과거 주문 금액은 다시 계산하지 않습니다.',
+  '기존 주문: 계정 ID가 없는 과거 주문은 임의로 연결하지 않고 사용량 합산에서 제외합니다.'
+ ]},
+ {title:'현재 구현과 서버 요구사항',items:[
+  '현재 구현: 할인은 goodsDiscountsV1, 주문은 goodsOrders에 저장합니다. 실제 회원 인증 없이 브라우저별 goodsPreviewAccountId를 새 주문의 accountId로 저장합니다.',
+  '한계: 브라우저·기기 간 사용량 공유, 저장소 삭제에 대한 한도 유지, 동시 결제의 원자적 한도 차감은 지원하지 않습니다.',
+  '결제 검증: 주문서와 결제 직전에 최신 주문 사용량 및 할인 정책을 읽습니다. 선택한 할인 금액이나 정책이 바뀌면 결제 재확인을 요구합니다.',
+  '운영 개발: 서버에서 인증한 회원 ID로 할인별 사용량을 조회하고, 결제 승인·주문 생성·한도 차감 및 취소·환불 복원을 트랜잭션과 중복 방지 키로 처리해야 합니다.'
+ ]}
+];
+requirementCopy['discount-list']=[{title:'목록 · 메뉴',items:[
+ '위치: 별도 사이드 메뉴 없이 온라인 스토어 운영의 할인 관리 탭에 배치합니다. 목표 권한은 admin 및 브랜드총괄부입니다. 현재 프로토타입은 관리자 로그인만 검사하며 계정별 메뉴·직접 접근 차단은 미연결입니다. 운영 구현에서 두 경로 모두 권한 검증해야 합니다.',
+ '목록: 할인명 / 할인 방식·혜택 / 적용 상품 / 최대 수량 / 적용 기간 / 상태 / 수정 버튼입니다. 검색·상태 필터는 제공하지 않습니다.',
+ '정렬: 최신 등록순입니다. 수정해도 등록 순서는 바뀌지 않습니다. 할인명은 왼쪽, 나머지 열은 가운데 정렬합니다. 수정 버튼 열 제목은 비워둡니다.',
+ '상품 표시: 전체 또는 상품명, 복수이면 첫 상품명 외 n종으로 표시합니다.',
+ '상태: 활성·비활성만 표시하며 활성이어도 기간 밖이면 주문서에 적용되지 않습니다. 최대 수량은 계정당 n개로 표시합니다.'
+]},...discountRules];
+requirementCopy['discount-editor']=[{title:'입력과 저장',items:[
+ '항목: 할인명, 정액·정률, 할인금액·할인율, 계정당 최대 적용 수량, 안내 문구, 시작일·종료일, 전체 상품 여부, 활성 여부입니다.',
+ '검증: 이름 필수, 정률은 0% 초과 100% 이하, 정액은 1원 이상 정수, 수량은 1 이상 정수, 시작일은 종료일 이하, 전체 해제 시 상품 1개 이상 선택입니다.',
+ '안내 문구: 선택 입력이며 비워두면 사용자 화면에서 표시하지 않습니다.',
+ '위계: 적용 상품과 사용 설정을 분리합니다. 개별 상품은 이름과 가격을 나눠 표시합니다. 입력값·placeholder·선택값·날짜는 일반 굵기이고 라벨만 강조합니다.',
+ '저장: 저장 후 팝업을 닫고 목록을 갱신합니다. 할인 저장 완료 문구는 별도 표시하지 않습니다.',
+ '삭제·변경: 기존 주문의 할인 정책 스냅샷과 실제 결제금액은 유지합니다.'
+]},...discountRules];
+requirementCopy['checkout-discount']=[{title:'선택 UI',items:[
+ '위치: 배송메모 아래, 구매 전 확인사항 위에 배치합니다. 예약 시스템과 같은 라디오 목록으로 할인 미적용 또는 할인 1종을 선택합니다.',
+ '표시: 할인명·할인율 또는 금액, 선택 입력한 안내 문구, 계정당 최대 수량·남은 수량을 표시합니다. 한도 소진 할인은 선택 불가입니다.',
+ '반영: 선택 즉시 상품별 적용 수량과 요약 금액을 갱신합니다. 필수 동의는 재확인하도록 해제합니다.'
+]},...discountRules];
+function appendRequirements(id,title,items){(requirementCopy[id]||(requirementCopy[id]=[])).push({title,items});}
+appendRequirements('product-summary','할인 안내 위치',['상품 상세에는 사용 가능한 할인 목록·예상 할인액 안내를 표시하지 않습니다. 할인 선택은 주문·결제 화면에서 합니다.']);
+appendRequirements('checkout-fields','입력 · 안내 · 동의 위계',[
+ '글자: 입력 라벨은 중간 굵기, 입력값·placeholder는 14px 일반 굵기로 통일합니다. 선택 표시는 작고 연하게 라벨 옆에 배치합니다.',
+ '구매 전 확인사항: 노란 안내 박스에는 확인사항만 표시합니다. 필수 동의는 박스 아래 흰 배경에 별도 배치합니다.',
+ '동의: 구매 안내 및 개인정보 수집·이용 두 동의 모두 필요합니다. 문장은 일반 굵기이고 (필수)만 굵게 표시합니다.'
+]);
+appendRequirements('checkout-summary','상품과 결제금액 구분',[
+ '상품 영역: 상품명·수량, 개당 가격, 할인율 또는 개당 할인금액과 적용 수량, 정상가 수량을 표시합니다.',
+ '금액 영역: 상품 금액 → 할인금액 → 배송비 → 총 결제금액 순서입니다. 상품별 할인금액을 중복 표시하지 않고 총 결제금액을 가장 강조합니다.',
+ '저장: 주문에 accountId, discountSnapshot, discountAmount, discountAllocations 및 상품별 discountQty·discountAmount를 기록합니다. 취소·환불·정산은 실결제금액 기준입니다.'
+]);
+appendRequirements('order-complete','할인 내역 · 버튼',[
+ '상품별: 결제 당시 단가·수량, 할인율 또는 개당 정액과 적용 수량, 남은 정상가 수량을 표시합니다.',
+ '결제 요약: 상품 금액, 할인명·총 할인금액, 배송비, 총 결제금액을 표시합니다. 현재 할인 정책이 아닌 주문 스냅샷 기준입니다.',
+ '버튼: 주문 내역 확인은 노란 주요 버튼, 쇼핑 계속하기는 테두리 보조 버튼입니다. 같은 높이와 두 열 배치, 400px 이하에서는 한 열로 표시합니다.'
+]);
+appendRequirements('order-detail','상품별 할인 상세',[
+ '구성: 할인명 · 할인율(정액은 개당 금액) · n개 적용, 다음 줄에 총 n원 할인을 표시합니다. 할인 없는 상품에는 안내를 표시하지 않습니다.',
+ '근거: 주문 당시 정책 스냅샷과 상품별 저장 금액·수량을 사용합니다. 현재 할인 수정·삭제와 무관하게 과거 내역을 유지합니다.',
+ '합계: 상품별 할인 총액은 해당 상품에 대한 합계입니다. 결제정보의 할인금액은 주문 전체 할인액입니다.'
+]);
+appendRequirements('admin-products','작업 열',['상품 수정·재고 관리·삭제 버튼은 유지하며 해당 열의 관리 제목은 표시하지 않습니다.']);
+
 const stateCopy={
   "product-grid": [
     [
@@ -1538,6 +1609,7 @@ const $=(s,r=document)=>r.querySelector(s), esc=v=>String(v??'').replace(/[&<>"'
 function visible(el){if(!el)return false;const st=getComputedStyle(el),r=el.getBoundingClientRect();return st.display!=='none'&&st.visibility!=='hidden'&&r.width>0&&r.height>0;}
 function bounds(selector){const rects=[...document.querySelectorAll(selector)].filter(visible).map(el=>el.getBoundingClientRect());if(!rects.length)return null;return rects.reduce((a,r)=>({left:Math.min(a.left,r.left),top:Math.min(a.top,r.top),right:Math.max(a.right,r.right),bottom:Math.max(a.bottom,r.bottom)}),rects[0]);}
 function scope(){
+ if(document.body.dataset.operation==='operationDiscounts')return 'adminDiscounts';
  if($('.sidebar')){
   const accountView=$('#sharedAccountsView')||$('#accountsView');
   if(accountView&&!accountView.hidden)return 'adminAccounts';

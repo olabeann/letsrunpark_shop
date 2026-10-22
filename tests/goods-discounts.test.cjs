@@ -34,3 +34,17 @@ test('initial discounts seed once and preserve edits and deletion',()=>{
  storage.value='[]';assert.equal(api.read().length,0);
  storage.value=JSON.stringify([{...policy,name:'수정한 할인'}]);assert.equal(api.read()[0].name,'수정한 할인');
 });
+
+test('account quota accumulates across orders but isolates accounts and policies',()=>{
+ const {api}=harness();const prior={accountId:'A',discountSnapshot:policy,discountAllocations:[{id:1,qty:1}],status:'출고 대기'};
+ const context={accountId:'A',orders:[prior,{...prior,accountId:'B'},{...prior,discountSnapshot:{id:'other'}},{...prior,accountId:undefined}]};
+ const result=api.calculate(policy,[{id:1,qty:3}],[{id:1,price:10000}],now,context);
+ assert.equal(result.amount,1000);assert.equal(result.allocations[0].qty,1);
+ context.orders.push(prior);assert.equal(api.quote(policy.id,[{id:1,qty:1}],[{id:1,price:10000}],now,context).amount,0);
+});
+test('cancelled and refunded orders restore quota, pending returns still consume it',()=>{
+ const {api}=harness();const order={accountId:'A',discountSnapshot:policy,discountAllocations:[{id:1,qty:2}],status:'출고 완료'};
+ for(const patch of [{status:'전체 취소'},{returnStatus:'환불 완료'}])assert.equal(api.remainingQty(policy,{accountId:'A',orders:[{...order,...patch}]}),2);
+ assert.equal(api.remainingQty(policy,{accountId:'A',orders:[{...order,returnStatus:'반품 신청'}]}),0);
+ assert.equal(api.remainingQty({...policy,maxQty:1},{accountId:'A',orders:[order]}),0);
+});

@@ -35,3 +35,8 @@
 #discount-policy-list table th,#discount-policy-list table td{text-align:center;vertical-align:middle}
 
 #discount-policy-list table th:first-child,#discount-policy-list table td:first-child{text-align:left}
+
+/* Keep field contents independent of bold labels. */
+#discount-form input:not([type="checkbox"]),#discount-form select,#discount-form textarea{font-weight:400}
+#discount-form input::placeholder,#discount-form textarea::placeholder{font-weight:400}
+#discount-form input::-webkit-datetime-edit{font-weight:400}
