@@ -116,3 +116,17 @@
 #checkoutForm input::placeholder,#checkoutForm textarea::placeholder{font-size:14px;font-weight:400;color:var(--grey);opacity:1}
 #checkoutForm .optional-mark{margin-left:4px;font-size:12px;font-weight:400;color:var(--grey)}
 #checkoutForm .address-search-row button{font-size:14px;font-weight:500}
+
+#completePage .completion-card{max-width:640px}
+.completion-number{margin:0 0 20px;padding-bottom:18px;border-bottom:1px solid var(--line);font-size:14px}
+.completion-item{padding:16px 0;border-bottom:1px solid var(--line)}
+.completion-item-heading{display:flex;justify-content:space-between;gap:16px;font-size:16px}
+.completion-item-heading span{font-size:14px}
+.completion-item p{margin:6px 0 0;font-size:13px;line-height:1.6;color:var(--grey)}
+.completion-discount{color:#387a30}
+.completion-discount small{display:block;margin-top:5px;font-size:12px;color:var(--grey);font-weight:400}
+#completePage .completion-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:640px}
+#completePage .completion-actions a{display:flex;align-items:center;justify-content:center;min-height:48px;margin:0;padding:14px 20px;border-radius:8px;font-size:14px;line-height:1.5;text-align:center}
+#completePage .completion-actions .primary{background:var(--yellow);border:1px solid var(--yellow);font-weight:700}
+#completePage .completion-actions .outline{font-weight:500}
+@media(max-width:400px){#completePage .completion-actions{grid-template-columns:1fr}}
