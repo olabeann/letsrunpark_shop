@@ -109,3 +109,10 @@
 .checkout-consents .checkout-consent-title{margin:0 0 12px;font-size:14px}
 .checkout-consents .purchase-agreement{display:flex;align-items:flex-start;gap:10px;margin:12px 0;font-size:13px;font-weight:400;line-height:1.6;cursor:pointer}
 .checkout-consents .purchase-agreement input{width:18px;height:18px;flex-shrink:0;margin:2px 0 0;padding:0;accent-color:#1d1d1f}
+
+/* Checkout field typography: labels, values and hints have distinct weights. */
+#checkoutForm>label,#checkoutForm .address-fields>label{font-size:14px;font-weight:600;line-height:1.5}
+#checkoutForm input:not([type="checkbox"]):not([type="radio"]),#checkoutForm textarea,#checkoutForm select{font-size:14px;font-weight:400;line-height:1.5;color:var(--ink)}
+#checkoutForm input::placeholder,#checkoutForm textarea::placeholder{font-size:14px;font-weight:400;color:var(--grey);opacity:1}
+#checkoutForm .optional-mark{margin-left:4px;font-size:12px;font-weight:400;color:var(--grey)}
+#checkoutForm .address-search-row button{font-size:14px;font-weight:500}
