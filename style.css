@@ -103,3 +103,9 @@
 .payment-note .checkout-consent-title{margin:22px 0 10px;padding-top:18px;border-top:1px solid #e8dfab}.payment-note .checkout-consent-title+.purchase-agreement,.payment-note .purchase-agreement+.purchase-agreement{border-top:0;padding-top:0;margin-top:12px}
 
 .payment-note .purchase-notices{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7}
+
+/* Required consent sits below the purchase notice, outside its background. */
+.checkout-consents{margin-top:24px;color:var(--ink)}
+.checkout-consents .checkout-consent-title{margin:0 0 12px;font-size:14px}
+.checkout-consents .purchase-agreement{display:flex;align-items:flex-start;gap:10px;margin:12px 0;font-size:13px;font-weight:400;line-height:1.6;cursor:pointer}
+.checkout-consents .purchase-agreement input{width:18px;height:18px;flex-shrink:0;margin:2px 0 0;padding:0;accent-color:#1d1d1f}
