@@ -1,7 +1,11 @@
 // Shared merchandise discount rules. Browser demo storage; production must validate on server.
 const GoodsDiscounts = {
  key: 'goodsDiscountsV1',
- read(){try{const rows=JSON.parse(localStorage.getItem(this.key)||'[]');return Array.isArray(rows)?rows:[];}catch{return [];}},
+ defaults(){return [
+  {id:'initial-autumn-discount',name:'가을 굿즈 할인',type:'percent',value:10,maxQty:2,noticeText:'',startDate:'2026-10-22',endDate:'2026-10-22',allProducts:true,active:true,productIds:[]},
+  {id:'initial-selected-discount',name:'ㅇㄹㅇㄹ',type:'percent',value:10,maxQty:1,noticeText:'ㅇㄹㅇㄹㅇㄹ',startDate:'2026-10-22',endDate:'2026-10-22',allProducts:false,active:true,productIds:[3,2]}
+ ];},
+ read(){try{const saved=localStorage.getItem(this.key);if(saved===null){const rows=this.defaults();localStorage.setItem(this.key,JSON.stringify(rows));return rows;}const rows=JSON.parse(saved);return Array.isArray(rows)?rows:[];}catch{return [];}},
  day(now=Date.now()){return new Date(now+9*3600000).toISOString().slice(0,10);},
  validate(d){
   if(!String(d.name||'').trim())return '할인명을 입력해 주세요.';

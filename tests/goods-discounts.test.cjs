@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 const policy={id:'event',name:'가을',type:'percent',value:10,maxQty:2,startDate:'2026-10-22',endDate:'2026-10-22',allProducts:true,active:true,productIds:[]};
 const now=Date.parse('2026-10-22T12:00:00+09:00');
-function harness(){const storage={value:JSON.stringify([policy]),getItem(){return this.value;}};const c={localStorage:storage};vm.createContext(c);vm.runInContext(fs.readFileSync('dist/goods-discounts.js','utf8')+';globalThis.api=GoodsDiscounts;',c);return {api:c.api,storage};}
+function harness(){const storage={value:JSON.stringify([policy]),getItem(){return this.value;},setItem(key,value){this.value=value;}};const c={localStorage:storage};vm.createContext(c);vm.runInContext(fs.readFileSync('dist/goods-discounts.js','utf8')+';globalThis.api=GoodsDiscounts;',c);return {api:c.api,storage};}
 test('discount allocation favors highest savings and respects total quantity across products',()=>{
  const {api}=harness();const q=api.calculate(policy,[{id:1,qty:2},{id:2,qty:3}],[{id:1,price:10000},{id:2,price:20000}],now);
  assert.equal(q.amount,4000);assert.equal(q.allocations[0].id,2);assert.equal(q.allocations[0].qty,2);
@@ -26,4 +26,11 @@ test('new products qualify for all-products offers and percentage rounding is pe
 });
 test('quotes preserve a historical snapshot and reread edited policies',()=>{
  const {api,storage}=harness();const items=[{id:1,qty:1}],products=[{id:1,price:10000}];const old=api.quote('event',items,products,now);storage.value=JSON.stringify([{...policy,value:20}]);assert.equal(old.amount,1000);assert.equal(old.policy.value,10);assert.equal(api.quote('event',items,products,now).amount,2000);
+});
+
+test('initial discounts seed once and preserve edits and deletion',()=>{
+ const {api,storage}=harness();storage.value=null;
+ assert.equal(api.read().length,2);assert.equal(api.read()[0].name,'가을 굿즈 할인');
+ storage.value='[]';assert.equal(api.read().length,0);
+ storage.value=JSON.stringify([{...policy,name:'수정한 할인'}]);assert.equal(api.read()[0].name,'수정한 할인');
 });
