@@ -137,23 +137,42 @@ body .shipping-guide{grid-template-columns:100px minmax(0,1fr) auto}.shipping-gu
 #stockForm label { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
 #stockPreview { font-weight: 700; color: #3159d9; }
 #stockError { color: #bd2637; }
-#stockDialog table { min-width: 0; width: 100%; table-layout: fixed; }
-body #stockDialog .table-wrap :is(th, td) {
-  padding: 14px 16px;
-  text-align: left;
-  vertical-align: middle;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  line-height: 1.6;
-}
-body #stockDialog .table-wrap :is(th, td):nth-child(1) { width: 26%; font-variant-numeric: tabular-nums; }
-body #stockDialog .table-wrap :is(th, td):nth-child(2) { width: 12%; text-align: center; }
-body #stockDialog .table-wrap :is(th, td):nth-child(3) { width: 16%; text-align: center; }
-body #stockDialog .table-wrap :is(th, td):nth-child(4) { width: 30%; }
-body #stockDialog .table-wrap :is(th, td):nth-child(5) { width: 16%; text-align: center; }
+#stockDialog .stock-journal { padding: 20px; border: 1px solid #e0e5ef; border-radius: 12px; }
+#stockDialog .stock-journal-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+#stockDialog .stock-journal-heading h3 { margin: 0; font-size: 16px; line-height: 1.5; font-weight: 700; }
+#stockHistoryCount, #stockDialog .stock-history-footer { color: #747b83; font-size: 12px; font-weight: 400; }
+#stockDialog .stock-history-filters, #stockDialog .stock-history-dates { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+#stockDialog .stock-history-filters select { width: 100%; height: 40px; padding: 8px 12px; border: 1px solid #e0e5ef; border-radius: 7px; background-color: #fff; font-size: 13px; }
+#stockDialog .stock-history-dates label { display: grid; gap: 8px; color: #666; }
+#stockHistoryError { color: #bd2637; }
+#stockDialog .stock-journal .table-wrap { border: 0; border-radius: 0; overflow: visible; }
+#stockDialog table { min-width: 0; width: 100%; table-layout: fixed; font-size: 13px; }
+body #stockDialog .table-wrap :is(th, td) { height: auto; padding: 12px 8px; text-align: left; vertical-align: top; white-space: normal; overflow-wrap: anywhere; line-height: 1.5; border-bottom: 1px solid #eee; }
+body #stockDialog .table-wrap th { background: transparent; font-size: 12px; font-weight: 500; color: #747b83; }
+body #stockDialog .table-wrap :is(th, td):first-child { width: 33%; padding-left: 0; font-variant-numeric: tabular-nums; }
+body #stockDialog .table-wrap :is(th, td):nth-child(2) { width: 23%; }
+body #stockDialog .table-wrap :is(th, td):nth-child(3) { width: 24%; }
+body #stockDialog .table-wrap :is(th, td):nth-child(4) { width: 20%; }
+body #stockDialog .table-wrap tr:last-child td { border-bottom: 0; }
+#stockDialog .stock-entry-detail summary { cursor: pointer; list-style: none; }
+#stockDialog .stock-entry-detail summary::-webkit-details-marker { display: none; }
+#stockDialog .stock-entry-detail summary:hover { text-decoration: underline; }
+#stockDialog .stock-entry-detail summary:focus-visible { outline: 2px solid #3864f4; outline-offset: 3px; }
+#stockDialog .stock-entry-detail div { margin-top: 8px; color: #666; font-size: 12px; }
+#stockDialog .stock-history-footer { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 8px; padding-top: 12px; border-top: 1px solid #eee; }
+#stockHistoryPagination { display: flex; align-items: center; gap: 2px; }
+#stockHistoryPagination button { min-width: 32px; height: 32px; padding: 0 8px; border: 0; background: transparent; color: #747b83; font-size: 13px; font-weight: 400; }
+#stockHistoryPagination button[aria-current="page"] { color: #111; font-weight: 700; }
+#stockHistoryPagination button:hover:not(:disabled) { background: #f4f4f4; }
+body #stockDialog .table-wrap td.stock-history-empty { text-align: center; padding: 32px 0; color: #777; }
 @media (max-width: 600px) {
-  #stockDialog table { min-width: 640px; }
-  body #stockDialog .table-wrap :is(th, td) { padding: 12px; }
+  #stockDialog { padding: 16px; width: calc(100vw - 24px); }
+  #stockDialog .stock-journal { padding: 14px; }
+  #stockDialog .stock-journal-heading h3 { font-size: 16px; }
+  #stockDialog .stock-history-filters, #stockDialog .stock-history-dates { grid-template-columns: 1fr; }
+  #stockDialog .stock-history-footer { flex-wrap: wrap; font-size: 12px; }
+  #stockHistoryPagination { margin-left: auto; }
+  #stockDialog table { font-size: 12px; }
 }
 
 /* Sales list keeps payment, shipping, and return states separate; tracking is in detail. */

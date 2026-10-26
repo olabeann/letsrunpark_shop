@@ -74,16 +74,66 @@ $('reorderProducts').onclick=()=>{reorderMode=!reorderMode;$('reorderProducts').
 renderProducts();window.addEventListener('admin-data-change',renderProducts);
 
 let stockProductId;
+let stockHistoryPage=1;
+const stockHistoryPageSize=20;
 function renderStock() {
   const product=goods.find(item=>item.id===stockProductId);
   if(!product || product.deletedAt) { $('stockDialog').close(); return; }
   $('stockTitle').textContent=product.name+' · 재고 관리';
   const history=Inventory.history(product);
   $('stockBalance').textContent=product.stock+'개';
-  $('stockHistory').innerHTML=history.slice().reverse().map(entry=>`<tr><td>${new Date(entry.at).toLocaleString('ko-KR')}</td><td>${entry.delta>0?'+':''}${entry.delta}개</td><td><b>${entry.balance}개</b></td><td>${esc(entry.reason)}${entry.reference?'<br>'+esc(entry.reference):''}</td><td>${esc(Inventory.actorLabel(entry))}</td></tr>`).join('');
+  renderStockHistory(history);
   renderStockPreview();
 }
-function openStock(id) { goods=JSON.parse(localStorage.goodsProducts||JSON.stringify(goods));stockProductId=id;const product=goods.find(item=>item.id===id);if(product){Inventory.history(product);localStorage.goodsProducts=JSON.stringify(goods);}$('stockForm').reset();$('stockError').textContent='';renderStock();$('stockDialog').showModal(); }
+function resetStockHistory() {
+  stockHistoryPage=1;
+  ['stockHistoryPeriod','stockHistoryType','stockHistoryStart','stockHistoryEnd'].forEach(id=>$(id).value='');
+}
+function renderStockHistory(history) {
+  const period=$('stockHistoryPeriod').value;
+  const type=$('stockHistoryType').value;
+  const start=$('stockHistoryStart').value, end=$('stockHistoryEnd').value;
+  $('stockHistoryDates').hidden=period!=='custom';
+  const invalid=period==='custom' && start && end && start>end;
+  $('stockHistoryError').hidden=!invalid;
+  $('stockHistoryError').textContent=invalid?'종료일은 시작일 이후로 선택해 주세요.':'';
+  let from=-Infinity, until=Infinity;
+  if(period==='custom') {
+    if(start) from=new Date(start+'T00:00:00').getTime();
+    if(end) { const next=new Date(end+'T00:00:00');next.setDate(next.getDate()+1);until=next.getTime(); }
+  } else if(period) {
+    const today=new Date();today.setHours(0,0,0,0);today.setDate(today.getDate()-Number(period)+1);from=today.getTime();
+  }
+  const filtered=invalid?[]:history.slice().reverse().filter(entry=>
+    Number(entry.at)>=from && Number(entry.at)<until &&
+    (!type || (type==='increase'?entry.delta>0:entry.delta<0))
+  ).sort((a,b)=>Number(b.at)-Number(a.at));
+  const pages=Math.max(1,Math.ceil(filtered.length/stockHistoryPageSize));
+  stockHistoryPage=Math.min(stockHistoryPage,pages);
+  $('stockHistoryCount').textContent='총 '+filtered.length.toLocaleString('ko-KR')+'건';
+  $('stockHistory').innerHTML=filtered.slice((stockHistoryPage-1)*stockHistoryPageSize,stockHistoryPage*stockHistoryPageSize).map(entry=>{
+    const date=new Date(entry.at),pad=value=>String(value).padStart(2,'0');
+    const stamp=`${pad(date.getMonth()+1)}.${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    return `<tr><td><details class="stock-entry-detail"><summary aria-label="${esc(date.toLocaleString('ko-KR'))} 변경 상세">${stamp}</summary><div>${esc(date.toLocaleString('ko-KR'))}<br>${esc(entry.reason||'')}${entry.reference?'<br>'+esc(entry.reference):''}</div></details></td><td>${entry.delta>0?'+':''}${entry.delta.toLocaleString('ko-KR')}</td><td>${entry.balance.toLocaleString('ko-KR')}</td><td>${esc(Inventory.actorLabel(entry))}</td></tr>`;
+  }).join('') || '<tr><td colspan="4" class="stock-history-empty">조건에 맞는 재고 변경 이력이 없습니다.</td></tr>';
+  const button=(page,label,disabled=false)=>`<button type="button" data-stock-page="${page}" ${disabled?'disabled':''} ${page===stockHistoryPage && /^\d+$/.test(label)?'aria-current="page"':''} aria-label="${label==='‹'?'이전 페이지':label==='›'?'다음 페이지':page+'페이지'}">${label}</button>`;
+  const visible=new Set([1,pages,stockHistoryPage-1,stockHistoryPage,stockHistoryPage+1]);
+  if(stockHistoryPage<=2)visible.add(3);
+  if(stockHistoryPage>=pages-1)visible.add(pages-2);
+  let previous=0,html=button(stockHistoryPage-1,'‹',stockHistoryPage===1);
+  [...visible].filter(page=>page>=1&&page<=pages).sort((a,b)=>a-b).forEach(page=>{
+    if(previous && page-previous>1)html+='<span aria-hidden="true">…</span>';
+    html+=button(page,String(page));previous=page;
+  });
+  $('stockHistoryPagination').innerHTML=html+button(stockHistoryPage+1,'›',stockHistoryPage===pages);
+}
+['stockHistoryPeriod','stockHistoryType','stockHistoryStart','stockHistoryEnd'].forEach(id=>$(id).onchange=()=>{stockHistoryPage=1;renderStock();});
+$('stockHistoryPagination').onclick=event=>{
+  const button=event.target.closest('button[data-stock-page]');
+  if(!button || button.disabled)return;
+  stockHistoryPage=Number(button.dataset.stockPage);renderStock();
+};
+function openStock(id) { goods=JSON.parse(localStorage.goodsProducts||JSON.stringify(goods));stockProductId=id;resetStockHistory();const product=goods.find(item=>item.id===id);if(product){Inventory.history(product);localStorage.goodsProducts=JSON.stringify(goods);}$('stockForm').reset();$('stockError').textContent='';renderStock();$('stockDialog').showModal(); }
 function renderStockPreview() {
   const product=goods.find(item=>item.id===stockProductId);if(!product)return;
   const delta=Number($('stockQuantity').value)*Number($('stockDirection').value);
@@ -101,6 +151,6 @@ $('stockForm').onsubmit=event=>{
     Inventory.change(product,delta,$('stockReason').value);
     localStorage.goodsProducts=JSON.stringify(goods);
   } catch(error) { goods=JSON.parse(localStorage.goodsProducts||JSON.stringify(goods));renderProducts();renderStock();$('stockError').textContent=error.message;return; }
-  $('stockForm').reset();$('stockError').textContent='';renderProducts();renderStock();notify('재고 변경을 기록했습니다.');
+  $('stockForm').reset();$('stockError').textContent='';resetStockHistory();renderProducts();renderStock();notify('재고 변경을 기록했습니다.');
 };
 window.addEventListener('admin-data-change',()=>{if($('stockDialog').open)renderStock();});
