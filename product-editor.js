@@ -99,11 +99,12 @@
   const saveButton = document.getElementById('productSaveButton');
   let coverRequest = 0;
   function showCover(name) {
-    const src = ProductContent.url(coverValue.value, true);
-    document.getElementById('coverImagePreview').hidden = !src;
+    const src = ProductContent.url(coverValue.value, true) || 'assets/product-malma-default.png';
+    document.getElementById('coverImagePreview').hidden = false;
+    document.getElementById('removeCoverImage').hidden = src === 'assets/product-malma-default.png';
     const image = document.getElementById('coverImageThumb');
     if (src) image.src = src; else image.removeAttribute('src');
-    document.getElementById('coverImageName').textContent = name || '등록된 대표 이미지';
+    document.getElementById('coverImageName').textContent = name || (src === 'assets/product-malma-default.png' ? '기본 말마 이미지' : '등록된 대표 이미지');
   }
   coverInput.addEventListener('change', async () => {
     const file = coverInput.files[0]; if (!file) return;

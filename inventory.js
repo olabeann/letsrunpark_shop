@@ -1,5 +1,8 @@
 // Each product stores its balance and append-only stock movements together.
 const Inventory = {
+  validateStatus(status, stock) {
+    if (status === 'sale' && !(Number(stock) > 0)) throw new Error('재고가 0개인 상품은 판매 중으로 변경할 수 없습니다. 재고를 먼저 추가해 주세요.');
+  },
   adminActor() {
     // Use the same login ID as the shared reservation admin session.
     const loginId = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('letsrunPlayAdminSessionV1') : null;
@@ -34,6 +37,5 @@ const Inventory = {
     product.stockHistory = [...history, {at: Date.now(), delta, balance, reason: reason.trim(), actor, reference}];
     product.stock = balance;
     if (!balance && product.status === 'sale') product.status = 'soldout';
-    else if (balance > 0 && product.status === 'soldout') product.status = 'sale';
   }
 };
