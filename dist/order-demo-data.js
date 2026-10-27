@@ -13,6 +13,7 @@ const OrderDemoData = {
       ['RETURN-DONE-FULL', '반품 전액 환불 완료', 'returned', '상품 불량·파손', 0],
       ['RETURN-DONE-DEDUCT', '반품 차감 환불 완료', 'returned', '단순 변심', 6000],
       ['SHIP-PENDING', '배송 준비', 'pending'],
+      ['LONG-NAME', '긴 상품명 수량 표시', 'pending'],
       ['SHIP-SENT', '발송 완료', 'shipped'],
       ['CANCELLED', '주문 취소 완료', 'cancelled'],
       ['EXCEPTION-FULL', '예외 환불 완료', 'exception', '', 0]
@@ -42,6 +43,11 @@ const OrderDemoData = {
         status: '출고 대기', returnDays: 14,
         policySnapshot: {shippingFee: 3000, cancelHours: 24, returnDays: 14, returnShippingFee: 6000}
       };
+      if (id === 'LONG-NAME') Object.assign(order, {
+        items: [{id: 2, name: '[샘플] 경주마 인형 1'.repeat(8), price: 6500, qty: 1, discountQty: 1}],
+        subtotal: 6500, discountAmount: 6000, shippingFee: 3000, total: 3500,
+        discountSnapshot: {name: '테스트 1', type: 'fixed', value: 6000}
+      });
       if (!['pending', 'cancelled'].includes(state)) {
         Object.assign(order, {status: '출고 완료', carrier: 'CJ대한통운',
           trackingNumber: '00000000' + String(index + 1).padStart(4, '0'), shippedAt: createdAt + 1000});

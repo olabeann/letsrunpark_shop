@@ -1,0 +1,77 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../../dist/admin.css"><link rel="stylesheet" href="../../dist/policy-v2.css"><main><h1>상품 노출 순서 설정 예시</h1><button id="reorderProducts" hidden></button><p id="notice" role="status"></p><div id="productsTable" class="table-wrap is-reordering"></div><div id="productPagination"></div></main><script>const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));const localStorage={};let reorderMode=true;let goods=Array.from({length:25},(_,i)=>({id:i+1,name:i===0?'[샘플] 경주마 인형 1'.repeat(8):'[샘플] 상품 '+(i+1),displayOrder:i+1,status:i%5===0?'hidden':i%5===1?'soldout':'sale',stock:i%5===1?0:10}));function saveAll(){window.savedOrder=goods.slice().sort((a,b)=>a.displayOrder-b.displayOrder).map(p=>p.id)}function notify(s){$('notice').textContent=s}function renderProducts(){renderReorderProducts(goods.filter(isReorderableProduct).sort((a,b)=>a.displayOrder-b.displayOrder))}function productOrderSignature(products) {
+  return JSON.stringify(products.filter(product => !product.deletedAt).map(product => [Number(product.id), Number(product.displayOrder) || 0, isReorderableProduct(product)]).sort((a,b) => a[0]-b[0]));
+}
+function isReorderableProduct(product) {
+  return !product.deletedAt && ['sale', 'soldout'].includes(product.status);
+}
+function applyProductOrder(products, ids, initialSignature) {
+  const eligible = products.filter(isReorderableProduct);
+  if (productOrderSignature(products) !== initialSignature || new Set(ids).size !== ids.length || ids.length !== eligible.length || ids.some(id => !eligible.some(product => Number(product.id) === id))) throw new Error('ORDER_CHANGED');
+  // Replace only the selling products' slots, retaining other products' positions.
+  const ordered = products.filter(product => !product.deletedAt).slice().sort((a,b) => (Number(a.displayOrder)||0)-(Number(b.displayOrder)||0)||Number(a.id)-Number(b.id));
+  let cursor = 0;
+  const positions = new Map(ordered.map((product,index) => [isReorderableProduct(product) ? ids[cursor++] : Number(product.id), index + 1]));
+  return products.map(product => product.deletedAt ? product : {...product, displayOrder: positions.get(Number(product.id))});
+}
+
+  function renderReorderProducts(rows) {
+    $('productPagination').innerHTML = '';
+    $('productsTable').innerHTML = `<div class="reorder-toolbar"><button id="saveProductOrder" class="blue">순서 저장</button><button id="cancelProductOrder">취소</button></div><p id="reorderStatus" class="reorder-status" role="status" aria-live="polite"></p><ol id="productOrderList" class="product-order-list">${rows.map((product, index) => `<li data-id="${product.id}"><span class="drag-handle" draggable="true" title="드래그해서 이동" aria-hidden="true">⋮⋮</span><input class="order-position" type="number" min="1" max="${rows.length}" step="1" value="${index + 1}" aria-label="${esc(product.name)} 노출 순번"><div class="order-product">${product.image ? `<img src="${esc(product.image)}" alt="">` : ''}<span>${esc(product.name)}</span></div><small>${product.status === 'hidden' ? '판매 중지' : product.stock === 0 || product.status === 'soldout' ? '품절' : '판매 중'}</small><div class="order-moves"><button type="button" data-move="up" aria-label="한 칸 위로">↑</button><button type="button" data-move="down" aria-label="한 칸 아래로">↓</button><button type="button" data-move="first">맨 위</button><button type="button" data-move="last">맨 아래</button></div></li>`).join('')}</ol>`;
+    const list = $('productOrderList');
+    const initialOrder = productOrderSignature(goods);
+    $('saveProductOrder').disabled = rows.length === 0;
+    if (!rows.length) list.insertAdjacentHTML('afterend', '<p class="empty">순서를 설정할 상품이 없습니다.</p>');
+    let dragged;
+    const refresh = () => [...list.children].forEach((row, index) => {
+      row.querySelector('input').value = index + 1;
+      row.querySelectorAll('[data-move]').forEach(button => {
+        button.disabled = ['up', 'first'].includes(button.dataset.move) ? index === 0 : index === list.children.length - 1;
+      });
+    });
+    const announce = () => { $('reorderStatus').textContent = ''; };
+    const move = (row, position, focus = true) => {
+      const target = Math.max(1, Math.min(list.children.length, position));
+      const others = [...list.children].filter(item => item !== row);
+      list.insertBefore(row, others[target - 1] || null);
+      refresh(); announce(row);
+      if (focus) { row.querySelector('input').focus({preventScroll: true}); row.scrollIntoView({block: 'nearest'}); }
+    };
+    [...list.children].forEach(row => {
+      const input = row.querySelector('input');
+      const applyPosition = (focus = true) => {
+        const value = Number(input.value);
+        if (!Number.isInteger(value) || value < 1 || value > rows.length) {
+          $('reorderStatus').textContent = `1부터 ${rows.length} 사이의 순번을 입력해 주세요.`;
+          refresh(); return;
+        }
+        if (value !== [...list.children].indexOf(row) + 1) move(row, value, focus);
+      };
+      input.onblur = () => applyPosition(false);
+      input.onkeydown = event => { if (event.key === 'Enter') { event.preventDefault(); applyPosition(); } };
+      row.querySelectorAll('[data-move]').forEach(button => button.onclick = () => {
+        const current = [...list.children].indexOf(row) + 1;
+        move(row, ({up: current - 1, down: current + 1, first: 1, last: rows.length})[button.dataset.move]);
+      });
+      row.querySelector('.drag-handle').ondragstart = event => { dragged = row; event.dataTransfer.setData('text/plain', row.dataset.id); event.dataTransfer.effectAllowed = 'move'; row.classList.add('dragging'); };
+      row.ondragend = () => { row.classList.remove('dragging'); dragged = null; refresh(); announce(row); };
+      row.ondragover = event => { event.preventDefault(); if (dragged && row !== dragged) { list.insertBefore(dragged, row.getBoundingClientRect().top + row.offsetHeight / 2 < event.clientY ? row.nextSibling : row); refresh(); } };
+      row.ondrop = event => event.preventDefault();
+    });
+    refresh();
+    $('saveProductOrder').onclick = () => {
+      try {
+        const latest = JSON.parse(localStorage.goodsProducts || JSON.stringify(goods));
+        const next = applyProductOrder(latest, [...list.children].map(row => Number(row.dataset.id)), initialOrder);
+        localStorage.goodsProducts = JSON.stringify(next);
+        goods = next;
+      } catch (error) {
+        $('reorderStatus').textContent = error.message === 'ORDER_CHANGED' ? '상품 목록이 변경되었습니다. 취소 후 다시 정렬해 주세요.' : '저장하지 못했습니다. 다시 시도해 주세요.';
+        return;
+      }
+      reorderMode = false; $('reorderProducts').textContent = '노출 순서 설정'; renderProducts();
+      notify('상품 노출 순서를 저장했습니다.');
+    };
+    $('cancelProductOrder').onclick = () => { reorderMode = false; $('reorderProducts').textContent = '노출 순서 설정'; renderProducts(); };
+  }
+
+renderProducts();</script></html>

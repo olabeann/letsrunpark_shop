@@ -14,7 +14,7 @@ function setup() {
 }
 test('fixtures cover active/disabled return buttons and all current state labels', () => {
   const c = setup(), orders = c.seed([], Date.now());
-  assert.equal(orders.length, 8);
+  assert.equal(orders.length, 9);
   for (const [label, expected] of [
     ['paymentStateLabel', ['결제 완료', '환불 완료', '전액 환불 완료']],
     ['state', ['배송 준비 중', '발송 완료', '배송 대상 아님']],
@@ -27,7 +27,7 @@ test('fixtures cover active/disabled return buttons and all current state labels
       assert.ok(button);
       assert.equal(button[0].includes(' disabled'), !order.returnTrackingNumber);
     } else assert.equal(button, null);
-    assert.equal(order.total, order.subtotal + order.shippingFee);
+    assert.equal(order.total, order.subtotal + order.shippingFee - (order.discountAmount || 0));
     assert.equal(order.inventoryApplied, false);
     if (order.refundAmount) assert.equal(order.total, order.refundAmount + order.shippingDeduction);
   }
@@ -62,7 +62,7 @@ test('migration removes only retired generated examples, keeps real history and 
   const orders = [real, unmarked, edited, ...['RETURN-READY-DEFECT','RETURN-WAIT-WRONG','EXCEPTION-DEDUCT','RETURN-LEGACY-REJECT']
     .map(id=>({number:'G-DEMO-'+id,demo:true}))];
   c.seed(orders);
-  assert.equal(orders.length,10);
+  assert.equal(orders.length,11);
   assert.ok(orders.includes(real));assert.ok(orders.includes(unmarked));
   assert.equal(edited.returnStatus,'환불 완료');assert.equal(edited.refundAmount,49000);
   assert.equal(edited.name,'[예시] 반품 처리 가능');

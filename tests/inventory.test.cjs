@@ -21,9 +21,9 @@ test('order deduction and cancellation retain references and are idempotent',()=
  api.change(p,2,'주문 취소','고객','ORDER:cancel');
  assert.equal(p.stock,3);assert.equal(p.stockHistory.length,3);
 });
-test('zero balance sells out; replenishment restores availability without exposing hidden goods',()=>{
+test('zero balance sells out; replenishment keeps sold-out and hidden goods unavailable',()=>{
  const api=inventory(),p={stock:1,status:'sale'};
- api.change(p,-1,'판매');assert.equal(p.status,'soldout');api.change(p,2,'입고');assert.equal(p.status,'sale');
+ api.change(p,-1,'판매');assert.equal(p.status,'soldout');api.change(p,2,'입고');assert.equal(p.status,'soldout');
  p.status='hidden';api.change(p,1,'입고');assert.equal(p.status,'hidden');
 });
 test('stock history snapshots the active account ID instead of its role',()=>{
@@ -45,4 +45,19 @@ test('opening balance has a stable timestamp and account after registration',()=
  assert.equal(api.history(p)[0].at,first.at);
  const old={stock:4,stockHistory:[{at:null,delta:4,balance:4,actor:'시스템'}]};
  assert.ok(api.history(old)[0].at);assert.equal(old.stockHistory[0].actor,'admin');
+});
+
+test('manual status validation preserves stock; zero stock cannot be on sale',()=>{
+ const api=inventory(),p={stock:5,status:'sale'};
+ api.validateStatus('soldout',p.stock);p.status='soldout';
+ assert.equal(p.stock,5);assert.equal(p.stockHistory,undefined);
+ api.validateStatus('sale',p.stock);p.status='sale';assert.equal(p.stock,5);
+ assert.throws(()=>api.validateStatus('sale',0),/재고가 0개/);
+ api.validateStatus('soldout',0);api.validateStatus('hidden',0);
+});
+test('cancellation restoration does not resume a sold-out product',()=>{
+ const api=inventory(),p={stock:1,status:'sale'};
+ api.change(p,-1,'주문 결제','고객','sale-1');
+ api.change(p,1,'주문 취소','고객','cancel-1');
+ assert.equal(p.stock,1);assert.equal(p.status,'soldout');
 });

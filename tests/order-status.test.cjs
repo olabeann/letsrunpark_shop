@@ -48,7 +48,7 @@ test('return details show return status separately from financial status',()=>{
 test('exception refund details do not invent a return request or return tracking',()=>{
  const c=harness([{number:'EXCEPTION',total:100,status:'출고 완료',trackingNumber:'123',items:[],returnStatus:'환불 완료',refundKind:'관리자 예외 환불',refundAmount:80,shippingDeduction:20,exceptionalRefundReason:'개별 협의'}]);
  c.showDetail('EXCEPTION');const html=c.$('orderDetail').innerHTML;
- assert.match(html,/<span>환불 유형<\/span><b>관리자 예외 환불<\/b>/);assert.match(html,/<span>최종 환불액<\/span><b>80원<\/b>/);assert.doesNotMatch(html,/<h3>반품 처리<\/h3>|반품 사유|반품 운송장/);
+ assert.match(html,/<span>환불 유형<\/span><b>관리자 예외 환불<\/b>/);assert.match(html,/<span>최종 환불액<\/span><b class="detail-amount">80원<\/b>/);assert.doesNotMatch(html,/<h3>반품 처리<\/h3>|반품 사유|반품 운송장/);
 });
 test('admin list filters do not mix return status or refund method into financial options',()=>{
  assert.doesNotMatch(orders,/value="return_requested"|value="return_rejected"|value="exception_refunded"/);
