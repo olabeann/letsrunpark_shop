@@ -130,3 +130,8 @@
 #completePage .completion-actions .primary{background:var(--yellow);border:1px solid var(--yellow);font-weight:700}
 #completePage .completion-actions .outline{font-weight:500}
 @media(max-width:400px){#completePage .completion-actions{grid-template-columns:1fr}}
+
+/* Shipping notice before quantity selection and purchase. */
+.product-shipping-notice{margin:0 0 20px;padding:18px 20px;border:1px solid var(--line);border-radius:12px;background:#f7f8f5}
+.product-shipping-notice h2{margin:0 0 8px;font-size:14px;font-weight:700}
+.product-shipping-notice p{margin:0;color:var(--ink);font-size:14px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
