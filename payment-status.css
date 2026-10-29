@@ -30,25 +30,25 @@
 @media (prefers-reduced-motion: reduce) { .payment-spinner { animation: none; border-right-color: #d85d36; } }
 @media (max-width: 600px) { .payment-result--checking { min-height: 480px; } }
 
-/* Failed payment: centered result, quiet details and a clear retry action. */
-body[data-page="payment-failed"] { background: #fff; }
-.payment-result--failed { max-width: 760px; padding: 60px 32px 72px; }
-.payment-result--failed .payment-symbol { width: 96px; height: 96px; margin-bottom: 28px; border-radius: 34px; }
-.payment-result--failed .payment-symbol svg { width: 48px; height: 48px; }
-.payment-result--failed .eyebrow { margin: 0 0 16px; font-size: 13px; }
-.payment-result--failed h1 { font-size: clamp(26px, 3.5vw, 34px); }
-.payment-result--failed .payment-description { margin: 24px 0 38px; font-size: 16px; line-height: 1.9; }
-.payment-result--failed .payment-details { padding: 24px 28px; border-radius: 16px; }
-.payment-result--failed .payment-details dt { font-size: 14px; }
-.payment-result--failed .payment-details dd { min-width: 0; font-size: 16px; }
-.payment-result--failed .payment-state { padding: 8px 12px; font-size: 13px; }
-.payment-result--failed .payment-actions { margin-top: 32px; gap: 12px; }
-.payment-result--failed .payment-actions a { min-height: 64px; font-size: 17px; border-radius: 11px; }
+/* Shared visual layout for separate failed and delayed payment pages. */
+body[data-page="payment-failed"], body[data-page="payment-delayed"] { background: #fff; }
+.payment-result--summary { max-width: 760px; padding: 60px 32px 72px; }
+.payment-result--summary .payment-symbol { width: 96px; height: 96px; margin-bottom: 28px; border-radius: 34px; }
+.payment-result--summary .payment-symbol svg { width: 48px; height: 48px; }
+.payment-result--summary .eyebrow { margin: 0 0 16px; font-size: 13px; }
+.payment-result--summary h1 { font-size: clamp(26px, 3.5vw, 34px); }
+.payment-result--summary .payment-description { margin: 24px 0 38px; font-size: 16px; line-height: 1.9; }
+.payment-result--summary .payment-details { padding: 24px 28px; border-radius: 16px; }
+.payment-result--summary .payment-details dt { font-size: 14px; }
+.payment-result--summary .payment-details dd { min-width: 0; font-size: 16px; }
+.payment-result--summary .payment-state { padding: 8px 12px; font-size: 13px; }
+.payment-result--summary .payment-actions { margin-top: 32px; gap: 12px; }
+.payment-result--summary .payment-actions a { min-height: 64px; font-size: 17px; border-radius: 11px; }
 @media (max-width: 600px) {
-  .payment-result--failed { padding: 40px 20px 52px; }
-  .payment-result--failed .payment-symbol { width: 80px; height: 80px; border-radius: 28px; margin-bottom: 24px; }
-  .payment-result--failed .payment-description { font-size: 14px; margin: 20px 0 28px; }
-  .payment-result--failed .payment-details { padding: 18px; }
-  .payment-result--failed .payment-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 24px; }
-  .payment-result--failed .payment-actions a { min-height: 56px; padding: 12px 8px; font-size: 14px; }
+  .payment-result--summary { padding: 40px 20px 52px; }
+  .payment-result--summary .payment-symbol { width: 80px; height: 80px; border-radius: 28px; margin-bottom: 24px; }
+  .payment-result--summary .payment-description { font-size: 14px; margin: 20px 0 28px; }
+  .payment-result--summary .payment-details { padding: 18px; }
+  .payment-result--summary .payment-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 24px; }
+  .payment-result--summary .payment-actions a { min-height: 56px; padding: 12px 8px; font-size: 14px; }
 }
