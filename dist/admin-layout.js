@@ -1,3 +1,38 @@
+// One transient result message, including above modal dialogs.
+window.AdminToast = (() => {
+  let toast, timer;
+  function show(message) {
+    if (!message) return;
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'adminToast';
+      toast.className = 'admin-toast';
+      toast.setAttribute('role', 'status');
+      toast.setAttribute('aria-live', 'polite');
+      toast.setAttribute('aria-atomic', 'true');
+      toast.setAttribute('popover', 'manual');
+      toast.hidden = true;
+      document.body.append(toast);
+    }
+    clearTimeout(timer);
+    toast.textContent = message;
+    toast.hidden = false;
+    if (typeof toast.showPopover === 'function') {
+      if (toast.matches(':popover-open')) toast.hidePopover();
+      toast.showPopover();
+    } else {
+      const dialogs = document.querySelectorAll('dialog[open]');
+      (dialogs[dialogs.length - 1] || document.body).append(toast);
+    }
+    timer = setTimeout(() => {
+      if (typeof toast.hidePopover === 'function' && toast.matches(':popover-open')) toast.hidePopover();
+      toast.hidden = true;
+      toast.textContent = '';
+    }, 5000);
+  }
+  return { show };
+})();
+
 // Shared administrator navigation; legacy operation links redirect to their page.
 const legacyOperationPages={operationProducts:'admin-products.html',operationBanner:'admin-banner.html',operationSettings:'admin-settings.html',operationDiscounts:'admin-discounts.html'};
 if(location.pathname.endsWith('/admin.html')&&legacyOperationPages[location.hash.slice(1)])location.replace(legacyOperationPages[location.hash.slice(1)]);

@@ -61,7 +61,7 @@ function refundTypeLabel(order) {
 }
 const state=shippingStateLabel;
 function persist(){localStorage.goodsOrders=JSON.stringify(orderData);localStorage.goodsProducts=JSON.stringify(goods);localStorage.goodsSettings=JSON.stringify(settings);}
-function notify(message){$('adminStatus').textContent=message;}
+function notify(message){AdminToast.show(message);}
 function updatePendingCount(){const count=orderData.filter(order=>order.status==='출고 대기').length,badge=$('pendingCount');badge.textContent=count;badge.hidden=count<1;}
 function bindClose(){document.querySelectorAll('[data-close]').forEach(b=>b.onclick=() =>$(b.dataset.close).close());}
   const PAGE_SIZE = 20;

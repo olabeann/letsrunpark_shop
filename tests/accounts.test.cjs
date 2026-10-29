@@ -9,7 +9,7 @@ function mount(){
  const elements={},stored=new Map();
  function element(){return {value:'',hidden:false,checked:false,disabled:false,options:[],children:[],classList:{add(){},remove(){},toggle(){}},addEventListener(type,fn){this[type]=fn;},replaceChildren(){this.children=[];},append(row){this.children.push(row);},querySelector(){return this.button??=element();},showModal(){this.open=true;},close(){this.open=false;},insertAdjacentHTML(){},set innerHTML(value){this.markup=value;this.options=[...value.matchAll(/<option>(.*?)<\/option>/g)].map(m=>({value:m[1]}));if(this.options.length)this.value=this.options[0].value;},get innerHTML(){return this.markup||'';}};}
  for(const match of html.matchAll(/\bid="([^"]+)"/g))elements[match[1]]=element();
- const context={document:{getElementById:id=>elements[id]||null,createElement:element,querySelectorAll:()=>[]},localStorage:{getItem:k=>stored.get(k)||null,setItem:(k,v)=>stored.set(k,v)},sessionStorage:{getItem:()=> 'admin'},setTimeout:()=>1,clearTimeout(){},Date};
+ const context={AdminToast:{show(message){elements.toastMessage=message;}},document:{getElementById:id=>elements[id]||null,createElement:element,querySelectorAll:()=>[]},localStorage:{getItem:k=>stored.get(k)||null,setItem:(k,v)=>stored.set(k,v)},sessionStorage:{getItem:()=> 'admin'},setTimeout:()=>1,clearTimeout(){},Date};
  vm.runInNewContext(source,context);
  return {elements,stored};
 }
