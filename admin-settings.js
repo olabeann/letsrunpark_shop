@@ -29,5 +29,5 @@ settingsForm.onsubmit=event=>{
     cancelHours:Number(values.cancelHours),returnDays:Number(values.returnDays),
     shippingNotice:values.shippingNotice,returnAddress:values.returnAddress};
   localStorage.goodsDefaultCarrier=values.defaultCarrier;
-  persist();status.textContent='스토어 운영 설정을 저장했습니다. 변경값은 신규 주문부터 적용됩니다.';
+  persist();status.textContent='';notify('스토어 운영 설정을 저장했습니다. 변경값은 신규 주문부터 적용됩니다.');
 };

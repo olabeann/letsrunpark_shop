@@ -253,3 +253,8 @@ body #settlementTable td button.settlement-order-link:hover{border:0;background:
 .refund-processing-dialog .refund-options{grid-template-columns:1fr}
 .refund-processing-dialog .dialog-footer{bottom:-20px;box-shadow:0 20px 0 white}
 }
+
+/* Transient action feedback stays at the viewport's bottom center. */
+body .admin-toast{position:fixed;inset:auto auto calc(24px + env(safe-area-inset-bottom,0px)) 50%;transform:translateX(-50%);z-index:10000;width:max-content;max-width:calc(100vw - 32px);margin:0;padding:15px 24px;border:0;border-radius:10px;background:#1d1d1f;color:#fff;font-size:14px;font-weight:600;line-height:1.6;box-shadow:0 6px 24px #0003;text-align:center;white-space:normal;overflow-wrap:anywhere;pointer-events:none}
+body .admin-toast::backdrop{background:transparent;pointer-events:none}
+body :is(#adminStatus,#inlineSettingsStatus,#homeBannerStatus,#detailEditorStatus,#coverImageStatus):empty{display:none}

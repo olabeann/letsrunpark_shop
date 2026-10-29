@@ -92,7 +92,7 @@ checkout.onclick=()=>startCheckout(cart,'cart');
 ordersToggle.onclick=event=>{event.preventDefault();requireLogin(()=>StorePages.go('orders'));};
 document.addEventListener('click',event=>{const button=event.target.closest('[data-close]');if(!button)return;const target=document.getElementById(button.dataset.close);if(target instanceof HTMLDialogElement)target.close();else{target.classList.remove('open');target.hidden=true;}});
 let storeToastTimer;
-function showStoreToast(message){const toast=document.getElementById('storeToast');clearTimeout(storeToastTimer);toast.textContent=message;toast.hidden=false;storeToastTimer=setTimeout(()=>{toast.hidden=true;toast.textContent='';},2500);}
+function showStoreToast(message){const toast=document.getElementById('storeToast');clearTimeout(storeToastTimer);toast.textContent=message;toast.hidden=false;storeToastTimer=setTimeout(()=>{toast.hidden=true;toast.textContent='';},5000);}
 // Add example orders once without replacing purchases already saved in this browser.
 function seedExampleOrders(){
   if(localStorage.goodsExampleOrdersVersion==='1')return;
