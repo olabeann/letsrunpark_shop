@@ -47,3 +47,24 @@
 #checkoutDiscountArea .discount-account-limit{font-size:12px;color:var(--grey);font-weight:400;line-height:1.5}
 #checkoutDiscountArea .discount-check:has(input:disabled){color:var(--grey);background:var(--paper);cursor:default}
 @media(max-width:600px){#checkoutDiscountArea .discount-account-limit{margin-left:24px}}
+
+/* Promotion codes share the checkout discount typography and spacing. */
+#checkoutDiscountArea .promo-code-area{margin:0 0 4px;padding:4px 0 0 24px;border:0;min-width:0}
+#checkoutDiscountArea .promo-code-area h3{margin:0 0 12px;font-size:14px;font-weight:600;line-height:1.5}
+#checkoutDiscountArea .promo-code-entry{display:flex;align-items:stretch;gap:8px}
+#checkoutDiscountArea .promo-code-entry input{flex:1;min-width:0;width:0;margin:0;padding:11px 12px;border:1px solid var(--line);border-radius:8px}
+#checkoutDiscountArea .promo-code-entry button{flex:none;min-width:72px;margin:0;padding:10px 18px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font-size:14px;font-weight:500}
+#checkoutDiscountArea .promo-code-entry button:hover{border-color:var(--ink)}
+#checkoutDiscountArea .promo-code-area .discount-help{margin:8px 0 0;color:var(--grey);font-size:12px;line-height:1.6}
+#checkoutDiscountArea .promo-code-success{display:flex;align-items:center;gap:12px;margin:12px 0 0;padding:12px;border:1px solid var(--ink);border-radius:8px;background:#fff;color:var(--ink)}
+#checkoutDiscountArea .promo-code-success button{flex:none;min-height:32px;padding:4px 0;border:0;background:none;color:var(--grey);font-size:12px;text-decoration:underline;text-underline-offset:3px}
+#promoCodeMessage{margin:8px 0 0;color:var(--grey);font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+#promoCodeMessage:empty{display:none}
+#checkoutDiscountArea .promo-code-entry :focus-visible,#checkoutDiscountArea .promo-code-success button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+@media(max-width:600px){#checkoutDiscountArea .promo-code-entry button{min-width:64px;padding:10px 14px}#checkoutDiscountArea .promo-code-success{flex-wrap:wrap}#checkoutDiscountArea .promo-code-success .discount-option-copy{flex-basis:calc(100% - 60px)}}
+
+#checkoutDiscountArea .promo-code-area[hidden]{display:none}
+
+#checkoutDiscountArea .general-discount-fields{display:grid;gap:8px;min-width:0;padding:4px 0 4px 24px}
+#checkoutDiscountArea .general-discount-fields[hidden]{display:none}
+#checkoutDiscountArea .general-discount-fields>.discount-help{margin:4px 0;color:var(--grey);font-size:12px;line-height:1.6}
