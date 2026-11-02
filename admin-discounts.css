@@ -43,4 +43,4 @@
 
 #discount-form [hidden]{display:none!important}#discount-code{text-transform:uppercase}#discount-policy-list td small{display:block;margin-top:4px;color:#667085}
 
-#discount-policy-list td .discount-code-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap}#discount-policy-list .discount-copy{padding:2px 7px;font-size:11px;line-height:1.5;border:1px solid var(--line);border-radius:4px;background:#fff;color:#61666e}#discount-code[readonly]{background:#f8fafc;color:#61666e}
+#discount-code[readonly]{background:#f8fafc;color:#61666e}
