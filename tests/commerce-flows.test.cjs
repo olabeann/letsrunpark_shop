@@ -33,17 +33,18 @@ test('checkout draft travels between documents without carrying agreement state'
  assert.ok(!context.sessionStorage.goodsCheckout.includes('Agreement'));
 });
 function settingsContext(values){
- const defaults={shippingFee:3000,returnShippingFee:6000,cancelHours:24,returnDays:14,shippingNotice:'배송 안내',returnAddress:'반품 주소',purchaseNoticesText:'구매 안내',purchaseAgreementText:'구매 동의',privacyAgreementText:'개인정보 동의',purchasePolicyVersion:'old-purchase',privacyPolicyVersion:'old-privacy'};
+ const defaults={shippingBannerEnabled:true,shippingBannerTitle:'매주 목요일 일괄 발송',shippingBannerText:'직전 주 토요일까지 접수된 주문 대상',shippingFee:3000,returnShippingFee:6000,cancelHours:24,returnDays:14,shippingNotice:'배송 안내',returnAddress:'반품 주소',purchaseNoticesText:'구매 안내',purchaseAgreementText:'구매 동의',privacyAgreementText:'개인정보 동의',purchasePolicyVersion:'old-purchase',privacyPolicyVersion:'old-privacy'};
  const elements=Object.fromEntries(Object.entries({...defaults,defaultCarrier:'CJ대한통운'}).map(([key,value])=>[key,{value,focus(){}}]));
  const form={elements},status={textContent:''};
- const context={notify(message){context.toast=message;},document:{getElementById:id=>id==='inlineSettingsForm'?form:status},settings:{...defaults},carrierNames:['CJ대한통운'],orderData:[{number:'ORDER',returnDays:14}],localStorage:{},Date,persist(){context.saved=JSON.parse(JSON.stringify(context.settings));},FormData:class{*[Symbol.iterator](){yield* Object.entries(values);}}};
+ const context={notify(message){context.toast=message;},document:{getElementById:id=>id==='inlineSettingsForm'?form:status},settings:{...defaults},carrierNames:['CJ대한통운'],orderData:[{number:'ORDER',returnDays:14}],localStorage:{},Date,persist(){context.saved=JSON.parse(JSON.stringify(context.settings));},FormData:class{*[Symbol.iterator](){yield* Object.entries({...defaults,shippingBannerEnabled:'true',...values});}}};
  vm.createContext(context);vm.runInContext(read('admin-settings.js'),context);
  return {context,form,status,defaults};
 }
 test('settings save snapshots existing order policy before applying new defaults',()=>{
- const values={shippingFee:'4000',returnShippingFee:'8000',cancelHours:'24',returnDays:'21',shippingNotice:'배송 안내',returnAddress:'반품 주소',purchaseNoticesText:'구매 안내',purchaseAgreementText:'구매 동의',privacyAgreementText:'개인정보 동의',defaultCarrier:'CJ대한통운'};
+ const values={shippingBannerEnabled:'false',shippingBannerTitle:'변경된 배송 일정',shippingBannerText:'변경된 마감 안내',shippingFee:'4000',returnShippingFee:'8000',cancelHours:'24',returnDays:'21',shippingNotice:'배송 안내',returnAddress:'반품 주소',purchaseNoticesText:'구매 안내',purchaseAgreementText:'구매 동의',privacyAgreementText:'개인정보 동의',defaultCarrier:'CJ대한통운'};
  const {context,form,status}=settingsContext(values);form.onsubmit({preventDefault(){}});
  assert.equal(status.textContent,'');assert.match(context.toast,/스토어 운영 설정을 저장했습니다/);
+ assert.equal(context.saved.shippingBannerEnabled,false);assert.equal(context.saved.shippingBannerTitle,'변경된 배송 일정');assert.equal(context.saved.shippingBannerText,'변경된 마감 안내');
  assert.equal(context.saved.shippingFee,4000);assert.equal(context.saved.returnDays,21);
  assert.equal(context.orderData[0].policySnapshot.shippingFee,3000);assert.equal(context.orderData[0].returnDays,14);
 });
@@ -51,4 +52,12 @@ test('invalid settings do not partially save or rewrite existing order policy',(
  const values={shippingFee:'-1',returnShippingFee:'8000',cancelHours:'24',returnDays:'21'};
  const {context,form,status}=settingsContext(values);form.onsubmit({preventDefault(){}});
  assert.equal(context.saved,undefined);assert.equal(context.orderData[0].policySnapshot,undefined);assert.ok(status.textContent);
+});
+
+test('shipping schedule upgrades old default copy while preserving custom notices',()=>{
+ const context={localStorage:{}};vm.createContext(context);vm.runInContext(read('checkout-content.js')+';this.copy=CheckoutContent;',context);
+ const defaults=context.copy.defaults;
+ const old={...defaults,shippingNotice:'주 1회 모아서 발송합니다. 주간 마감과 발송일은 렛츠런플레이 상품 상세 안내를 확인해 주세요.'};
+ assert.equal(context.copy.migrateShippingSettings(old).shippingNotice,defaults.shippingNotice);
+ assert.equal(context.copy.migrateShippingSettings({...old,shippingNotice:'공휴일에는 별도 안내합니다.'}).shippingNotice,'공휴일에는 별도 안내합니다.');
 });
