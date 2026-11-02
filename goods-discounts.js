@@ -1,11 +1,26 @@
 // Shared merchandise discount rules. Browser demo storage; production must validate on server.
 const GoodsDiscounts = {
  key: 'goodsDiscountsV1',
+ demoSeedKey: 'goodsPublicDiscountDemo20261102',
  defaults(){return [
-  {id:'initial-autumn-discount',name:'가을 굿즈 할인',type:'percent',value:10,maxQty:2,noticeText:'',startDate:'2026-10-22',endDate:'2026-10-22',allProducts:true,active:true,productIds:[]},
-  {id:'initial-selected-discount',name:'ㅇㄹㅇㄹ',type:'percent',value:10,maxQty:1,noticeText:'ㅇㄹㅇㄹㅇㄹ',startDate:'2026-10-22',endDate:'2026-10-22',allProducts:false,active:true,productIds:[3,2]}
+  {id:'demo-public-percent-20261102',mode:'public',name:'[시연] 굿즈 10% 할인',type:'percent',value:10,maxQty:10,noticeText:'일반 할인 선택을 확인하기 위한 시연용 할인입니다.',startDate:'2026-11-02',endDate:'2027-12-31',allProducts:true,active:true,productIds:[],demo:true},
+  {id:'demo-public-fixed-20261102',mode:'public',name:'[시연] 굿즈 3,000원 할인',type:'fixed',value:3000,maxQty:10,noticeText:'상품 1개당 3,000원 할인 · 시연용',startDate:'2026-11-02',endDate:'2027-12-31',allProducts:true,active:true,productIds:[],demo:true}
  ];},
- read(){try{const saved=localStorage.getItem(this.key);if(saved===null){const rows=this.defaults();localStorage.setItem(this.key,JSON.stringify(rows));return rows;}const rows=JSON.parse(saved);return Array.isArray(rows)?rows:[];}catch{return [];}},
+ read(){
+  try{
+   const saved=localStorage.getItem(this.key);
+   const rows=saved===null?[]:JSON.parse(saved);
+   if(!Array.isArray(rows))return [];
+   // Seed once per browser without replacing edited policies or resurrecting deleted demos.
+   if(localStorage.getItem(this.demoSeedKey)!=='1'){
+    const ids=new Set(rows.map(d=>d.id));
+    rows.push(...this.defaults().filter(d=>!ids.has(d.id)));
+    localStorage.setItem(this.key,JSON.stringify(rows));
+    localStorage.setItem(this.demoSeedKey,'1');
+   }
+   return rows;
+  }catch{return [];}
+ },
  day(now=Date.now()){return new Date(now+9*3600000).toISOString().slice(0,10);},
  normalizeCode(value){return String(value||'').trim().toUpperCase();},
  validate(d,policies=[]){
