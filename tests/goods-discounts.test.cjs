@@ -30,7 +30,7 @@ test('quotes preserve a historical snapshot and reread edited policies',()=>{
 
 test('initial discounts seed once and preserve edits and deletion',()=>{
  const {api,storage}=harness();storage.value=null;storage.seed=null;
- assert.equal(api.read().length,2);assert.equal(api.read()[0].name,'[시연] 굿즈 10% 할인');
+ assert.equal(api.read().length,2);assert.equal(api.read()[0].name,'굿즈 10% 할인');
  storage.value='[]';assert.equal(api.read().length,0);
  storage.value=JSON.stringify([{...policy,name:'수정한 할인'}]);assert.equal(api.read()[0].name,'수정한 할인');
 });
@@ -89,4 +89,13 @@ test('promo demo seeds once, applies by code, and preserves existing matching co
  storage.value='[]';assert.equal(api.read().length,0);
  storage.promoSeed=null;storage.value=JSON.stringify([{...promo,id:'custom',code:'malma2026',value:5000}]);
  assert.equal(api.read().length,1);assert.equal(api.read()[0].value,5000);
+});
+
+test('old seeded labels are updated without changing edited labels or discount identity',()=>{
+ const {api,storage}=harness();storage.value=JSON.stringify([
+  {...policy,id:'demo-public-percent-20261102',name:'[시연] 굿즈 10% 할인',noticeText:'일반 할인 선택을 확인하기 위한 시연용 할인입니다.'},
+  {...policy,id:'demo-code-malma2026',name:'관리자가 변경한 이름',noticeText:'맞춤 안내'}
+ ]);
+ const rows=api.read();assert.equal(rows[0].name,'굿즈 10% 할인');assert.equal(rows[0].noticeText,'상품 1개당 10% 할인');assert.equal(rows[0].id,'demo-public-percent-20261102');
+ assert.equal(rows[1].name,'관리자가 변경한 이름');assert.equal(rows[1].noticeText,'맞춤 안내');assert.equal(JSON.parse(storage.value)[0].name,'굿즈 10% 할인');
 });

@@ -4,8 +4,8 @@ const GoodsDiscounts = {
  promoDemoSeedKey: 'goodsPromoCodeDemo20261102',
  demoSeedKey: 'goodsPublicDiscountDemo20261102',
  defaults(){return [
-  {id:'demo-public-percent-20261102',mode:'public',name:'[시연] 굿즈 10% 할인',type:'percent',value:10,maxQty:10,noticeText:'일반 할인 선택을 확인하기 위한 시연용 할인입니다.',startDate:'2026-11-02',endDate:'2027-12-31',allProducts:true,active:true,productIds:[],demo:true},
-  {id:'demo-public-fixed-20261102',mode:'public',name:'[시연] 굿즈 3,000원 할인',type:'fixed',value:3000,maxQty:10,noticeText:'상품 1개당 3,000원 할인 · 시연용',startDate:'2026-11-02',endDate:'2027-12-31',allProducts:true,active:true,productIds:[],demo:true}
+  {id:'demo-public-percent-20261102',mode:'public',name:'굿즈 10% 할인',type:'percent',value:10,maxQty:10,noticeText:'상품 1개당 10% 할인',startDate:'2026-11-02',endDate:'2027-12-31',allProducts:true,active:true,productIds:[],demo:true},
+  {id:'demo-public-fixed-20261102',mode:'public',name:'굿즈 3,000원 할인',type:'fixed',value:3000,maxQty:10,noticeText:'상품 1개당 3,000원 할인',startDate:'2026-11-02',endDate:'2027-12-31',allProducts:true,active:true,productIds:[],demo:true}
  ];},
  read(){
   try{
@@ -22,11 +22,23 @@ const GoodsDiscounts = {
    if(localStorage.getItem(this.promoDemoSeedKey)!=='1'){
     const code='MALMA2026',id='demo-code-malma2026';
     if(!rows.some(d=>d.id===id||(d.mode==='code'&&this.normalizeCode(d.code)===code))){
-     rows.push({id,mode:'code',code,name:'[시연] 말마 프로모션',type:'fixed',value:3000,maxUses:1,noticeText:'상품 1개당 3,000원 할인 · 계정당 1회 · 시연용',startDate:'2026-11-02',endDate:'2027-12-31',allProducts:true,active:true,productIds:[],demo:true});
+     rows.push({id,mode:'code',code,name:'말마 프로모션',type:'fixed',value:3000,maxUses:1,noticeText:'상품 1개당 3,000원 할인 · 계정당 1회',startDate:'2026-11-02',endDate:'2027-12-31',allProducts:true,active:true,productIds:[],demo:true});
      localStorage.setItem(this.key,JSON.stringify(rows));
     }
     localStorage.setItem(this.promoDemoSeedKey,'1');
    }
+   const previousCopy={
+    'demo-public-percent-20261102':['[시연] 굿즈 10% 할인','굿즈 10% 할인','일반 할인 선택을 확인하기 위한 시연용 할인입니다.','상품 1개당 10% 할인'],
+    'demo-public-fixed-20261102':['[시연] 굿즈 3,000원 할인','굿즈 3,000원 할인','상품 1개당 3,000원 할인 · 시연용','상품 1개당 3,000원 할인'],
+    'demo-code-malma2026':['[시연] 말마 프로모션','말마 프로모션','상품 1개당 3,000원 할인 · 계정당 1회 · 시연용','상품 1개당 3,000원 할인 · 계정당 1회']
+   };
+   let copyChanged=false;
+   for(const row of rows){
+    const copy=previousCopy[row.id];if(!copy)continue;
+    if(row.name===copy[0]){row.name=copy[1];copyChanged=true;}
+    if(row.noticeText===copy[2]){row.noticeText=copy[3];copyChanged=true;}
+   }
+   if(copyChanged)localStorage.setItem(this.key,JSON.stringify(rows));
    return rows;
   }catch{return [];}
  },
