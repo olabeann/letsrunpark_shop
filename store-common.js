@@ -34,7 +34,27 @@ const shippingAnnouncement=document.getElementById('shippingAnnouncement');
 if(shippingAnnouncement){
   document.getElementById('shippingAnnouncementTitle').textContent=storeSettings.shippingBannerTitle;
   document.getElementById('shippingAnnouncementText').textContent=storeSettings.shippingBannerText;
-  shippingAnnouncement.hidden=storeSettings.shippingBannerEnabled===false;
+  const dismissalKey='goodsShippingBannerDismissedDay';
+  const koreaOffset=9*60*60*1000,dayLength=24*60*60*1000;
+  const today=()=>new Date(Date.now()+koreaOffset).toISOString().slice(0,10);
+  let dismissedDay='',midnightTimer;
+  function syncShippingAnnouncement(){
+    try{dismissedDay=localStorage.getItem(dismissalKey)||'';}catch{/* Keep this page usable if browser storage is unavailable. */}
+    shippingAnnouncement.hidden=storeSettings.shippingBannerEnabled===false||dismissedDay===today();
+    clearTimeout(midnightTimer);
+    // Recheck at Korean midnight even when the customer leaves this page open.
+    midnightTimer=setTimeout(syncShippingAnnouncement,dayLength-((Date.now()+koreaOffset)%dayLength)+100);
+  }
+  document.getElementById('shippingAnnouncementClose').onclick=()=>{
+    dismissedDay=today();
+    try{localStorage.setItem(dismissalKey,dismissedDay);}catch{/* Closing still works for the current page. */}
+    shippingAnnouncement.hidden=true;
+  };
+  window.addEventListener('storage',event=>{if(event.key===dismissalKey||event.key===null)syncShippingAnnouncement();});
+  window.addEventListener('focus',syncShippingAnnouncement);
+  window.addEventListener('pageshow',syncShippingAnnouncement);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncShippingAnnouncement();});
+  syncShippingAnnouncement();
 }
 // A product uses the same representative-image frame in both views.
 function productVisual(p,className='product-image'){

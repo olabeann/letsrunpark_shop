@@ -137,7 +137,7 @@
 .product-shipping-notice p{margin:0;color:var(--ink);font-size:14px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
 
 /* Shared shipping schedule announcement; participates in header layout. */
-.shipping-announcement{display:flex;align-items:center;justify-content:center;gap:14px;min-height:46px;padding:10px 20px;background:#ffeb58;color:#202020;font-size:14px;line-height:1.5}
+.shipping-announcement{position:relative;display:flex;align-items:center;justify-content:center;gap:14px;min-height:46px;padding:10px 56px;background:#ffeb58;color:#202020;font-size:14px;line-height:1.5}
 .shipping-announcement[hidden]{display:none}
 .shipping-announcement-icon{flex:none}
 .shipping-announcement-copy{display:flex;align-items:center;gap:22px;min-width:0;overflow-wrap:anywhere}
@@ -145,8 +145,12 @@
 .shipping-announcement-copy span{border-left:1px solid #20202066;padding-left:22px}
 @media(max-width:700px){
   .top{position:sticky;top:0}
-  .shipping-announcement{gap:10px;min-height:62px;padding:10px 16px;font-size:12px}
+  .shipping-announcement{gap:10px;min-height:62px;padding:10px 48px 10px 16px;font-size:12px}
   .shipping-announcement-copy{flex-direction:column;align-items:flex-start;gap:2px}
   .shipping-announcement-copy strong{font-size:13px}
   .shipping-announcement-copy span{border:0;padding:0}
 }
+
+.top .shipping-announcement-close{position:absolute;right:8px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:40px;height:40px;padding:0;border:0;border-radius:6px;background:transparent;color:inherit;font-size:25px;line-height:1;cursor:pointer}
+.top .shipping-announcement-close:hover{background:#0000000a}
+.top .shipping-announcement-close:focus-visible{outline:2px solid currentColor;outline-offset:-4px}
