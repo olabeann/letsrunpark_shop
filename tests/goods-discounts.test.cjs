@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 const policy={id:'event',name:'가을',type:'percent',value:10,maxQty:2,startDate:'2026-10-22',endDate:'2026-10-22',allProducts:true,active:true,productIds:[]};
 const now=Date.parse('2026-10-22T12:00:00+09:00');
-function harness(){const storage={value:JSON.stringify([policy]),seed:'1',getItem(key){return key==='goodsDiscountsV1'?this.value:this.seed;},setItem(key,value){if(key==='goodsDiscountsV1')this.value=value;else this.seed=value;}};const c={localStorage:storage};vm.createContext(c);vm.runInContext(fs.readFileSync('dist/goods-discounts.js','utf8')+';globalThis.api=GoodsDiscounts;',c);return {api:c.api,storage};}
+function harness(){const storage={value:JSON.stringify([policy]),seed:'1',promoSeed:'1',getItem(key){return key==='goodsDiscountsV1'?this.value:key==='goodsPublicDiscountDemo20261102'?this.seed:this.promoSeed;},setItem(key,value){if(key==='goodsDiscountsV1')this.value=value;else if(key==='goodsPublicDiscountDemo20261102')this.seed=value;else this.promoSeed=value;}};const c={localStorage:storage};vm.createContext(c);vm.runInContext(fs.readFileSync('dist/goods-discounts.js','utf8')+';globalThis.api=GoodsDiscounts;',c);return {api:c.api,storage};}
 test('discount allocation favors highest savings and respects total quantity across products',()=>{
  const {api}=harness();const q=api.calculate(policy,[{id:1,qty:2},{id:2,qty:3}],[{id:1,price:10000},{id:2,price:20000}],now);
  assert.equal(q.amount,4000);assert.equal(q.allocations[0].id,2);assert.equal(q.allocations[0].qty,2);
@@ -79,4 +79,14 @@ test('existing browsers receive active public demo offers once without changing 
  }
  assert.equal(api.read().length,3);
  storage.value=JSON.stringify([original]);assert.equal(api.read().length,1);
+});
+
+test('promo demo seeds once, applies by code, and preserves existing matching codes',()=>{
+ const {api,storage}=harness();storage.promoSeed=null;
+ const rows=api.read(),promo=rows.find(d=>d.code==='MALMA2026');assert.ok(promo);assert.equal(promo.maxUses,1);
+ assert.equal(api.applyCode('malma2026',[{id:1,qty:2}],[{id:1,price:29000}],Date.parse('2026-11-02T12:00:00+09:00'),{accountId:'demo',orders:[]}).amount,6000);
+ assert.equal(api.read().length,rows.length);
+ storage.value='[]';assert.equal(api.read().length,0);
+ storage.promoSeed=null;storage.value=JSON.stringify([{...promo,id:'custom',code:'malma2026',value:5000}]);
+ assert.equal(api.read().length,1);assert.equal(api.read()[0].value,5000);
 });
