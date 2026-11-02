@@ -29,7 +29,13 @@ document.querySelectorAll('[data-provider]').forEach(button=>button.addEventList
 const escapeText=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const canBuy=p=>p&&!p.deletedAt&&p.status==='sale'&&p.stock>0;
 // Prototype defaults; production reads these values from administrator settings.
-const storeSettings={...CheckoutContent.defaults,shippingFee:3000,returnShippingFee:6000,cancelHours:24,returnDays:14,shippingNotice:'주 1회 모아서 발송합니다. 이번 주 주문 마감과 발송일은 렛츠런플레이 상품 상세 안내를 확인해 주세요.',returnAddress:'경기도 과천시 경마공원대로 107 렛츠런파크 굿즈 반품 담당',...JSON.parse(localStorage.goodsSettings||'{}')};
+const storeSettings=CheckoutContent.migrateShippingSettings({...CheckoutContent.defaults,shippingFee:3000,returnShippingFee:6000,cancelHours:24,returnDays:14,returnAddress:'경기도 과천시 경마공원대로 107 렛츠런파크 굿즈 반품 담당',...JSON.parse(localStorage.goodsSettings||'{}')});
+const shippingAnnouncement=document.getElementById('shippingAnnouncement');
+if(shippingAnnouncement){
+  document.getElementById('shippingAnnouncementTitle').textContent=storeSettings.shippingBannerTitle;
+  document.getElementById('shippingAnnouncementText').textContent=storeSettings.shippingBannerText;
+  shippingAnnouncement.hidden=storeSettings.shippingBannerEnabled===false;
+}
 // A product uses the same representative-image frame in both views.
 function productVisual(p,className='product-image'){
  const colors=['#f3ddd4','#e9e5df','#e1eadb'],background=colors[Math.abs(Number(p.id)||0)%3];
