@@ -1,3 +1,4 @@
+let appliedPromoCode='',promoMessage='',discountMode='none';
 const checkoutForm=document.getElementById("checkoutForm");
 const addressModal=document.getElementById('addressModal');
 function closeAddressSearch(){addressModal.hidden=true;document.getElementById('searchAddress').focus();}
@@ -42,23 +43,43 @@ function discountAccountContext(){
  if(!accountId){accountId='preview-'+crypto.randomUUID();localStorage.setItem('goodsPreviewAccountId',accountId);}
  return {accountId,orders:JSON.parse(localStorage.getItem('goodsOrders')||'[]')};
 }
-function currentDiscountQuote(){return GoodsDiscounts.quote(selectedDiscountId,checkoutDraft?.items||[],products,Date.now(),discountAccountContext());}
+function currentDiscountQuote(){return GoodsDiscounts.quote(selectedDiscountId,checkoutDraft?.items||[],products,Date.now(),{...discountAccountContext(),promoCode:appliedPromoCode});}
 function renderDiscountSelector(){
  const context=discountAccountContext();
- const offers=GoodsDiscounts.read().filter(policy=>GoodsDiscounts.calculate(policy,checkoutDraft.items,products).amount>0).map(policy=>({policy,remaining:GoodsDiscounts.remainingQty(policy,context),...GoodsDiscounts.calculate(policy,checkoutDraft.items,products,Date.now(),context)})).sort((a,b)=>b.amount-a.amount);
+ const offers=GoodsDiscounts.read().filter(policy=>policy.mode!=='code'&&GoodsDiscounts.calculate(policy,checkoutDraft.items,products).amount>0).map(policy=>({policy,remaining:GoodsDiscounts.remainingQty(policy,context),...GoodsDiscounts.calculate(policy,checkoutDraft.items,products,Date.now(),context)})).sort((a,b)=>b.amount-a.amount);
  const quote=currentDiscountQuote();displayedDiscountQuote=JSON.stringify(quote);
- return `<fieldset class="checkout-discount discount-options"><legend>할인 선택</legend><label class="discount-check"><input type="radio" name="checkoutDiscount" value="" ${!selectedDiscountId?'checked':''}><span class="discount-option-copy"><strong>할인 미적용</strong></span></label>${offers.map(({policy:d,remaining})=>`<label class="discount-check"><input type="radio" name="checkoutDiscount" value="${escapeText(d.id)}" ${d.id===selectedDiscountId?'checked':''} ${remaining?'':'disabled'}><span class="discount-option-copy"><strong>${escapeText(d.name)} · ${d.type==='percent'?d.value+'%':won(d.value)} 할인</strong>${d.noticeText?`<small class="discount-option-notice">${escapeText(d.noticeText)}</small>`:''}</span><span class="discount-account-limit">계정당 최대 ${d.maxQty}개 · ${remaining?`남은 수량 ${remaining}개`:'한도 소진'}</span></label>`).join('')}${offers.length?'':'<p class="discount-help">적용 가능한 할인이 없습니다.</p>'}</fieldset>`;
+ return `<fieldset class="checkout-discount discount-options"><legend>할인 적용</legend>
+ <label class="discount-check"><input type="radio" name="discountMode" value="none" ${discountMode==='none'?'checked':''}><span class="discount-option-copy"><strong>적용 안 함</strong></span></label>
+ <label class="discount-check"><input type="radio" name="discountMode" value="public" aria-controls="generalDiscountFields" aria-expanded="${discountMode==='public'}" ${discountMode==='public'?'checked':''}><span class="discount-option-copy"><strong id="generalDiscountTitle">일반 할인</strong></span></label>
+ <section id="generalDiscountFields" class="general-discount-fields" aria-labelledby="generalDiscountTitle" ${discountMode==='public'?'':'hidden'}>${offers.map(({policy:d,remaining})=>`<label class="discount-check"><input type="radio" name="checkoutDiscount" value="${escapeText(d.id)}" ${discountMode==='public'&&d.id===selectedDiscountId?'checked':''} ${remaining?'':'disabled'}><span class="discount-option-copy"><strong>${escapeText(d.name)} · ${d.type==='percent'?d.value+'%':won(d.value)} 할인</strong>${d.noticeText?`<small class="discount-option-notice">${escapeText(d.noticeText)}</small>`:''}</span><span class="discount-account-limit">계정당 최대 ${d.maxQty}개 · ${remaining?`남은 수량 ${remaining}개`:'한도 소진'}</span></label>`).join('')}${offers.length?'':'<p class="discount-help">적용 가능한 일반 할인이 없습니다.</p>'}</section>
+ <label class="discount-check"><input type="radio" name="discountMode" value="code" aria-controls="promoCodeFields" aria-expanded="${discountMode==='code'}" ${discountMode==='code'?'checked':''}><span class="discount-option-copy"><strong id="promoCodeTitle">프로모션 코드</strong></span></label><section id="promoCodeFields" class="promo-code-area" aria-labelledby="promoCodeTitle" ${discountMode==='code'?'':'hidden'}><div class="promo-code-entry"><input id="promoCodeInput" aria-label="프로모션 코드" maxlength="24" autocomplete="off" placeholder="코드를 입력해 주세요" value="${escapeText(appliedPromoCode)}"><button type="button" id="applyPromoCode" class="outline">적용</button></div><p class="discount-help">일반 할인 또는 프로모션 코드 중 하나만 적용할 수 있습니다.</p>${quote.policy?.mode==='code'?`<div class="promo-code-success"><span class="discount-option-copy"><strong>${escapeText(quote.policy.name)} · ${quote.policy.type==='percent'?quote.policy.value+'%':won(quote.policy.value)+' / 개'} 할인</strong><small class="discount-option-notice">${escapeText(quote.policy.code)} · 계정당 ${quote.policy.maxUses}회 · ${won(quote.amount)} 할인 적용</small></span><button type="button" id="removePromoCode">적용 해제</button></div>`:''}<p id="promoCodeMessage" role="status">${escapeText(promoMessage)}</p></section></fieldset>`;
 }
 function renderCheckoutPage(){
   renderPurchaseNotices();
   const valid=Array.isArray(checkoutDraft?.items)&&checkoutDraft.items.length>0&&checkoutDraft.items.every(x=>products.some(p=>p.id===x.id));checkoutForm.hidden=!valid;
   if(!valid){document.getElementById('checkoutSummary').innerHTML=EmptyStates.html('checkout');return;}
-  if(selectedDiscountId&&!currentDiscountQuote().amount)selectedDiscountId='';
+  if(selectedDiscountId&&!currentDiscountQuote().amount){selectedDiscountId='';appliedPromoCode='';promoMessage='할인 조건이 변경되었거나 종료되었습니다. 다시 확인해 주세요.';}
   const discount=currentDiscountQuote();
   const sub=checkoutDraft.items.reduce((s,x)=>s+products.find(p=>p.id===x.id).price*x.qty,0),ship=shippingFee(sub);
   document.getElementById('checkoutSummary').innerHTML=`<h2>주문 상품</h2>${checkoutDraft.items.map(x=>{const p=products.find(p=>p.id===x.id),applied=discount.allocations.find(a=>a.id===x.id);return `<div class="checkout-item checkout-item-detail"><div class="checkout-product-heading"><a href="product.html?id=${p.id}">${escapeText(p.name)}</a><span>${x.qty}개</span></div><p class="checkout-unit-price">개당 ${won(p.price)}</p>${applied?`<p class="checkout-discount-condition">${discount.policy.type==='percent'?discount.policy.value+'%':won(applied.unitDiscount)} 할인 적용 ${applied.qty}개${x.qty>applied.qty?` · 정상가 ${x.qty-applied.qty}개`:''}</p>`:''}</div>`;}).join('')}<dl class="cost-summary"><div><dt>상품 금액</dt><dd>${won(sub)}</dd></div><div class="discount-savings"><dt>할인금액</dt><dd>${discount.amount?'−':''}${won(discount.amount)}</dd></div><div><dt>배송비</dt><dd>${ship?won(ship):'무료'}</dd></div><div class="grand-total"><dt>총 결제금액</dt><dd>${won(sub+ship-discount.amount)}</dd></div></dl>`;
   document.getElementById('checkoutDiscountArea').innerHTML=renderDiscountSelector();
-  document.querySelectorAll('input[name="checkoutDiscount"]').forEach(input=>{input.onchange=()=>{selectedDiscountId=input.value;renderCheckoutPage();document.querySelector('input[name="checkoutDiscount"]:checked')?.focus();};});
+  const applyCode=()=>{
+    const result=GoodsDiscounts.applyCode(document.getElementById('promoCodeInput').value,checkoutDraft.items,products,Date.now(),discountAccountContext());
+    if(result.error){document.getElementById('promoCodeMessage').textContent=result.error;return;}
+    promoMessage=selectedDiscountId&&selectedDiscountId!==result.policy.id?'기존 할인을 프로모션 코드 할인으로 변경했습니다.':'프로모션 코드를 적용했습니다.';
+    discountMode='code';selectedDiscountId=result.policy.id;appliedPromoCode=result.code;renderCheckoutPage();document.getElementById('removePromoCode')?.focus();
+  };
+  document.getElementById('applyPromoCode').onclick=applyCode;
+  document.getElementById('promoCodeInput').onkeydown=event=>{if(event.key==='Enter'){event.preventDefault();applyCode();}};
+  const removeCode=document.getElementById('removePromoCode');
+  if(removeCode)removeCode.onclick=()=>{selectedDiscountId='';appliedPromoCode='';promoMessage='프로모션 코드 적용을 해제했습니다.';renderCheckoutPage();document.getElementById('promoCodeInput').focus();};
+  document.querySelectorAll('input[name="discountMode"]').forEach(input=>{input.onchange=()=>{
+    discountMode=input.value;selectedDiscountId='';appliedPromoCode='';promoMessage='';renderCheckoutPage();
+    document.querySelector('input[name="discountMode"]:checked')?.focus();
+  };});
+  document.querySelectorAll('input[name="checkoutDiscount"]').forEach(input=>{input.onchange=()=>{
+    selectedDiscountId=input.value;renderCheckoutPage();document.querySelector('input[name="checkoutDiscount"]:checked')?.focus();
+  };});
 }
 checkoutForm.onsubmit=e=>{e.preventDefault();products=JSON.parse(localStorage.goodsProducts||JSON.stringify(products));orders=JSON.parse(localStorage.goodsOrders||JSON.stringify(orders));if(!purchaseAgreement.checked){purchaseAgreement.reportValidity();return;}if(!privacyAgreement.checked){privacyAgreement.reportValidity();return;}if(!checkoutForm.elements.address.value.trim()){document.getElementById('addressStatus').textContent='배송지 주소를 입력해 주세요.';document.getElementById('searchAddress').focus();return;}if(checkoutDraft?.items?.some(item=>item.priceAtCheckout!==products.find(p=>p.id===item.id)?.price)){checkoutDraft.items.forEach(item=>{item.priceAtCheckout=products.find(p=>p.id===item.id)?.price;});sessionStorage.goodsCheckout=JSON.stringify(checkoutDraft);renderCheckoutPage();return alert('상품 금액이 변경되었습니다. 변경된 주문 금액을 확인해 주세요.');}if(!cartValid(checkoutDraft?.items)){renderCheckoutPage();return alert('판매 상태나 재고가 변경되었습니다. 상품을 다시 선택해 주세요.');}requireLogin(()=>{
   if(!cartValid(checkoutDraft?.items))return renderCheckoutPage();
