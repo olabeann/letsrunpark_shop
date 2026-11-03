@@ -6,7 +6,7 @@
   const form = document.getElementById('mediaForm');
   const preview = document.getElementById('detailPreview');
   let savedRange = null, mediaType = 'image';
-  const message = text => status.textContent = text;
+  const message = text => { status.textContent = ''; if (text) AdminToast.show(text); };
   function remember() {
     const selection = window.getSelection();
     if (selection.rangeCount && editor.contains(selection.anchorNode) && editor.contains(selection.focusNode)) savedRange = selection.getRangeAt(0).cloneRange();
@@ -99,11 +99,12 @@
   const saveButton = document.getElementById('productSaveButton');
   let coverRequest = 0;
   function showCover(name) {
-    const src = ProductContent.url(coverValue.value, true);
-    document.getElementById('coverImagePreview').hidden = !src;
+    const src = ProductContent.url(coverValue.value, true) || 'assets/product-malma-default.png';
+    document.getElementById('coverImagePreview').hidden = false;
+    document.getElementById('removeCoverImage').hidden = src === 'assets/product-malma-default.png';
     const image = document.getElementById('coverImageThumb');
     if (src) image.src = src; else image.removeAttribute('src');
-    document.getElementById('coverImageName').textContent = name || '등록된 대표 이미지';
+    document.getElementById('coverImageName').textContent = name || (src === 'assets/product-malma-default.png' ? '기본 말마 이미지' : '등록된 대표 이미지');
   }
   coverInput.addEventListener('change', async () => {
     const file = coverInput.files[0]; if (!file) return;
@@ -115,7 +116,7 @@
       const data = await imageFile(file);
       if (request !== coverRequest) return;
       coverValue.value = data; showCover(file.name);
-      coverStatus.textContent = '이미지가 준비되었습니다. 상품 저장을 눌러 반영해 주세요.';
+      coverStatus.textContent = ''; AdminToast.show('이미지가 준비되었습니다. 상품 저장을 눌러 반영해 주세요.');
     } catch (error) {
       if (request !== coverRequest) return;
       coverInput.value = ''; coverStatus.className = 'form-error';
@@ -126,7 +127,7 @@
   });
   document.getElementById('removeCoverImage').onclick = () => {
     ++coverRequest; coverValue.value = ''; coverInput.value = ''; saveButton.disabled = false;
-    showCover(); coverStatus.className = 'form-note'; coverStatus.textContent = '대표 이미지를 삭제했습니다. 상품 저장을 눌러 반영해 주세요.';
+    showCover(); coverStatus.className = 'form-note'; coverStatus.textContent = ''; AdminToast.show('대표 이미지를 삭제했습니다. 상품 저장을 눌러 반영해 주세요.');
   };
   window.CoverImage = {
     load(value) {

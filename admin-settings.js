@@ -32,5 +32,5 @@ settingsForm.onsubmit=event=>{
     shippingBannerTitle:values.shippingBannerTitle,shippingBannerText:values.shippingBannerText,
     shippingNotice:values.shippingNotice,returnAddress:values.returnAddress};
   localStorage.goodsDefaultCarrier=values.defaultCarrier;
-  persist();status.textContent='스토어 운영 설정을 저장했습니다. 배너·안내 문구는 페이지를 새로 열면 반영되며, 주문 정책은 신규 주문부터 적용됩니다.';
+  persist();status.textContent='';notify('스토어 운영 설정을 저장했습니다. 배너·안내 문구는 페이지를 새로 열면 반영되며, 주문 정책은 신규 주문부터 적용됩니다.');
 };

@@ -3,7 +3,6 @@
   "use strict";
 
   var storeKey = "letsrunParkDepartmentAccountsV3";
-  var toastTimer;
   var activeAccountKey = null;
   var pendingDeletionKey = null;
   var pendingOtpRegistered = false;
@@ -26,9 +25,7 @@
   function byId(id) { return document.getElementById(id); }
   function escapeHtml(value) { return String(value).replace(/[&<>'"]/g, function (character) { return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]; }); }
   function notify(message) {
-    var toast = byId("account-toast");
-    toast.textContent = message; toast.classList.add("is-on"); clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { toast.classList.remove("is-on"); }, 3200);
+    AdminToast.show(message);
   }
   function load() {
     try {
@@ -211,14 +208,16 @@
     }
     pendingOtpRegistered = true;
     byId("account-otp-code").value = "";
-    byId("account-otp-feedback").textContent = "인증되었습니다. 계정 저장을 눌러 등록을 완료해주세요.";
+    byId("account-otp-feedback").textContent = "";
+    notify("인증되었습니다. 계정 저장을 눌러 등록을 완료해주세요.");
     renderOtpSettings();
   });
   byId("account-otp-reset").addEventListener("click", function () {
     if (!canManageCommercePermission()) return;
     pendingOtpRegistered = false;
     byId("account-otp-code").value = "";
-    byId("account-otp-feedback").textContent = "초기화는 계정 저장 시 반영됩니다. 새로 등록할 수도 있습니다.";
+    byId("account-otp-feedback").textContent = "";
+    notify("초기화는 계정 저장 시 반영됩니다. 새로 등록할 수도 있습니다.");
     renderOtpSettings();
   });
   byId("account-otp-required").addEventListener("change", renderOtpSettings);

@@ -80,3 +80,6 @@
 @media (max-width: 600px) {
   .product-layout .detail-art { padding: 22px; font-size: 36px; }
 }
+
+/* Leave breathing room around the default mascot on the rotating card background. */
+.product .product-image.default-product-image, .product-layout .detail-art.default-product-image { padding: 12%; }

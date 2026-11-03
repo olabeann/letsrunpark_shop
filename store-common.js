@@ -57,9 +57,12 @@ if(shippingAnnouncement){
   syncShippingAnnouncement();
 }
 // A product uses the same representative-image frame in both views.
-function productVisual(p,className='product-image'){
- const colors=['#f3ddd4','#e9e5df','#e1eadb'],background=colors[Math.abs(Number(p.id)||0)%3];
- return `<div class="${className}" style="background:${background}!important">${p.image?`<img src="${escapeText(p.image)}" alt="${escapeText(p.name)}">`:escapeText(p.art||'GOODS')}</div>`;
+function productVisual(p,className='product-image',position){
+ const colors=['#e9e5df','#e1eadb','#f3ddd4'];
+ const index=position??Math.max(0,(Number(p.displayOrder)||Number(p.id)||1)-1);
+ const background=colors[index%3],src=p.image||'assets/product-malma-default.png';
+ const isDefault=src==='assets/product-malma-default.png';
+ return `<div class="${className}${isDefault?' default-product-image':''}" style="background:${background}!important"><img src="${escapeText(src)}" alt="${escapeText(p.name)}"></div>`;
 };
 
 function storePageRows(items,size,page,containerId,anchor,onChange){
@@ -76,13 +79,33 @@ function save(){localStorage.goodsProducts=JSON.stringify(products);localStorage
 const shippingFee=sub=>sub>0?storeSettings.shippingFee:0;
 const cartValid=items=>Array.isArray(items)&&items.length>0&&items.every(item=>Number.isInteger(item.qty)&&item.qty>0&&canBuy(products.find(p=>p.id===item.id))&&products.find(p=>p.id===item.id).stock>=item.qty);
 function updateSelection(){const count=cart.reduce((sum,item)=>sum+item.qty,0);cartCount.textContent=count;cartToggle.hidden=count===0;if(!count){cartPanel.classList.remove('open');cartPanel.hidden=true;}}
-function renderCart(){
+function renderCart(notifyChanges=true){
   const before=cart.length;cart=cart.filter(item=>canBuy(products.find(product=>product.id===item.id)));
-  if(before!==cart.length)queueMicrotask(()=>showStoreToast('구매할 수 없는 상품이 장바구니에서 제외되었습니다.'));
+  if(notifyChanges && before!==cart.length)queueMicrotask(()=>showStoreToast('구매할 수 없는 상품이 장바구니에서 제외되었습니다.'));
   cart.forEach(item=>{const product=products.find(p=>p.id===item.id);item.qty=Math.min(item.qty,product.stock);item.priceAtAdd=product.price;});
   localStorage.goodsCart=JSON.stringify(cart);
-  cartItems.innerHTML=cart.map(item=>{const product=products.find(p=>p.id===item.id);return `<div class="cart-row"><div><strong>${escapeText(product.name)}</strong><small>${won(product.price)}</small></div><div class="qty"><button class="qty-step" aria-label="수량 줄이기" onclick="changeQty(${item.id},-1)" ${item.qty<=1?'disabled':''}>−</button><span class="qty-value">${item.qty}</span><button class="qty-step" aria-label="수량 늘리기" onclick="changeQty(${item.id},1)" ${item.qty>=product.stock?'disabled':''}>+</button><button class="qty-remove" aria-label="상품 삭제" onclick="removeCart(${item.id})">×</button></div></div>`;}).join('')||EmptyStates.html('cart');
+  cartItems.innerHTML=cart.map(item=>{const product=products.find(p=>p.id===item.id);return `<div class="cart-row"><div><strong>${escapeText(product.name)}</strong><small>${won(product.price)}</small></div><div class="qty"><button class="qty-step" aria-label="수량 줄이기" onclick="changeQty(${item.id},-1)" ${item.qty<=1?'disabled':''}>−</button><input class="qty-value qty-input" type="text" inputmode="numeric" pattern="[0-9]*" aria-label="${escapeText(product.name)} 수량" value="${item.qty}" oninput="inputCartQty(${item.id},this,false)" onblur="inputCartQty(${item.id},this,true)" onkeydown="if(event.key==='Enter'){event.preventDefault();inputCartQty(${item.id},this,true)}"><button class="qty-step" aria-label="수량 늘리기" onclick="changeQty(${item.id},1)" ${item.qty>=product.stock?'disabled':''}>+</button><button class="qty-remove" aria-label="상품 삭제" onclick="removeCart(${item.id})">×</button></div></div>`;}).join('')||EmptyStates.html('cart');
+  updateCartTotals();
+}
+function updateCartTotals(){
   const sub=cart.reduce((sum,item)=>sum+products.find(p=>p.id===item.id).price*item.qty,0);subtotal.textContent=won(sub);shipping.textContent=won(shippingFee(sub));total.textContent=won(sub+shippingFee(sub));updateSelection();
+}
+function cartQuantityValue(raw, stock, previous, commit){
+ const value=Number(raw),valid=/^\d+$/.test(raw)&&Number.isSafeInteger(value);
+ if(!commit)return valid&&value>=1&&value<=stock?value:null;
+ return Math.max(1,Math.min(stock,valid?value:previous));
+}
+function inputCartQty(id,input,commit){
+ const item=cart.find(item=>item.id===id),product=products.find(product=>product.id===id);
+ if(!item||!canBuy(product))return renderCart();
+ const qty=cartQuantityValue(input.value,product.stock,item.qty,commit);
+ if(qty===null)return;
+ item.qty=qty;
+ if(commit)input.value=qty;
+ const buttons=input.closest('.qty').querySelectorAll('.qty-step');
+ buttons[0].disabled=qty<=1;buttons[1].disabled=qty>=product.stock;
+ localStorage.goodsCart=JSON.stringify(cart);
+ updateCartTotals();
 }
 function changeQty(id,delta){const item=cart.find(item=>item.id===id),product=products.find(p=>p.id===id);if(!item||!canBuy(product))return renderCart();item.qty=Math.max(1,Math.min(product.stock,item.qty+delta));renderCart();}
 function removeCart(id){cart=cart.filter(item=>item.id!==id);renderCart();}
@@ -95,7 +118,7 @@ checkout.onclick=()=>startCheckout(cart,'cart');
 ordersToggle.onclick=event=>{event.preventDefault();requireLogin(()=>StorePages.go('orders'));};
 document.addEventListener('click',event=>{const button=event.target.closest('[data-close]');if(!button)return;const target=document.getElementById(button.dataset.close);if(target instanceof HTMLDialogElement)target.close();else{target.classList.remove('open');target.hidden=true;}});
 let storeToastTimer;
-function showStoreToast(message){const toast=document.getElementById('storeToast');clearTimeout(storeToastTimer);toast.textContent=message;toast.hidden=false;storeToastTimer=setTimeout(()=>{toast.hidden=true;toast.textContent='';},2500);}
+function showStoreToast(message){const toast=document.getElementById('storeToast');clearTimeout(storeToastTimer);toast.textContent=message;toast.hidden=false;storeToastTimer=setTimeout(()=>{toast.hidden=true;toast.textContent='';},5000);}
 // Add example orders once without replacing purchases already saved in this browser.
 function seedExampleOrders(){
   if(localStorage.goodsExampleOrdersVersion==='1')return;

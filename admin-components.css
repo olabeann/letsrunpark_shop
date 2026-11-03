@@ -35,6 +35,10 @@ body #resetFilters:hover{background:#edf0f3;color:#25282c}
 body :is(.admin-panel,.table-wrap){overflow:auto;border:1px solid #e6e8eb;border-radius:10px;background:#fff;box-shadow:none}
 body .table-wrap table{width:100%;border-collapse:collapse;border-spacing:0;white-space:nowrap;font-size:13px}
 body .table-wrap .orders-table{min-width:1100px}
+/* Keep long order item names inside their assigned column. */
+body .table-wrap .orders-table .order-summary{white-space:normal;overflow-wrap:anywhere}
+body .table-wrap .orders-table .order-summary>div{min-width:0;grid-template-columns:minmax(0,1fr)}
+body .table-wrap .orders-table .order-summary small{min-width:0;white-space:normal;overflow-wrap:anywhere}
 body .table-wrap th{height:auto;padding:13px 16px;border-bottom:1px solid #e6e8eb;background:#fafbfc;color:#646a71;font-size:12px;font-weight:700;text-align:left}
 body .table-wrap td{height:58px;padding:10px 16px;border-bottom:1px solid #e8eaed;background:#fff;color:#4d5359;font-size:13px;text-align:left;vertical-align:middle}
 body .table-wrap tbody tr:last-child td{border-bottom:0}
@@ -62,10 +66,28 @@ body #productsTable .kiosk-product-table :is(th,td):nth-child(3){width:14%;text-
 body #productsTable .kiosk-product-table :is(th,td):nth-child(4){width:11%;text-align:left}
 body #productsTable .kiosk-product-table :is(th,td):nth-child(5){width:13%;text-align:left}
 body #productsTable .kiosk-product-table :is(th,td):nth-child(6){width:21%;text-align:right}
-body #productsTable .product-title{justify-content:flex-start}
+body #productsTable .product-title{justify-content:flex-start;min-width:0;width:100%}
+body #productsTable .product-title>b{flex:1;min-width:0;white-space:normal;overflow-wrap:anywhere;line-height:1.6}
+body #productsTable .product-actions{flex-wrap:wrap;justify-content:flex-end}
 body #productsTable .kiosk-product-table :is(td:nth-child(1),td:nth-child(3),td:nth-child(4)){font-variant-numeric:tabular-nums}
 body #productsTable .product-state-select.badge{display:block;width:104px;margin:0 auto;padding:0 28px;text-align:center;text-align-last:center;background-position:right 12px center}
 body #productsTable .product-state-select option{text-align:left}
+body #productsTable.is-reordering{max-height:75vh;overflow:auto;scroll-padding-top:100px;border:0;border-radius:0}
+body #productsTable .reorder-toolbar{position:sticky;top:0;z-index:2;align-items:center;margin:0;padding:14px;background:#fff;border-bottom:0}
+body #productsTable .reorder-toolbar p{flex:1;margin:0;color:#626970;line-height:1.6}
+body #productsTable .reorder-toolbar button{flex-shrink:0}
+body #productsTable .reorder-status{margin:10px 16px;color:#b4473b}
+body #productsTable .reorder-status:empty{display:none}
+body #productsTable .product-order-list{padding:0 14px 14px}
+body #productsTable .product-order-list li{grid-template-columns:24px 64px minmax(0,1fr) auto auto;cursor:default}
+body #productsTable .drag-handle{cursor:grab;padding:12px 0}
+body #productsTable .order-position{width:64px;padding:8px}
+body #productsTable .order-product{display:flex;align-items:center;gap:10px;min-width:0}
+body #productsTable .order-product img{width:40px;height:40px;object-fit:contain;flex-shrink:0}
+body #productsTable .order-product span{min-width:0;overflow-wrap:anywhere;line-height:1.6}
+body #productsTable .order-moves{display:flex;gap:4px}
+body #productsTable .order-moves button{white-space:nowrap;padding:8px}
+@media(max-width:800px){body #productsTable .product-order-list li{grid-template-columns:20px 64px minmax(0,1fr)}body #productsTable .product-order-list li small{grid-column:3}body #productsTable .order-moves{grid-column:2/-1;justify-content:flex-end}body #productsTable .reorder-toolbar{flex-wrap:wrap}body #productsTable .reorder-toolbar p{flex-basis:100%}}
 
 body :is(.reservation-list-head,.list-heading){display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:22px 0 12px}
 body :is(.reservation-list-head,.list-heading) h2{margin:0;font-size:17px;color:#22252a}
@@ -96,6 +118,9 @@ body .operations-search :is(input,select){height:38px;border:1px solid #dfe3e7;b
 body dialog{border:1px solid #dfe3e7;border-radius:12px;box-shadow:0 24px 70px rgba(0,0,0,.2)}
 body .dialog-heading{border-bottom:1px solid #e7e9ec}
 body .dialog-footer{border-top:1px solid #e7e9ec}
+body .detail-cost{gap:16px;align-items:flex-start}
+body .detail-cost>span{min-width:0;overflow-wrap:anywhere}
+body .detail-cost>.detail-amount{flex-shrink:0;white-space:nowrap;text-align:right}
 body .refund-options label:has(input:checked){border-color:var(--admin-blue);background:#f1f6ff;box-shadow:0 0 0 3px rgba(23,105,255,.1)}
 
 @media(min-width:1001px){body #filterForm.shipping-mode{grid-template-columns:130px 130px minmax(240px,1fr) 64px 42px}}
