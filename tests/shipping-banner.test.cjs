@@ -6,7 +6,7 @@ const source=fs.readFileSync('dist/store-common.js','utf8');
 const code=source.slice(source.indexOf('const shippingAnnouncement='),source.indexOf('// A product uses'));
 function page(storage={},enabled=true){
  let now=Date.parse('2026-11-02T23:59:00+09:00'),timer;
- const elements=Object.fromEntries(['shippingAnnouncement','shippingAnnouncementTitle','shippingAnnouncementText','shippingAnnouncementClose'].map(id=>[id,{}]));
+ const elements=Object.fromEntries(['shippingAnnouncement','shippingAnnouncementClose'].map(id=>[id,{}]));
  const listeners={};
  class Clock extends Date{static now(){return now;}}
  const context={Date:Clock,storeSettings:{shippingBannerEnabled:enabled},localStorage:{getItem:k=>storage[k],setItem:(k,v)=>storage[k]=v},document:{getElementById:id=>elements[id],addEventListener(){}},window:{addEventListener:(key,fn)=>listeners[key]=fn},clearTimeout(){},setTimeout(fn,ms){timer={fn,ms};}};
@@ -18,7 +18,7 @@ test('dismissal lasts through Korean midnight and persists only in the same brow
  assert.equal(storage.goodsShippingBannerDismissedDay,'2026-11-02');assert.equal(page(storage).hidden(),true);assert.equal(page({}).hidden(),false);
  assert.equal(first.delay(),60100);first.midnight();assert.equal(first.hidden(),false);
 });
-test('dismissal synchronizes tabs and never overrides administrator hidden setting',()=>{
+test('dismissal synchronizes tabs and ignores legacy administrator visibility settings',()=>{
  const storage={},first=page(storage),second=page(storage);first.close();second.listeners.storage({key:'goodsShippingBannerDismissedDay'});assert.equal(second.hidden(),true);
- const disabled=page(storage,false);disabled.midnight();assert.equal(disabled.hidden(),true);
+ const disabled=page(storage,false);disabled.midnight();assert.equal(disabled.hidden(),false);
 });

@@ -32,15 +32,13 @@ const canBuy=p=>p&&!p.deletedAt&&p.status==='sale'&&p.stock>0;
 const storeSettings=CheckoutContent.migrateShippingSettings({...CheckoutContent.defaults,shippingFee:3000,returnShippingFee:6000,cancelHours:24,returnDays:14,returnAddress:'경기도 과천시 경마공원대로 107 렛츠런파크 굿즈 반품 담당',...JSON.parse(localStorage.goodsSettings||'{}')});
 const shippingAnnouncement=document.getElementById('shippingAnnouncement');
 if(shippingAnnouncement){
-  document.getElementById('shippingAnnouncementTitle').textContent=storeSettings.shippingBannerTitle;
-  document.getElementById('shippingAnnouncementText').textContent=storeSettings.shippingBannerText;
   const dismissalKey='goodsShippingBannerDismissedDay';
   const koreaOffset=9*60*60*1000,dayLength=24*60*60*1000;
   const today=()=>new Date(Date.now()+koreaOffset).toISOString().slice(0,10);
   let dismissedDay='',midnightTimer;
   function syncShippingAnnouncement(){
     try{dismissedDay=localStorage.getItem(dismissalKey)||'';}catch{/* Keep this page usable if browser storage is unavailable. */}
-    shippingAnnouncement.hidden=storeSettings.shippingBannerEnabled===false||dismissedDay===today();
+    shippingAnnouncement.hidden=dismissedDay===today();
     clearTimeout(midnightTimer);
     // Recheck at Korean midnight even when the customer leaves this page open.
     midnightTimer=setTimeout(syncShippingAnnouncement,dayLength-((Date.now()+koreaOffset)%dayLength)+100);
