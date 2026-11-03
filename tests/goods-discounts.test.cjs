@@ -49,21 +49,23 @@ test('cancelled and refunded orders restore quota, pending returns still consume
  assert.equal(api.remainingQty({...policy,maxQty:1},{accountId:'A',orders:[order]}),0);
 });
 
-test('promo fixed discount applies to every eligible unit but consumes one use per order',()=>{
- const {api,storage}=harness();const promo={...policy,mode:'code',code:'MALMA2026',type:'fixed',value:3000,maxUses:1,maxQty:1};storage.value=JSON.stringify([promo]);
+test('promo fixed discount respects cumulative discounted quantity across orders',()=>{
+ const {api,storage}=harness();const promo={...policy,mode:'code',code:'MALMA2026',type:'fixed',value:3000,maxQty:2};storage.value=JSON.stringify([promo]);
  const items=[{id:1,qty:3}],products=[{id:1,price:10000}],context={accountId:'member-a',orders:[]};
- const q=api.applyCode(' malma2026 ',items,products,now,context);assert.equal(q.amount,9000);assert.equal(q.code,'MALMA2026');
+ const q=api.applyCode(' malma2026 ',items,products,now,context);assert.equal(q.amount,6000);assert.equal(q.code,'MALMA2026');
  assert.equal(api.quote(promo.id,items,products,now,context).amount,0,'policy ID alone must not apply a code');
- const order={accountId:'member-a',discountSnapshot:q.policy,discountAmount:q.amount,status:'출고 대기'};
- assert.match(api.applyCode(promo.code,items,products,now,{...context,orders:[order]}).error,/횟수/);
- assert.equal(api.applyCode(promo.code,items,products,now,{accountId:'member-b',orders:[order]}).amount,9000);
- for(const restored of [{...order,status:'전체 취소'},{...order,returnStatus:'환불 완료'}])assert.equal(api.applyCode(promo.code,items,products,now,{...context,orders:[restored]}).amount,9000);
- assert.match(api.applyCode(promo.code,items,products,now,{...context,orders:[{...order,returnStatus:'반품 신청'}]}).error,/횟수/);
+ const order={accountId:'member-a',discountSnapshot:q.policy,discountAllocations:q.allocations,discountAmount:q.amount,status:'출고 대기'};
+ const partial={...order,discountAllocations:[{...q.allocations[0],qty:1}]};
+ assert.equal(api.applyCode(promo.code,items,products,now,{...context,orders:[partial]}).amount,3000);
+ assert.match(api.applyCode(promo.code,items,products,now,{...context,orders:[order]}).error,/수량/);
+ assert.equal(api.applyCode(promo.code,items,products,now,{accountId:'member-b',orders:[order]}).amount,6000);
+ for(const restored of [{...order,status:'전체 취소'},{...order,returnStatus:'환불 완료'}])assert.equal(api.applyCode(promo.code,items,products,now,{...context,orders:[restored]}).amount,6000);
+ assert.match(api.applyCode(promo.code,items,products,now,{...context,orders:[{...order,returnStatus:'반품 신청'}]}).error,/수량/);
 });
 test('promo rejects duplicates, invalid limits, invalid codes and ineligible orders',()=>{
- const {api,storage}=harness();const promo={...policy,mode:'code',code:'MALMA2026',maxUses:1,allProducts:false,productIds:[1]};storage.value=JSON.stringify([promo]);
+ const {api,storage}=harness();const promo={...policy,mode:'code',code:'MALMA2026',allProducts:false,productIds:[1]};storage.value=JSON.stringify([promo]);
  assert.match(api.validate({...promo,id:'new',code:'malma2026'},[promo]),/이미/);
- assert.match(api.validate({...promo,maxUses:0}),/횟수/);assert.match(api.validate({...promo,code:'한글!'}),/코드/);
+ assert.match(api.validate({...promo,maxQty:0}),/수량/);assert.match(api.validate({...promo,code:'한글!'}),/코드/);
  const items=[{id:2,qty:1}],products=[{id:2,price:10000}],ctx={accountId:'a',orders:[]};
  assert.ok(api.applyCode(promo.code,items,products,now,ctx).error);assert.ok(api.applyCode('WRONG',items,products,now,ctx).error);
  for(const changes of [{active:false},{endDate:'2026-10-21'}]){storage.value=JSON.stringify([{...promo,...changes}]);assert.ok(api.applyCode(promo.code,[{id:1,qty:1}],[{id:1,price:10000}],now,ctx).error);}
@@ -83,7 +85,7 @@ test('existing browsers receive active public demo offers once without changing 
 
 test('promo demo seeds once, applies by code, and preserves existing matching codes',()=>{
  const {api,storage}=harness();storage.promoSeed=null;
- const rows=api.read(),promo=rows.find(d=>d.code==='MALMA2026');assert.ok(promo);assert.equal(promo.maxUses,1);
+ const rows=api.read(),promo=rows.find(d=>d.code==='MALMA2026');assert.ok(promo);assert.equal(promo.maxQty,10);
  assert.equal(api.applyCode('malma2026',[{id:1,qty:2}],[{id:1,price:29000}],Date.parse('2026-11-02T12:00:00+09:00'),{accountId:'demo',orders:[]}).amount,6000);
  assert.equal(api.read().length,rows.length);
  storage.value='[]';assert.equal(api.read().length,0);
