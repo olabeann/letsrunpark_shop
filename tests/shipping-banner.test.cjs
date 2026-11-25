@@ -15,10 +15,10 @@ function page(storage={},enabled=true){
 }
 test('dismissal lasts through Korean midnight and persists only in the same browser storage',()=>{
  const storage={},first=page(storage);assert.equal(first.hidden(),false);first.close();assert.equal(first.hidden(),true);
- assert.equal(storage.goodsShippingBannerDismissedDay,'2026-11-02');assert.equal(page(storage).hidden(),true);assert.equal(page({}).hidden(),false);
+ assert.equal(storage.goodsMaintenanceBanner20261125DismissedDay,'2026-11-02');assert.equal(page(storage).hidden(),true);assert.equal(page({}).hidden(),false);
  assert.equal(first.delay(),60100);first.midnight();assert.equal(first.hidden(),false);
 });
 test('dismissal synchronizes tabs and ignores legacy administrator visibility settings',()=>{
- const storage={},first=page(storage),second=page(storage);first.close();second.listeners.storage({key:'goodsShippingBannerDismissedDay'});assert.equal(second.hidden(),true);
+ const storage={},first=page(storage),second=page(storage);first.close();second.listeners.storage({key:'goodsMaintenanceBanner20261125DismissedDay'});assert.equal(second.hidden(),true);
  const disabled=page(storage,false);disabled.midnight();assert.equal(disabled.hidden(),false);
 });

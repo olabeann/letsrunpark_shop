@@ -32,7 +32,7 @@ const canBuy=p=>p&&!p.deletedAt&&p.status==='sale'&&p.stock>0;
 const storeSettings=CheckoutContent.migrateShippingSettings({...CheckoutContent.defaults,shippingFee:3000,returnShippingFee:6000,cancelHours:24,returnDays:14,returnAddress:'경기도 과천시 경마공원대로 107 렛츠런파크 굿즈 반품 담당',...JSON.parse(localStorage.goodsSettings||'{}')});
 const shippingAnnouncement=document.getElementById('shippingAnnouncement');
 if(shippingAnnouncement){
-  const dismissalKey='goodsShippingBannerDismissedDay';
+  const dismissalKey='goodsMaintenanceBanner20261125DismissedDay';
   const koreaOffset=9*60*60*1000,dayLength=24*60*60*1000;
   const today=()=>new Date(Date.now()+koreaOffset).toISOString().slice(0,10);
   let dismissedDay='',midnightTimer;
